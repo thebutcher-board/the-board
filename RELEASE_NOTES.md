@@ -1,23 +1,22 @@
-# THE BOARD v0.2.0
+# THE BOARD v0.3.0 — Master Database Foundation
 
-## Added
-- Confirmation step before every draft selection.
-- Undo Last button in both War Room and History.
-- Player detail modal with projection, rank, board score, fit, risk, roster percentage, and recommendation context.
-- Dynamic "On the Board" reasons based on The Butcher roster needs and positional value.
-- Keyboard support for player cards and Escape-to-close modals.
+## New
+- Added a searchable master player database containing available players, keepers, and drafted players.
+- Keepers remain available for player comparisons but are excluded from the live draft board.
+- Added two-player comparison from player cards, the live board, recommendations, and the player database.
+- Added draft/keeper/available status labels and owner visibility.
+- Added a persistent comparison tray.
 
-## Reliability and security
-- HTML escaping for player and team data before rendering.
-- Validation and migration of locally saved draft state.
-- Draft availability rechecked before confirmation to prevent duplicate picks.
-- Existing draft state remains stored locally in the browser.
+## Fixed
+- James Cook is explicitly identified as Patti's keeper and cannot appear on Best Available or the live draft board.
+- Corrected `George KittleO` to `George Kittle`.
+- Replaced unsafe name normalization that could alter legitimate player names.
+- Migrates existing v0.2 draft state into v0.3 local storage.
 
-## Regression checklist
-- Navigation tabs work.
-- Search and position filters work.
-- Keepers remain excluded from available players.
-- Confirmed picks advance the snake draft.
-- Undo restores the previous team and player.
-- Reset Draft preserves keepers.
-- Vercel-compatible static deployment retained.
+## Architecture
+- Introduced `MASTER_PLAYERS` as the single player universe.
+- Draft availability is now computed from player status rather than deleting keepers from the database.
+- Added stable internal player IDs and a provider-ready record shape for future ESPN/news/projection integrations.
+
+## Not yet live
+- ESPN sync, live injury updates, live news, headshots, and category projections require a server-side provider layer and are planned for a later release.
