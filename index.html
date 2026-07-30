@@ -10,7 +10,7 @@
 <body>
 <header class="topbar">
   <img class="logo" src="logo.png" alt="The Butcher bull logo">
-  <div class="brand"><h1>THE BOARD</h1><p>WIN BEFORE THE CLOCK STARTS.</p></div>
+  <div class="brand"><h1>THE BOARD</h1><p>WIN BEFORE THE CLOCK STARTS. <span id="versionLabel"></span></p></div>
   <button id="settingsBtn" class="icon-btn" aria-label="Draft settings">⚙</button>
 </header>
 <nav class="tabs" aria-label="Main navigation">
@@ -22,7 +22,7 @@
 <main>
 <section id="warroom" class="view active">
   <div class="clock panel"><div><span class="eyebrow">ON THE CLOCK</span><h2 id="clockTeam">—</h2><p id="clockPick">—</p></div><div class="pick-badge" id="pickBadge">1</div></div>
-  <div class="panel recommendation"><span class="eyebrow">RECOMMENDED PICK</span><div id="recommend"></div></div>
+  <div class="panel recommendation"><div class="panel-head"><span class="eyebrow">ON THE BOARD</span><button id="quickUndoBtn" class="btn secondary compact">Undo Last</button></div><div id="recommend"></div></div>
   <div class="panel"><div class="panel-head"><h3>Next Five</h3><button class="text-btn" data-jump="board">View board</button></div><div id="nextFive" class="stack"></div></div>
   <div class="panel"><div class="panel-head"><h3>The Butcher Roster</h3><span class="pill">5 Keepers</span></div><div id="myRoster" class="roster-list"></div></div>
 </section>
@@ -34,6 +34,8 @@
 <section id="league" class="view"><div class="panel"><div class="panel-head"><div><span class="eyebrow">LEAGUE ROOM</span><h2>All Rosters</h2></div></div><div id="rosters" class="team-grid"></div></div></section>
 <section id="history" class="view"><div class="panel"><div class="panel-head"><div><span class="eyebrow">DRAFT LOG</span><h2>Pick History</h2></div><button id="undoBtn" class="btn secondary">Undo Last</button></div><div id="draftHistory"></div></div></section>
 </main>
+<div id="confirmModal" class="modal" hidden><div class="modal-card confirm-card"><span class="eyebrow">CONFIRM PICK</span><h2 id="confirmPlayer">—</h2><p id="confirmMeta" class="muted"></p><p class="confirm-copy">Draft this player for <strong id="confirmTeam">—</strong>?</p><div class="modal-actions"><button id="cancelDraft" class="btn secondary">Cancel</button><button id="confirmDraft" class="btn primary">Confirm Draft</button></div></div></div>
+<div id="playerModal" class="modal" hidden><div class="modal-card player-modal-card"><button id="closePlayer" class="modal-close" aria-label="Close player details">×</button><div id="playerModalContent"></div></div></div>
 <div id="settingsModal" class="modal" hidden><div class="modal-card"><h2>Draft Settings</h2><label>The Butcher draft slot<select id="slotSelect"></select></label><div class="modal-actions"><button id="closeSettings" class="btn secondary">Cancel</button><button id="saveSettings" class="btn primary">Save</button></div><button id="resetBtn" class="danger-link">Reset entire draft</button></div></div>
 <div id="toast" class="toast" aria-live="polite"></div>
 <script src="data.js"></script>
