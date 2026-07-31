@@ -9,12 +9,12 @@
 </head>
 <body>
 <header class="topbar">
-  <img class="logo" src="logo.png" alt="The Butcher bull logo">
+  <img class="logo platform-logo" src="board-logo.svg" alt="THE BOARD platform logo">
   <div class="brand"><h1>THE BOARD</h1><p>WIN BEFORE THE CLOCK STARTS. <span id="versionLabel"></span></p></div>
   <button id="settingsBtn" class="icon-btn" aria-label="Draft settings">⚙</button>
 </header>
 <nav class="tabs" aria-label="Main navigation">
-  <button class="tab active" data-view="warroom">War Room</button>
+  <button class="tab active" data-view="warroom">Front Office</button>
   <button class="tab" data-view="board">Board</button>
   <button class="tab" data-view="database">Players</button>
   <button class="tab" data-view="league">League</button>
@@ -22,47 +22,52 @@
 </nav>
 <main>
 <section id="warroom" class="view active">
-  <div class="front-office-shell">
-    <header class="front-office-header">
-      <div><span class="eyebrow">PRIVATE FRONT OFFICE</span><h2>The Butcher Front Office</h2></div>
-      <div class="clock-inline"><span class="eyebrow">ON THE CLOCK</span><strong id="clockTeam">—</strong><span id="clockPick">—</span><b class="pick-badge" id="pickBadge">1</b></div>
+  <div class="ai-front-office">
+    <header class="ai-office-header">
+      <div class="franchise-heading"><img class="franchise-logo" src="logo.png" alt="The Butcher franchise logo"><div><span class="eyebrow">PRIVATE FRONT OFFICE</span><h2 id="frontOfficeTeamName">The Butcher</h2></div></div>
+      <div class="clock-inline"><span class="eyebrow">LIVE DRAFT</span><strong id="clockTeam">—</strong><span id="clockPick">—</span><b class="pick-badge" id="pickBadge">1</b></div>
     </header>
 
-    <div class="mission-grid">
-      <aside class="front-office-left">
-        <section class="command-panel">
-          <div class="panel-head"><div><span class="eyebrow">ROSTER COMMAND</span><h3>Your Competitive Position</h3></div><button id="quickUndoBtn" class="btn secondary compact">Undo Last</button></div>
-          <div id="rosterSummary" class="roster-summary"></div>
+    <div class="ai-office-grid">
+      <aside class="organization-rail">
+        <section class="office-section">
+          <div class="panel-head"><div><span class="eyebrow">YOUR ORGANIZATION</span><h3>Roster Command</h3></div><button id="quickUndoBtn" class="text-btn">Undo</button></div>
+          <div id="rosterSummary" class="roster-summary compact-summary"></div>
           <div id="myRoster" class="roster-list compact-roster"></div>
         </section>
-        <section class="command-panel philosophy-panel">
-          <div class="panel-head"><div><span class="eyebrow">FRONT OFFICE PHILOSOPHY</span><h3>Your Draft Plan</h3></div></div>
-          <div id="draftBlueprint" class="blueprint"></div>
+        <section class="office-section">
+          <div class="panel-head"><div><span class="eyebrow">FRONT OFFICE PHILOSOPHY</span><h3>Current Plan</h3></div></div>
+          <div id="draftBlueprint" class="blueprint concise-blueprint"></div>
+        </section>
+        <section class="office-section">
+          <div class="panel-head"><div><span class="eyebrow">SCOUTING</span><h3>Your Targets</h3></div><button class="text-btn" data-jump="database">Manage</button></div>
+          <div id="scoutingSummary" class="scouting-summary"></div>
         </section>
       </aside>
 
-      <div class="front-office-center">
-        <section class="command-panel on-clock-panel">
-          <div class="panel-head"><div><span class="eyebrow">ON THE CLOCK</span><h3>Best Move Right Now</h3></div><button class="text-btn" data-jump="board">Open Board</button></div>
-          <div id="recommend"></div>
+      <main class="gm-conversation" aria-live="polite">
+        <section class="gm-briefing">
+          <div class="gm-identity"><div class="gm-mark">GM</div><div><span class="eyebrow">DECISION INTELLIGENCE</span><h3>GM Briefing</h3></div><span id="briefingStatus" class="live-pill">LIVE</span></div>
+          <div id="gooseThinking" class="gm-message"></div>
+          <div id="recommend" class="gm-recommendation"></div>
         </section>
-        <section class="command-panel goose-panel">
-          <span class="eyebrow">GOOSE IS THINKING</span>
-          <div id="gooseThinking" class="goose-thinking"></div>
+        <section class="decision-paths">
+          <div class="panel-head"><div><span class="eyebrow">DECISION INTELLIGENCE</span><h3>What Happens Next</h3></div></div>
+          <div id="decisionPaths" class="path-grid"></div>
         </section>
-        <section class="command-panel alternatives-panel">
-          <div class="panel-head"><div><span class="eyebrow">DECISION SET</span><h3>Other Players Who Matter</h3></div></div>
-          <div id="nextFive" class="decision-grid"></div>
+        <section class="office-section alternatives-panel">
+          <div class="panel-head"><div><span class="eyebrow">ALTERNATIVE PATHS</span><h3>Other Moves Worth Considering</h3></div><button class="text-btn" data-jump="board">Open Board</button></div>
+          <div id="nextFive" class="decision-strip"></div>
         </section>
-      </div>
+      </main>
 
-      <aside class="front-office-right">
-        <section class="command-panel threat-panel">
-          <div class="panel-head"><div><span class="eyebrow">THREAT DESK</span><h3>Who Can Change Your Plan</h3></div></div>
+      <aside class="intelligence-rail">
+        <section class="office-section">
+          <div class="panel-head"><div><span class="eyebrow">LEAGUE RADAR</span><h3>Room Movement</h3></div></div>
           <div id="draftPressure" class="pressure-board"></div>
         </section>
-        <section class="command-panel wishlist-panel">
-          <div class="panel-head"><div><span class="eyebrow">MY WISHLIST</span><h3>Targets by Position</h3></div></div>
+        <section class="office-section">
+          <div class="panel-head"><div><span class="eyebrow">WISHLIST INTELLIGENCE</span><h3>Target Status</h3></div><button class="text-btn" data-jump="database">Edit</button></div>
           <div id="positionTargets" class="target-board"></div>
         </section>
       </aside>
@@ -70,7 +75,7 @@
   </div>
 </section>
 <section id="board" class="view">
-  <div class="panel"><div class="panel-head"><div><span class="eyebrow">LIVE DRAFT BOARD</span><h2>The Butcher Big Board</h2></div><span id="availableCount" class="pill"></span></div>
+  <div class="panel"><div class="panel-head"><div><span class="eyebrow">LIVE DRAFT BOARD</span><h2>Live Draft Board</h2></div><span id="availableCount" class="pill"></span></div>
   <div class="filters"><input id="boardSearch" type="search" placeholder="Search player or team"><select id="boardPos"><option value="ALL">All positions</option><option>QB</option><option>RB</option><option>WR</option><option>TE</option><option>K</option><option>DEF</option></select></div>
   <div id="boardTable" class="player-list"></div></div>
 </section>
@@ -88,7 +93,28 @@
 <div id="playerModal" class="modal" hidden><div class="modal-card player-modal-card"><button id="closePlayer" class="modal-close" aria-label="Close player details">×</button><div id="playerModalContent"></div></div></div>
 <div id="compareModal" class="modal" hidden><div class="modal-card compare-modal-card"><button id="closeCompare" class="modal-close" aria-label="Close comparison">×</button><div id="compareModalContent"></div></div></div>
 <div id="compareTray" class="compare-tray" hidden></div>
-<div id="settingsModal" class="modal" hidden><div class="modal-card"><h2>Draft Settings</h2><label>The Butcher draft slot<select id="slotSelect"></select></label><div class="modal-actions"><button id="closeSettings" class="btn secondary">Cancel</button><button id="saveSettings" class="btn primary">Save</button></div><button id="resetBtn" class="danger-link">Reset entire draft</button></div></div>
+<div id="settingsModal" class="modal" hidden><div class="modal-card settings-card">
+<button id="closeSettings" class="modal-close" aria-label="Close settings">×</button>
+<span class="eyebrow">MILESTONE 1 SETUP</span><h2>Front Office Profile</h2>
+<p class="settings-note">Configure the league and your football philosophy here. Goose uses this profile—not hard-coded chat instructions—to shape every briefing.</p>
+<div class="settings-section"><h3>League Setup</h3>
+<div class="settings-grid two"><label>League name<input id="leagueNameInput" type="text"></label><label>Your team<input id="teamNameInput" type="text"></label></div>
+<div class="settings-grid three"><label>Teams<input id="teamCountInput" type="number" min="4" max="20"></label><label>Your draft slot<select id="slotSelect"></select></label><label>Keepers per team<input id="keeperCountInput" type="number" min="0" max="15"></label></div>
+<label>Team names <small>One per line, in draft order</small><textarea id="teamNamesInput" rows="5"></textarea></label>
+</div>
+<div class="settings-section"><h3>Roster Construction</h3>
+<div class="settings-grid roster-fields"><label>QB<input id="targetQB" type="number" min="0" max="6"></label><label>RB<input id="targetRB" type="number" min="0" max="10"></label><label>WR<input id="targetWR" type="number" min="0" max="10"></label><label>TE<input id="targetTE" type="number" min="0" max="5"></label><label>K<input id="targetK" type="number" min="0" max="3"></label><label>DEF<input id="targetDEF" type="number" min="0" max="3"></label><label>Bench<input id="benchInput" type="number" min="0" max="20"></label></div>
+</div>
+<div class="settings-section"><h3>Front Office Philosophy</h3>
+<label>Primary objective<textarea id="primaryObjectiveInput" rows="2"></textarea></label>
+<label>Secondary objectives<textarea id="secondaryObjectivesInput" rows="2"></textarea></label>
+<label>Avoid / downgrade<textarea id="avoidInput" rows="2"></textarea></label>
+<label>Late targets<textarea id="lateTargetsInput" rows="2"></textarea></label>
+<label>Emergency plan<textarea id="emergencyPlanInput" rows="2"></textarea></label>
+</div>
+<div class="modal-actions sticky-actions"><button id="saveSettings" class="btn primary">Save Profile</button></div>
+<button id="resetBtn" class="danger-link">Reset entire draft</button>
+</div></div>
 <div id="toast" class="toast" aria-live="polite"></div>
 <script src="data.js"></script>
 <script src="app.js"></script>
