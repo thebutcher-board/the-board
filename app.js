@@ -1,12 +1,46 @@
 'use strict';
 
-const APP_VERSION = '0.6.0';
-const STORAGE_KEY = 'the-board-v6';
-const LEGACY_STORAGE_KEYS = ['the-board-v5', 'the-board-v4', 'the-board-v3', 'the-board-v2', 'the-board-v1'];
+const APP_VERSION = '0.8.0';
+const STORAGE_KEY = 'the-board-v8';
+const LEGACY_STORAGE_KEYS = ['the-board-v7', 'the-board-v6', 'the-board-v5', 'the-board-v4', 'the-board-v3', 'the-board-v2', 'the-board-v1'];
 const NAME_CORRECTIONS = {
-  'George KittleO': 'George Kittle'
+  'George KittleO': 'George Kittle',
+  'James Cook': 'James Cook III'
 };
 const defaultState = { drafted: [], slot: 8, teams: [...BASE_TEAMS], compare: [] };
+
+const DRAFT_BLUEPRINT = [
+  { rounds: 'R1', title: 'Secure QB2', positions: ['QB'], detail: 'Leave Round 1 with a legitimate weekly QB2 unless an elite value shock changes the room.' },
+  { rounds: 'R2–4', title: 'Build RB/WR firepower', positions: ['RB','WR'], detail: 'Add three starting-caliber skill players and turn the flex into a weekly advantage.' },
+  { rounds: 'R5', title: 'Add QB3 upside', positions: ['QB'], detail: 'Target a younger or discounted quarterback with trade value and injury protection.' },
+  { rounds: 'R6', title: 'Add TE2', positions: ['TE'], detail: 'Back up McBride with a useful weekly option—not dead roster weight.' },
+  { rounds: 'R7', title: 'Attack premium kicker scoring', positions: ['K'], detail: 'Use the league scoring edge rather than waiting for leftovers.' },
+  { rounds: 'R8', title: 'Secure a difference-making defense', positions: ['DEF'], detail: 'Target pressure, turnover and scoring upside.' },
+  { rounds: 'R9–11', title: 'Handcuffs and rookie swings', positions: ['RB','WR'], detail: 'Finish with contingent value, direct handcuffs and players who can become weekly starters.' }
+];
+
+const POSITION_WISHLISTS = {
+  QB: ['Jalen Hurts','Brock Purdy','Dak Prescott','Jaxson Dart','Tyler Shough'],
+  RB: ['Jeremiyah Love','Javonte Williams','Cam Skattebo','TreVeyon Henderson','Quinshon Judkins'],
+  WR: ['Garrett Wilson','Davante Adams','Jaylen Waddle','Marvin Harrison Jr.','Mike Evans'],
+  TE: ['Tyler Warren','Colston Loveland','George Kittle','Tucker Kraft','Sam LaPorta'],
+  K: ['Brandon Aubrey','Cameron Dicker',"Ka'imi Fairbairn",'Harrison Mevis','Evan McPherson'],
+  DEF: []
+};
+
+const PLAYER_SCOUTING = {
+  'Jalen Hurts': 'Hurts gives this roster another week-winning quarterback through rushing touchdowns and red-zone usage. Pairing him with Drake Maye creates a weekly ceiling few teams can match.',
+  'Brock Purdy': 'Purdy is the balanced QB2 play: efficient offense, stable coaching and enough weekly volume to keep the floor intact without forcing a hero-ball outcome.',
+  'Dak Prescott': 'Dak is the veteran stabilizer. He will not create the same rushing edge as Hurts, but his passing volume can lock down QB2 and let the rest of the draft focus on flex firepower.',
+  'Jaxson Dart': 'Dart is an upside bet rather than a safety play. His mobility raises the ceiling, but the weekly range is wider and the roster must be comfortable absorbing developmental volatility.',
+  'Tyler Shough': 'Shough is the calculated swing: late-2025 momentum, functional rushing value and a price that can create major profit if the starting role holds.',
+  'Garrett Wilson': 'Wilson has alpha-level target talent, but the quarterback ecosystem still determines whether the weekly ceiling becomes elite or merely frustrating.',
+  'Davante Adams': 'Adams remains a route-winning volume receiver, but age and changing offensive context make price discipline essential.',
+  'Jaylen Waddle': 'Waddle adds explosive PPR upside and can tilt weeks without requiring twenty touches, though target competition keeps the floor less secure than a true alpha.',
+  'Cam Skattebo': 'Skattebo is a workload bet built on contact balance and receiving utility. He is appealing when the price reflects role uncertainty rather than assuming a full takeover.',
+  'Brandon Aubrey': 'Aubrey is not a throwaway kicker in this scoring system. His range creates legitimate weekly separation and justifies an earlier investment than standard formats.'
+};
+
 let state = loadState();
 let pendingPlayerName = null;
 let livePlayerData = new Map();
@@ -88,10 +122,10 @@ function marketLine(player) {
 }
 
 function analystTake(player) {
+  if (PLAYER_SCOUTING[player.name]) return PLAYER_SCOUTING[player.name];
   const counts = positionCounts('The Butcher');
   const live = liveInfo(player);
   const market = marketInfo(player);
-  const tierLeft = tierCount(player);
   const pos = player.pos;
   let lead = '';
   if (pos === 'QB') {
@@ -112,8 +146,6 @@ function analystTake(player) {
     lead = `${player.name} profiles as a useful roster piece at the current cost.`;
   }
   const context = [];
-  if (tierLeft <= 2) context.push(`Only ${tierLeft} player${tierLeft === 1 ? '' : 's'} remain in this ${pos} tier.`);
-  else context.push(`${tierLeft} players remain in this ${pos} tier, so you still have some room to maneuver.`);
   if (market?.adp) context.push(`FantasyPros market cost sits around pick ${Number(market.adp).toFixed(1)}.`);
   if (live?.depth_chart_order) context.push(`Sleeper currently lists him ${ordinal(live.depth_chart_order)} in the team depth-chart order.`);
   if (injuryLabel(player) !== 'Healthy') context.push(`${injuryLabel(player)} is an active concern and should be priced into the pick.`);
@@ -350,18 +382,18 @@ function renderRecommendation(list) {
   const player = list[0];
   const element = document.getElementById('recommend');
   if (!player) { element.innerHTML = '<div class="empty">Draft complete.</div>'; return; }
-  const reasons = recommendationReasons(player).map(reason => `<li>${escapeHtml(reason)}</li>`).join('');
   const strength = recommendationStrength(player);
   const market = marketInfo(player);
-  element.innerHTML = `<div class="recommend-hero" data-player="${encodeURIComponent(player.name)}" role="button" tabindex="0">
-      <div class="recommend-photo-wrap">${playerPhoto(player, 'player-photo hero-photo')}<span class="pos-float">${escapeHtml(player.pos)}</span></div>
-      <div class="recommend-copy"><div class="recommend-kicker">THE BOARD'S PICK</div><h2>${escapeHtml(player.name)}</h2><p>${escapeHtml(player.team)} · #${player.posRank || '—'} ${escapeHtml(player.pos)} · ${escapeHtml(player.tier)} tier</p><div class="strength-line"><span>RECOMMENDATION</span><strong>${strength.label}</strong><small>${escapeHtml(strength.detail)}</small></div></div>
+  const impact = rosterImpactLabel(player);
+  const pressure = positionPressure(player.pos).length;
+  element.innerHTML = `<div class="front-office-player" data-player="${encodeURIComponent(player.name)}" role="button" tabindex="0">
+      <div class="player-stage">${playerPhoto(player, 'player-photo hero-photo')}<span class="position-tag">${escapeHtml(player.pos)}</span></div>
+      <div class="player-decision-copy"><span class="decision-label ${strength.label.toLowerCase().replace(/\s+/g,'-')}">${strength.label}</span><h2>${escapeHtml(player.name)}</h2><p>${escapeHtml(player.team)} · ${escapeHtml(microTier(player))}</p>
+      <div class="decision-facts"><span><b>${Math.round(player.proj)}</b> projected pts</span><span><b>#${player.posRank || '—'}</b> position rank</span><span><b>${escapeHtml(impact)}</b> roster impact</span></div></div>
     </div>
-    <div class="analyst-take"><span class="eyebrow">GOOSE'S TAKE</span><p>${escapeHtml(analystTake(player))}</p></div>
-    <div class="metrics"><div class="metric feature"><b>${player.score}</b><span>BOARD SCORE</span></div><div class="metric"><b>${Math.round(player.proj)}</b><span>PROJECTED PTS</span></div><div class="metric"><b>${market?.adp ? Number(market.adp).toFixed(1) : '—'}</b><span>FP ADP</span></div><div class="metric"><b>${market?.ecr ? `#${market.ecr}` : `#${player.posRank || '—'}`}</b><span>${market?.ecr ? 'FP ECR' : 'POSITION'}</span></div></div>
-    <div class="market-strip"><div><span class="eyebrow">MARKET & AVAILABILITY</span><p>${escapeHtml(marketLine(player))}</p></div><div class="tier-remaining"><b>${tierCount(player)}</b><span>LEFT IN TIER</span></div></div>
-    <div class="why-block"><h3>Why this pick works</h3><ul>${reasons}</ul></div>
-    <div class="actions"><button class="btn primary" data-draft="${encodeURIComponent(player.name)}">Draft ${escapeHtml(player.name)}</button>${compareButton(player)}<button class="btn secondary" data-jump="board">Full Board</button></div>`;
+    <div class="analyst-take premium"><span class="eyebrow">GOOSE'S CALL</span><p>${escapeHtml(analystTake(player))}</p></div>
+    <div class="why-now-grid"><div><span>WHY NOW</span><b>${pressure ? `${pressure} teams ahead show ${player.pos} pressure` : 'Draft room is flexible'}</b></div><div><span>MARKET</span><b>${market?.adp ? `ADP ${Number(market.adp).toFixed(1)}` : 'Awaiting FP feed'}</b></div><div><span>RISK</span><b>${escapeHtml(player.risk)}</b></div></div>
+    <div class="actions"><button class="btn primary" data-draft="${encodeURIComponent(player.name)}">Draft ${escapeHtml(player.name)}</button>${compareButton(player)}<button class="btn secondary" data-jump="board">See Full Board</button></div>`;
 }
 function openPlayerDetails(name) {
   const player = playerByName(name); if (!player) return;
@@ -521,46 +553,106 @@ function positionPressure(pos) {
   });
 }
 
+
+function availabilityOutlook(player) {
+  const pressure = positionPressure(player.pos).length;
+  const positionRankAmongAvailable = ranked().filter(p => p.pos === player.pos).findIndex(p => normalize(p.name) === normalize(player.name)) + 1;
+  if (pressure >= 3 && positionRankAmongAvailable <= 3) return { label: 'HIGH PICK RISK', detail: 'Multiple teams ahead can remove this option.' };
+  if (pressure >= 1 && positionRankAmongAvailable <= 5) return { label: 'WATCH CLOSELY', detail: 'This player sits inside an active positional window.' };
+  return { label: 'ROOM TO WAIT', detail: 'Current roster pressure does not force the pick yet.' };
+}
+
+function teamNeedLabels(team) {
+  const counts = positionCounts(team);
+  const needs = [];
+  if ((counts.QB || 0) < 2) needs.push('QB2');
+  if ((counts.RB || 0) < 3) needs.push('RB');
+  if ((counts.WR || 0) < 3) needs.push('WR');
+  if ((counts.TE || 0) < 1) needs.push('TE');
+  if ((counts.K || 0) < 1) needs.push('K');
+  if ((counts.DEF || 0) < 1) needs.push('DEF');
+  return needs;
+}
+
+function blueprintStatus(step, index) {
+  const butcherPicks = state.drafted.filter(p => p.draftedBy === 'The Butcher');
+  const round = butcherPicks.length + 1;
+  const counts = positionCounts('The Butcher');
+  if (index === 0 && (counts.QB || 0) >= 2) return 'complete';
+  if (index === 1 && ((counts.RB || 0) + (counts.WR || 0)) >= 6) return 'complete';
+  if (index === 2 && (counts.QB || 0) >= 3) return 'complete';
+  if (index === 3 && (counts.TE || 0) >= 2) return 'complete';
+  if (index === 4 && (counts.K || 0) >= 1) return 'complete';
+  if (index === 5 && (counts.DEF || 0) >= 1) return 'complete';
+  const windows = [[1,1],[2,4],[5,5],[6,6],[7,7],[8,8],[9,11]];
+  const [start,end] = windows[index];
+  if (round >= start && round <= end) return 'active';
+  if (round > end) return 'missed';
+  return 'upcoming';
+}
+
+function wishlistCandidates(pos) {
+  const configured = (POSITION_WISHLISTS[pos] || []).map(playerByName).filter(Boolean).filter(p => playerStatus(p).draftable);
+  const fallbacks = ranked().filter(p => p.pos === pos && !configured.some(c => normalize(c.name) === normalize(p.name)));
+  return [...configured, ...fallbacks].slice(0, 5);
+}
+
 function renderRosterSummary() {
   const counts = positionCounts('The Butcher');
-  const positions = ['QB','RB','WR','TE'];
+  const positions = ['QB','RB','WR','TE','K','DEF'];
   document.getElementById('rosterSummary').innerHTML = positions.map(pos => {
     const have = counts[pos] || 0;
     const need = targetCount(pos);
-    const stateLabel = pos === 'QB' && have < 2 ? 'Critical' : have >= need ? 'Strong' : have >= Math.max(1, need - 1) ? 'Stable' : 'Needs work';
-    return `<div class="metric-card roster-metric"><span>${pos}</span><b>${have}/${need}</b><small>${stateLabel}</small></div>`;
+    const stateLabel = pos === 'QB' && have < 2 ? 'Critical' : have >= need ? 'Complete' : have >= Math.max(1, need - 1) ? 'Stable' : 'Needs work';
+    return `<div class="metric-card roster-metric ${stateLabel.toLowerCase().replace(' ','-')}"><span>${pos}</span><b>${have}/${need}</b><small>${stateLabel}</small></div>`;
   }).join('');
 }
 
 function renderBlueprint() {
   const counts = positionCounts('The Butcher');
-  const steps = [];
-  if ((counts.QB || 0) < 2) steps.push(['1','Secure QB2','Use the first draft selection on a trustworthy weekly starter unless an elite value shock changes the board.']);
-  else steps.push(['✓','QB room stabilized','Do not chase another quarterback until the QB3 value window opens.']);
-  if ((counts.WR || 0) < 3) steps.push(['2','Build WR and flex ceiling','Attack target volume and strong quarterback environments over fragile name value.']);
-  if ((counts.RB || 0) < 4) steps.push(['3','Add asymmetric RB upside','Prioritize receiving roles, quality lines and backs one injury away from major volume.']);
-  steps.push(['4','Exploit custom scoring','Reserve the right windows for a premium kicker and defense instead of treating them as throwaway picks.']);
-  document.getElementById('draftBlueprint').innerHTML = steps.map(([n,title,copy]) => `<div class="blueprint-step"><span>${n}</span><div><b>${title}</b><p>${copy}</p></div></div>`).join('');
-  document.getElementById('strategyHeadline').textContent = (counts.QB || 0) < 2 ? 'Priority one is unchanged: leave Round 1 with a legitimate QB2, then build a dominant flex and bench.' : 'The starting quarterback room is secure. Shift capital toward weekly flex value and roster insulation.';
+  const items = [
+    ['PRIMARY OBJECTIVE', (counts.QB || 0) < 2 ? 'Secure a trustworthy QB2 before the reliable starter tier dries up.' : 'QB2 secured. Shift capital toward RB/WR firepower.'],
+    ['SECONDARY OBJECTIVES', 'Build the flex through high-volume WRs and pass-catching backs; add a tradeable QB3 in the middle rounds.'],
+    ['AVOID', 'Full-price injury risk, committee backs without receiving work, and receivers attached to unstable quarterback play.'],
+    ['LATE TARGETS', 'Premium kicker, difference-making defense, direct handcuffs and rookies with a real path to weekly work.'],
+    ['EMERGENCY PLAN', 'If the QB tier collapses, take the best remaining starter immediately and recover value at RB/WR on the next turn.']
+  ];
+  document.getElementById('draftBlueprint').innerHTML = items.map(([label,text],index) => `<div class="philosophy-item ${index===0?'primary':''}"><span>${label}</span><p>${text}</p></div>`).join('');
 }
 
 function renderPositionTargets() {
   const groups = ['QB','RB','WR','TE','K','DEF'];
+  const labels = ['DREAM','LIKELY','VALUE','SLEEPER','LOTTERY'];
   document.getElementById('positionTargets').innerHTML = groups.map(pos => {
-    const candidates = ranked().filter(p => p.pos === pos).slice(0,3);
-    return `<div class="target-group"><div class="target-group-head"><b>${pos}</b><span>${positionPressure(pos).length} teams ahead may need one</span></div>${candidates.map((p,i)=>`<button class="target-row" data-player="${encodeURIComponent(p.name)}"><span>${i+1}</span>${playerPhoto(p,'player-photo tiny')}<div><b>${escapeHtml(p.name)}</b><small>${microTier(p)}</small></div></button>`).join('')}</div>`;
+    const candidates = wishlistCandidates(pos);
+    if (!candidates.length) return '';
+    const pressure = positionPressure(pos).length;
+    const rows = candidates.map((p,i) => `<button class="wishlist-row" data-player="${encodeURIComponent(p.name)}"><span class="wishlist-type">${labels[i] || 'TARGET'}</span>${playerPhoto(p,'player-photo tiny')}<div><b>${escapeHtml(p.name)}</b><small>${escapeHtml(microTier(p))}</small></div></button>`).join('');
+    return `<div class="wishlist-group"><div class="wishlist-head"><b>${pos}</b><span>${pressure ? `${pressure} teams ahead may need ${pos}` : 'Low immediate pressure'}</span></div>${rows}</div>`;
   }).join('');
 }
 
 function renderDraftPressure() {
   const teams = teamsBeforeNextPick();
-  const distance = pickDistanceToTeam('The Butcher');
-  const qbs = positionPressure('QB');
-  const wrs = positionPressure('WR');
-  const rbs = positionPressure('RB');
-  document.getElementById('draftPressure').innerHTML = `<div class="pressure-callout"><b>${distance-1} selections before your next turn</b><span>${teams.length ? teams.map(escapeHtml).join(' · ') : 'You are on the clock now.'}</span></div>
-    <div class="pressure-list"><div><b>QB pressure</b><span>${qbs.length ? `${qbs.length} team${qbs.length===1?'':'s'} in the window still lack QB2` : 'No immediate QB-needy team identified'}</span></div><div><b>WR pressure</b><span>${wrs.length} shallow WR room${wrs.length===1?'':'s'} before your next pick</span></div><div><b>RB pressure</b><span>${rbs.length} shallow RB room${rbs.length===1?'':'s'} before your next pick</span></div></div>
-    <p class="model-note">These are roster-based pressure signals, not fake probabilities. Owner tendencies and ADP simulations will strengthen this model later.</p>`;
+  const rows = teams.map((team,index) => {
+    const needs = teamNeedLabels(team);
+    const primary = needs[0] || 'VALUE';
+    return `<div class="threat-row"><span class="pick-order">${state.drafted.length + index + 2}</span><div><b>${escapeHtml(team)}</b><small>${needs.length ? `Needs: ${needs.join(' · ')}` : 'Can draft pure value'}</small></div><span class="threat-chip ${primary==='QB2'?'hot':''}">${primary}</span></div>`;
+  }).join('');
+  const qbThreats = teams.filter(t => teamNeedLabels(t).includes('QB2')).length;
+  document.getElementById('draftPressure').innerHTML = `<div class="threat-summary"><span>THREAT LEVEL</span><b>${qbThreats >= 3 ? 'HIGH' : qbThreats ? 'ACTIVE' : 'LOW'}</b><p>${qbThreats ? `${qbThreats} teams before your next turn still need a second quarterback.` : 'No immediate QB2 pressure before your next turn.'}</p></div><div class="opponent-board">${rows || '<div class="target-empty">You are on the clock.</div>'}</div>`;
+}
+
+function renderGooseThinking(list) {
+  const player = list[0];
+  const teams = teamsBeforeNextPick();
+  const qbThreats = teams.filter(t => teamNeedLabels(t).includes('QB2')).length;
+  const counts = positionCounts('The Butcher');
+  let copy = '';
+  if (!player) copy = 'The draft is complete. Time to grade the room.';
+  else if ((counts.QB || 0) < 2 && player.pos === 'QB') copy = `${player.name} solves the only open starting slot. ${qbThreats ? `${qbThreats} quarterback-needy teams pick before your next turn, so waiting carries real downside.` : 'The room is not forcing panic, but the tier still matters more than raw ADP.'}`;
+  else copy = `${player.name} is the best current fit, but I am watching the next tier more than the headline projection. The goal is to improve the starting lineup without paying for risk we can buy later.`;
+  document.getElementById('gooseThinking').innerHTML = `<p>${escapeHtml(copy)}</p><div class="goose-actions">${player ? `<button class="text-btn" data-player="${encodeURIComponent(player.name)}">Open dossier</button>` : ''}<button class="text-btn" data-jump="board">Challenge the call</button></div>`;
 }
 
 function renderRoster() {
@@ -607,7 +699,7 @@ function renderHistory() {
 function render() {
   const pick = state.drafted.length + 1; const list = ranked();
   document.getElementById('clockTeam').textContent = currentTeam(); document.getElementById('clockPick').textContent = `Round ${Math.ceil(pick / 10)} · Pick ${pick}`; document.getElementById('pickBadge').textContent = pick; document.getElementById('versionLabel').textContent = `v${APP_VERSION}`;
-  renderRecommendation(list); document.getElementById('nextFive').innerHTML = list.slice(0, 6).map((player, index) => playerCard(player, index, true)).join('');
+  renderRecommendation(list); renderGooseThinking(list); document.getElementById('nextFive').innerHTML = list.slice(1, 5).map((player, index) => playerCard(player, index, true)).join('');
   renderRosterSummary(); renderBlueprint(); renderPositionTargets(); renderDraftPressure(); renderRoster(); renderBoard(); renderDatabase(); renderLeague(); renderHistory(); renderCompareTray();
 }
 
