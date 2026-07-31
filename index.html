@@ -78,10 +78,11 @@
 </section>
 
 <section id="database" class="view">
-  <div class="panel"><div class="panel-head"><div><span class="eyebrow">SCOUTING DEPARTMENT</span><h2>Player Intelligence</h2></div><span id="databaseCount" class="pill"></span></div>
-  <div class="database-note">Research every player, including keepers and drafted players. Add a scouting signal in one tap.</div>
-  <div class="filters database-filters"><input id="databaseSearch" type="search" placeholder="Search player, team, or owner"><select id="databasePos"><option value="ALL">All positions</option><option>QB</option><option>RB</option><option>WR</option><option>TE</option><option>K</option><option>DEF</option></select><select id="databaseStatus"><option value="ALL">All statuses</option><option value="available">Available</option><option value="keeper">Keepers</option><option value="drafted">Drafted</option></select></div>
-  <div id="databaseList" class="database-list"></div></div>
+  <div class="scouting-hero"><div><span class="eyebrow">SCOUTING DEPARTMENT</span><h2>Build your player board.</h2><p>One tap tells Goose how you see a player. The AI handles timing, urgency and alternatives.</p></div><span id="databaseCount" class="pill"></span></div>
+  <div class="scouting-toolbar"><input id="databaseSearch" type="search" placeholder="Search players, teams, owners or notes"><select id="databasePos" aria-label="Position"><option value="ALL">All positions</option><option>QB</option><option>RB</option><option>WR</option><option>TE</option><option>K</option><option>DEF</option></select><select id="databaseStatus" aria-label="League status"><option value="ALL">All statuses</option><option value="available">Available</option><option value="keeper">Keepers</option><option value="drafted">Drafted</option></select><select id="databaseScout" aria-label="Scouting signal"><option value="ALL">All signals</option><option value="must_have">Targets</option><option value="watch">Watch</option><option value="value_only">Value only</option><option value="fade">Fades</option><option value="untagged">Untagged</option></select><select id="databaseSort" aria-label="Sort players"><option value="BOARD">Board order</option><option value="PROJ">Projected points</option><option value="ADP">ADP</option><option value="POS">Position rank</option></select></div>
+  <div class="scouting-legend"><span><b>★</b> Target</span><span><b>◉</b> Watch</span><span><b>$</b> Value</span><span><b>—</b> Fade</span><small>Tap again to clear.</small></div>
+  <div id="databaseList" class="database-list scouting-list"></div>
+</section>
 </section>
 <section id="league" class="view"><div class="panel"><div class="panel-head"><div><span class="eyebrow">LEAGUE ROOM</span><h2>All Rosters</h2></div></div><div id="rosters" class="team-grid"></div></div></section>
 <section id="history" class="view"><div class="panel"><div class="panel-head"><div><span class="eyebrow">DRAFT LOG</span><h2>Pick History</h2></div><button id="undoBtn" class="btn secondary">Undo Last</button></div><div id="draftHistory"></div></div></section>

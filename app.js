@@ -1,7 +1,7 @@
 'use strict';
 
-const APP_VERSION = '1.1.0';
-const STORAGE_KEY = 'the-board-v1-ai-gm-canonical';
+const APP_VERSION = '1.2.1';
+const STORAGE_KEY = 'the-board-v1-2-scouting-controls';
 const LEGACY_STORAGE_KEYS = ['the-board-v9','the-board-v8','the-board-v7', 'the-board-v6', 'the-board-v5', 'the-board-v4', 'the-board-v3', 'the-board-v2', 'the-board-v1'];
 const NAME_CORRECTIONS = {
   'George KittleO': 'George Kittle',
@@ -25,7 +25,7 @@ const DEFAULT_PROFILE = {
     emergency: 'If the QB tier collapses, take the best remaining starter immediately and recover value at RB/WR on the next turn.'
   }
 };
-const defaultState = { drafted: [], slot: 8, teams: [...BASE_TEAMS], compare: [], scouting: {}, profile: structuredClone(DEFAULT_PROFILE) };
+const defaultState = { drafted: [], slot: 8, teams: [...BASE_TEAMS], compare: [], scouting: {}, scoutingNotes: {}, profile: structuredClone(DEFAULT_PROFILE) };
 
 const DRAFT_BLUEPRINT = [
   { rounds: 'R1', title: 'Secure QB2', positions: ['QB'], detail: 'Leave Round 1 with a legitimate weekly QB2 unless an elite value shock changes the room.' },
@@ -248,6 +248,7 @@ function loadState() {
       teams: [...saved.teams],
       compare: Array.isArray(saved.compare) ? saved.compare.map(canonicalName).slice(0, 2) : [],
       scouting: saved.scouting && typeof saved.scouting === 'object' ? saved.scouting : {},
+      scoutingNotes: saved.scoutingNotes && typeof saved.scoutingNotes === 'object' ? saved.scoutingNotes : {},
       profile: saved.profile && typeof saved.profile === 'object' ? { ...structuredClone(DEFAULT_PROFILE), ...saved.profile, rosterTargets: { ...DEFAULT_PROFILE.rosterTargets, ...(saved.profile.rosterTargets || {}) }, philosophy: { ...DEFAULT_PROFILE.philosophy, ...(saved.profile.philosophy || {}) } } : structuredClone(DEFAULT_PROFILE)
     };
   } catch (error) {
@@ -608,6 +609,21 @@ function scoutingTag(player) {
   return state.scouting?.[normalize(player.name)] || null;
 }
 
+function scoutingNote(player) {
+  return state.scoutingNotes?.[normalize(player.name)] || '';
+}
+
+function setScoutingNote(name, note) {
+  const player = playerByName(name); if (!player) return;
+  state.scoutingNotes = state.scoutingNotes || {};
+  const key = normalize(player.name);
+  const clean = String(note || '').trim().slice(0, 180);
+  if (clean) state.scoutingNotes[key] = clean;
+  else delete state.scoutingNotes[key];
+  save(); renderDatabase();
+  showToast(clean ? `${player.name}: note saved` : `${player.name}: note cleared`);
+}
+
 function setScoutingTag(name, tag) {
   const player = playerByName(name); if (!player) return;
   state.scouting = state.scouting || {};
@@ -784,20 +800,87 @@ function renderBoard() {
   document.getElementById('boardTable').innerHTML = players.length ? players.map((player,index)=>playerCard(player,index)).join('') : '<div class="empty">No players found.</div>';
 }
 
+function byeWeek(player) {
+  const live = liveInfo(player);
+  return player.bye || live?.bye_week || live?.bye || 'TBD';
+}
+
+function nflStatus(player) {
+  const live = liveInfo(player);
+  if (!player.team || player.team === 'FA') return 'NFL FREE AGENT';
+  if (live?.status && live.status !== 'Active') return String(live.status).toUpperCase();
+  return 'ACTIVE';
+}
+
+
+function roleLabel(player) {
+  const live = liveInfo(player) || {};
+  const depth = Number(live.depth_chart_order || 0);
+  if (!player.team || player.team === 'FA') return 'Free agent';
+  if (player.pos === 'QB') {
+    if (depth === 1 || player.posRank <= 20) return 'Starter';
+    if (depth === 2 || player.posRank <= 32) return 'Backup';
+    return 'Developmental';
+  }
+  if (player.pos === 'RB') {
+    if (player.posRank <= 12) return 'Lead back';
+    if (player.posRank <= 30) return 'Committee';
+    return depth === 2 ? 'Handcuff' : 'Depth';
+  }
+  if (player.pos === 'WR') {
+    if (player.posRank <= 24) return 'Starter';
+    if (player.posRank <= 48) return 'Rotation';
+    return 'Depth';
+  }
+  if (player.pos === 'TE') return player.posRank <= 12 ? 'Starter' : player.posRank <= 24 ? 'Committee' : 'Depth';
+  if (player.pos === 'K' || player.pos === 'DEF') return 'Starter';
+  return 'Depth';
+}
+
+function opportunityLabel(player) {
+  const role = roleLabel(player);
+  if (role === 'Lead back' || role === 'Starter') return 'Secure role';
+  if (role === 'Handcuff') return 'Injury-away';
+  if (role === 'Committee' || role === 'Rotation') return 'Shared work';
+  if (role === 'Backup' || role === 'Developmental') return 'Needs opening';
+  if (role === 'Free agent') return 'No role';
+  return 'Unclear';
+}
+
+function trendLabel(player) {
+  const market = marketInfo(player);
+  if (market?.trend) return String(market.trend);
+  return 'Feed pending';
+}
+
 function databaseCard(player) {
-  const status=playerStatus(player); const tag=scoutingTag(player);
-  const tags=[['must_have','★','Target'],['watch','◉','Watch'],['value_only','$','Value'],['fade','—','Fade']].map(([value,icon,label])=>`<button class="quick-scout ${tag===value?'active':''}" title="${label}" data-scout="${value}" data-scout-player="${encodeURIComponent(player.name)}"><span>${icon}</span></button>`).join('');
-  return `<article class="scout-player" data-player="${encodeURIComponent(player.name)}">${playerPhoto(player,'player-photo small')}<div class="scout-copy"><div class="player-name">${escapeHtml(player.name)}</div><div class="player-meta">${player.team} · ${player.pos} · ${microTier(player)}</div><small>${status.label}${status.owner?` · ${escapeHtml(status.owner)}`:''}</small></div><div class="quick-scout-row">${tags}</div><button class="text-btn" data-player="${encodeURIComponent(player.name)}">Profile</button></article>`;
+  const status=playerStatus(player); const tag=scoutingTag(player); const market=marketInfo(player); const injury=injuryLabel(player); const note=scoutingNote(player);
+  const tags=[['must_have','★','Target'],['watch','◉','Watch'],['value_only','$','Value'],['fade','—','Fade']].map(([value,icon,label])=>`<button class="quick-scout ${tag===value?'active':''}" title="${label}" aria-label="${label} ${escapeHtml(player.name)}" data-scout="${value}" data-scout-player="${encodeURIComponent(player.name)}"><span>${icon}</span><em>${label}</em></button>`).join('');
+  const statusText = status.owner ? `${status.label} · ${escapeHtml(status.owner)}` : status.label;
+  return `<article class="scout-player premium-row" data-player-row="${encodeURIComponent(player.name)}">
+    ${playerPhoto(player,'player-photo scouting-photo')}
+    <div class="scout-copy"><div class="player-title-line"><div class="player-name">${escapeHtml(player.name)}</div>${injury!=='Healthy'?`<span class="injury-badge">${escapeHtml(injury)}</span>`:''}</div><div class="player-meta">${escapeHtml(player.team)} · ${escapeHtml(player.pos)} · ${escapeHtml(microTier(player))}</div><div class="status-line"><span class="status-chip ${status.key}">${statusText}</span><span>${escapeHtml(nflStatus(player))}</span></div><div class="scout-context"><span>${escapeHtml(roleLabel(player))}</span><span>${escapeHtml(opportunityLabel(player))}</span><span>${escapeHtml(trendLabel(player))}</span><span>${escapeHtml(draftWindow(player))}</span></div></div>
+    <div class="scout-metrics"><div><span>PROJ</span><b>${Math.round(player.proj||0)}</b></div><div><span>ADP</span><b>${market?.adp?Number(market.adp).toFixed(1):'—'}</b></div><div><span>BYE</span><b>${escapeHtml(String(byeWeek(player)))}</b></div><div><span>RANK</span><b>#${player.posRank||'—'}</b></div></div>
+    <div class="scout-actions"><div class="quick-scout-row">${tags}</div><div class="row-tools"><button class="note-btn ${note?'has-note':''}" data-note="${encodeURIComponent(player.name)}" aria-label="Add note for ${escapeHtml(player.name)}">${note?'✎ Note':'＋ Note'}</button><button class="details-btn" data-player="${encodeURIComponent(player.name)}">Details</button></div></div>
+    <div class="quick-note-editor" data-note-editor="${encodeURIComponent(player.name)}" hidden><input type="text" maxlength="180" value="${escapeHtml(note)}" placeholder="Quick scouting note…"><small>Enter to save · 180 characters</small></div>
+  </article>`;
 }
 
 function renderDatabase() {
   const query = document.getElementById('databaseSearch').value.toLowerCase();
   const position = document.getElementById('databasePos').value;
   const statusFilter = document.getElementById('databaseStatus').value;
+  const scoutFilter = document.getElementById('databaseScout').value;
+  const sortBy = document.getElementById('databaseSort').value;
   const players = MASTER_PLAYERS.filter(player => {
-    const status = playerStatus(player);
-    return (position === 'ALL' || player.pos === position) && (statusFilter === 'ALL' || status.key === statusFilter) && `${player.name} ${player.team} ${status.owner || ''}`.toLowerCase().includes(query);
-  }).sort((a, b) => Number(a.butcherRank || 9999) - Number(b.butcherRank || 9999));
+    const status = playerStatus(player); const tag=scoutingTag(player)||'untagged';
+    return (position === 'ALL' || player.pos === position) && (statusFilter === 'ALL' || status.key === statusFilter) && (scoutFilter === 'ALL' || tag === scoutFilter) && `${player.name} ${player.team} ${status.owner || ''} ${scoutingNote(player)}`.toLowerCase().includes(query);
+  }).sort((a,b)=>{
+    if(sortBy==='PROJ') return Number(b.proj||0)-Number(a.proj||0);
+    if(sortBy==='ADP') return Number(marketInfo(a)?.adp||9999)-Number(marketInfo(b)?.adp||9999);
+    if(sortBy==='POS') return String(a.pos).localeCompare(String(b.pos)) || Number(a.posRank||999)-Number(b.posRank||999);
+    return Number(a.butcherRank || 9999) - Number(b.butcherRank || 9999);
+  });
   document.getElementById('databaseCount').textContent = `${players.length} players`;
   document.getElementById('databaseList').innerHTML = players.length ? players.map(databaseCard).join('') : '<div class="empty">No players found.</div>';
 }
@@ -877,6 +960,7 @@ document.addEventListener('click', event => {
   const draft = event.target.closest('[data-draft]'); if (draft) { event.stopPropagation(); requestDraft(decodeURIComponent(draft.dataset.draft)); return; }
   const compare = event.target.closest('[data-compare]'); if (compare) { event.stopPropagation(); toggleCompare(decodeURIComponent(compare.dataset.compare)); return; }
   const scout = event.target.closest('[data-scout]'); if (scout) { event.stopPropagation(); setScoutingTag(decodeURIComponent(scout.dataset.scoutPlayer), scout.dataset.scout); return; }
+  const noteButton = event.target.closest('[data-note]'); if (noteButton) { event.stopPropagation(); const name=decodeURIComponent(noteButton.dataset.note); const editor=document.querySelector(`[data-note-editor="${CSS.escape(encodeURIComponent(name))}"]`); if(editor){ editor.hidden=!editor.hidden; if(!editor.hidden){ const input=editor.querySelector('input'); input.focus(); input.select(); } } return; }
   if (event.target.closest('[data-open-compare]')) { openComparison(); return; }
   if (event.target.closest('[data-clear-compare]')) { state.compare = []; save(); closeModal('compareModal'); render(); return; }
   const player = event.target.closest('[data-player]'); if (player) { openPlayerDetails(decodeURIComponent(player.dataset.player)); return; }
@@ -887,13 +971,19 @@ document.addEventListener('click', event => {
 });
 
 document.addEventListener('keydown', event => {
+  const input = event.target.closest('.quick-note-editor input');
+  if (input && event.key === 'Enter') {
+    event.preventDefault();
+    const editor=input.closest('[data-note-editor]');
+    setScoutingNote(decodeURIComponent(editor.dataset.noteEditor), input.value);
+  }
   if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('[data-player]')) { event.preventDefault(); openPlayerDetails(decodeURIComponent(event.target.dataset.player)); }
   if (event.key === 'Escape') ['confirmModal', 'playerModal', 'compareModal', 'settingsModal'].forEach(closeModal);
 });
 
 ['boardSearch', 'databaseSearch'].forEach(id => document.getElementById(id).addEventListener('input', id === 'boardSearch' ? renderBoard : renderDatabase));
 ['boardPos'].forEach(id => document.getElementById(id).addEventListener('change', renderBoard));
-['databasePos', 'databaseStatus'].forEach(id => document.getElementById(id).addEventListener('change', renderDatabase));
+['databasePos', 'databaseStatus', 'databaseScout', 'databaseSort'].forEach(id => document.getElementById(id).addEventListener('change', renderDatabase));
 document.getElementById('undoBtn').addEventListener('click', undo); document.getElementById('quickUndoBtn').addEventListener('click', undo); document.getElementById('settingsBtn').addEventListener('click', openSettings); document.getElementById('closeSettings').addEventListener('click', () => closeModal('settingsModal')); document.getElementById('saveSettings').addEventListener('click', applyProfile); document.getElementById('cancelDraft').addEventListener('click', () => closeModal('confirmModal')); document.getElementById('confirmDraft').addEventListener('click', confirmDraft); document.getElementById('closePlayer').addEventListener('click', () => closeModal('playerModal')); document.getElementById('closeCompare').addEventListener('click', () => closeModal('compareModal'));
 document.querySelectorAll('.modal').forEach(modal => modal.addEventListener('click', event => { if (event.target === modal) closeModal(modal.id); }));
 document.getElementById('resetBtn').addEventListener('click', () => { if (confirm('Reset every drafted player? Keepers remain.')) { state.drafted = []; save(); closeModal('settingsModal'); render(); showToast('Draft reset'); } });
