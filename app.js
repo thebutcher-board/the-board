@@ -1,7 +1,7 @@
 'use strict';
 
-const APP_VERSION = '1.0.0';
-const STORAGE_KEY = 'the-board-v1-milestone1';
+const APP_VERSION = '1.1.0';
+const STORAGE_KEY = 'the-board-v1-ai-gm-canonical';
 const LEGACY_STORAGE_KEYS = ['the-board-v9','the-board-v8','the-board-v7', 'the-board-v6', 'the-board-v5', 'the-board-v4', 'the-board-v3', 'the-board-v2', 'the-board-v1'];
 const NAME_CORRECTIONS = {
   'George KittleO': 'George Kittle',
@@ -13,6 +13,9 @@ const DEFAULT_PROFILE = {
   teamCount: 10,
   keeperCount: 5,
   bench: 6,
+  rosterSize: 16,
+  starterCount: 10,
+  ownerSkill: 'Advanced',
   rosterTargets: { QB: 3, RB: 4, WR: 5, TE: 2, K: 1, DEF: 1 },
   philosophy: {
     primary: 'Secure a trustworthy QB2 before the reliable starter tier dries up.',
@@ -387,12 +390,14 @@ function compareButton(player) {
 
 function playerCard(player, index, compact = false) {
   const injury = injuryLabel(player);
-  return `<article class="${compact ? 'mini-player' : 'player-card'}" data-player="${encodeURIComponent(player.name)}" role="button" tabindex="0" aria-label="View ${escapeHtml(player.name)}">
-    <div class="rank">${index + 1}</div>${playerPhoto(player, compact ? 'player-photo small' : 'player-photo')}
-    <div class="player-copy"><div class="player-title-line"><div class="player-name">${escapeHtml(player.name)}</div>${injury !== 'Healthy' ? `<span class="injury-badge">${escapeHtml(injury)}</span>` : ''}</div><div class="player-meta">${escapeHtml(player.team)} · ${escapeHtml(player.pos)} · ${escapeHtml(player.tier)} tier</div>${compact ? '' : `<div class="player-signal">#${player.posRank || '—'} ${player.pos} <span>•</span> ${Math.round(player.proj)} pts <span>•</span> ${escapeHtml(player.risk)} risk</div>`}</div>
-    <div class="score projection"><strong>${Number(player.score).toFixed(1)}</strong><span>BOARD</span></div>
-    ${compact ? '' : compareButton(player)}
-    <button class="draft-btn" data-draft="${encodeURIComponent(player.name)}" aria-label="Draft ${escapeHtml(player.name)}">${compact ? '+' : 'Draft'}</button>
+  const tag = scoutingTag(player);
+  const tagButtons = [['must_have','★','Target'],['watch','◉','Watch'],['value_only','$','Value'],['fade','—','Fade']]
+    .map(([value,icon,label]) => `<button class="quick-scout ${tag===value?'active':''}" title="${label}" aria-label="${label} ${escapeHtml(player.name)}" data-scout="${value}" data-scout-player="${encodeURIComponent(player.name)}"><span>${icon}</span></button>`).join('');
+  return `<article class="board-player" data-player="${encodeURIComponent(player.name)}" role="button" tabindex="0">
+    <div class="rank">${index + 1}</div>${playerPhoto(player, 'player-photo small')}
+    <div class="player-copy"><div class="player-title-line"><div class="player-name">${escapeHtml(player.name)}</div>${injury !== 'Healthy' ? `<span class="injury-badge">${escapeHtml(injury)}</span>` : ''}</div><div class="player-meta">${escapeHtml(player.team)} · ${escapeHtml(player.pos)} · ${escapeHtml(microTier(player))}</div><div class="player-signal">#${player.posRank || '—'} ${player.pos} · ${Math.round(player.proj)} pts · ${escapeHtml(player.risk)} risk</div></div>
+    <div class="quick-scout-row">${tagButtons}</div>
+    <button class="draft-btn" data-draft="${encodeURIComponent(player.name)}">Draft</button>
   </article>`;
 }
 
@@ -400,8 +405,7 @@ function renderRecommendation(list) {
   const element = document.getElementById('recommend');
   const player = list[0];
   if (!player) { element.innerHTML = ''; return; }
-  const strength = recommendationStrength(player);
-  element.innerHTML = `<div class="gm-action-line"><div><span class="decision-label">${strength.label}</span><b>${escapeHtml(player.name)}</b><small>${escapeHtml(player.pos)} · ${escapeHtml(microTier(player))}</small></div><div class="gm-action-buttons"><button class="btn primary" data-draft="${encodeURIComponent(player.name)}">Draft Player</button><button class="btn secondary" data-jump="board">Explore Paths</button></div></div>`;
+  element.innerHTML = `<button class="btn primary" data-draft="${encodeURIComponent(player.name)}">Approve ${escapeHtml(player.name)}</button><button class="btn secondary" id="challengeBtn">Challenge</button><button class="btn ghost" data-jump="board">Open Board</button>`;
 }
 
 function openPlayerDetails(name) {
@@ -660,13 +664,20 @@ function wishlistCandidates(pos) {
 
 function renderRosterSummary() {
   const counts = positionCounts(state.profile.teamName);
+  const labels = {QB:'Quarterback',RB:'Running back',WR:'Receiver',TE:'Tight end',K:'Kicker',DEF:'Defense'};
   const positions = ['QB','RB','WR','TE','K','DEF'];
   document.getElementById('rosterSummary').innerHTML = positions.map(pos => {
     const have = counts[pos] || 0;
-    const need = targetCount(pos);
-    const stateLabel = pos === 'QB' && have < 2 ? 'Critical' : have >= need ? 'Complete' : have >= Math.max(1, need - 1) ? 'Stable' : 'Needs work';
-    return `<div class="metric-card roster-metric ${stateLabel.toLowerCase().replace(' ','-')}"><span>${pos}</span><b>${have}/${need}</b><small>${stateLabel}</small></div>`;
+    const target = targetCount(pos);
+    const status = pos === 'QB' && have < 2 ? 'Need QB2' : have >= target ? 'Set' : have ? 'Build depth' : 'Open';
+    const tone = status === 'Set' ? 'good' : status === 'Need QB2' ? 'urgent' : 'watch';
+    return `<div class="roster-command-row"><span>${pos}</span><b>${status}</b><i class="${tone}">${have}</i></div>`;
   }).join('');
+  const objective=document.getElementById('currentObjective');
+  if(objective){
+    const needQB=(counts.QB||0)<2;
+    objective.innerHTML=`<span class="eyebrow">CURRENT OBJECTIVE</span><strong>${needQB?'Acquire QB2':'Build the best flex'}</strong><small>${needQB?'Do not leave the reliable starter tier exposed.':'Protect value and preserve future flexibility.'}</small>`;
+  }
 }
 
 function renderBlueprint() {
@@ -682,18 +693,24 @@ function renderBlueprint() {
 }
 
 function renderPositionTargets() {
-  const targets = taggedPlayers().filter(p => ['must_have','watch','value_only'].includes(scoutingTag(p)));
-  const ordered = targets.sort((a,b) => {
-    const order = {must_have:0,watch:1,value_only:2};
-    return order[scoutingTag(a)] - order[scoutingTag(b)] || Number(a.butcherRank||999) - Number(b.butcherRank||999);
+  const targets = taggedPlayers().filter(p => ['must_have','watch','value_only','fade'].includes(scoutingTag(p)));
+  if (!targets.length) {
+    document.getElementById('positionTargets').innerHTML = '<div class="empty-intel"><b>No targets yet</b><span>Tag players from Board or Players. Goose will organize them.</span></div>';
+    return;
+  }
+  const groups = {critical:[],pressure:[],watch:[],safe:[],fade:[]};
+  targets.forEach(p => {
+    const tag=scoutingTag(p);
+    if(tag==='fade'){groups.fade.push(p);return;}
+    const u=targetUrgency(p);
+    const key=u.tone==='critical'?'critical':u.tone==='watch'?'pressure':'safe';
+    groups[key].push(p);
   });
-  const fallback = ordered.length ? ordered : wishlistCandidates('QB').slice(0,3);
-  document.getElementById('positionTargets').innerHTML = fallback.slice(0,8).map(p => {
-    const urgency = targetUrgency(p);
-    const tag = scoutingTag(p) || 'watch';
-    const label = {must_have:'PRIORITY',watch:'WATCH',value_only:'VALUE'}[tag] || 'WATCH';
-    return `<button class="intel-target" data-player="${encodeURIComponent(p.name)}"><div>${playerPhoto(p,'player-photo tiny')}<span><small>${label} · ${draftWindow(p)}</small><b>${escapeHtml(p.name)}</b></span></div><span class="urgency ${urgency.tone}">${urgency.label}<small>${escapeHtml(urgency.action)}</small></span></button>`;
-  }).join('') || '<div class="target-empty">Add targets from Players.</div>';
+  const sections=[['MUST ACT SOON','critical'],['PRESSURE BUILDING','pressure'],['SAFE TO WAIT','safe'],['VALUE / WATCH','watch'],['FADE','fade']];
+  document.getElementById('positionTargets').innerHTML=sections.map(([label,key])=>{
+    const arr=groups[key]; if(!arr.length)return '';
+    return `<div class="wishlist-group"><span>${label}</span>${arr.slice(0,4).map(p=>`<button data-player="${encodeURIComponent(p.name)}"><b>${escapeHtml(p.name)}</b><small>${draftWindow(p)} · ${targetUrgency(p).action}</small></button>`).join('')}</div>`;
+  }).join('');
 }
 
 function renderDraftPressure() {
@@ -701,13 +718,12 @@ function renderDraftPressure() {
   const positions = ['QB','RB','WR','TE'];
   const radar = positions.map(pos => {
     const pressure = positionPressure(pos).length;
-    const label = pressure >= 4 ? 'HOT' : pressure >= 2 ? 'BUILDING' : pressure ? 'ACTIVE' : 'QUIET';
-    return `<div class="radar-row"><span>${pos}</span><div class="radar-track"><i style="width:${Math.min(100,pressure*22)}%"></i></div><b>${label}</b></div>`;
+    const label = pressure >= 4 ? 'Heating up' : pressure >= 2 ? 'Building' : pressure ? 'Active' : 'Quiet';
+    return `<div class="radar-line"><b>${pos}</b><div><i style="width:${Math.min(100,pressure*22)}%"></i></div><span>${label}</span></div>`;
   }).join('');
-  const threats = teams.slice(0,4).map((team,index) => {
-    const needs=teamNeedLabels(team); return `<div class="threat-row compact"><span class="pick-order">${state.drafted.length+index+2}</span><div><b>${escapeHtml(team)}</b><small>${needs.slice(0,3).join(' · ') || 'Pure value'}</small></div></div>`;
-  }).join('');
-  document.getElementById('draftPressure').innerHTML = `<div class="radar-board">${radar}</div><div class="radar-caption">Next threats</div><div class="opponent-board">${threats || '<div class="target-empty">You are on the clock.</div>'}</div>`;
+  const threat=teams.map(t=>({team:t,needs:teamNeedLabels(t)})).sort((a,b)=>b.needs.length-a.needs.length)[0];
+  const quiet=positions.map(pos=>({pos,n:positionPressure(pos).length})).sort((a,b)=>a.n-b.n)[0];
+  document.getElementById('draftPressure').innerHTML = `${radar}<div class="radar-callout"><span>BIGGEST THREAT</span><b>${escapeHtml(threat?.team||'None')}</b><small>${escapeHtml(threat?.needs?.slice(0,2).join(' · ')||'Value drafting')}</small></div><div class="radar-callout opportunity"><span>OPPORTUNITY</span><b>${quiet?.pos||'—'} is quiet</b><small>Value may continue to slide.</small></div>`;
 }
 
 function decisionAlternatives(list) {
@@ -718,34 +734,41 @@ function decisionAlternatives(list) {
 }
 
 function renderDecisionPaths(list) {
-  const [primary, alternative] = decisionAlternatives(list);
-  if (!primary) { document.getElementById('decisionPaths').innerHTML = '<div class="target-empty">Draft complete.</div>'; return; }
-  const counts = positionCounts(state.profile.teamName);
-  const path = (p, recommended=false) => {
-    const nextGoal = p.pos === 'QB' && (counts.QB||0)<2 ? 'QB2 solved; attack RB/WR next.' : `${p.pos} improves; ${primary.pos === 'QB' && p.pos !== 'QB' ? 'QB2 pressure remains.' : 'plan stays flexible.'}`;
-    const risk = targetUrgency(p);
-    return `<article class="decision-path ${recommended?'recommended':''}"><span>${recommended?'GM CHOICE':'ALTERNATIVE'}</span><h4>${escapeHtml(p.name)}</h4><ul><li>${escapeHtml(rosterImpactLabel(p))}</li><li>${escapeHtml(nextGoal)}</li><li>${escapeHtml(risk.action)}</li></ul><button class="text-btn" data-player="${encodeURIComponent(p.name)}">Tell me more</button></article>`;
+  const primary=list[0];
+  if(!primary){document.getElementById('decisionPaths').innerHTML='<div class="empty">Draft complete.</div>';return;}
+  const counts=positionCounts(state.profile.teamName);
+  const alternative=list.find(p=>p.pos!==primary.pos)||list[1];
+  const makePath=(p,label,recommended=false)=>{
+    if(!p)return '';
+    const qbOpen=(counts.QB||0)<2;
+    const bullets=[];
+    if(p.pos==='QB'&&qbOpen){bullets.push('QB2 solved');bullets.push('RB/WR stays open next');}
+    else {bullets.push(`${p.pos} room improves`);if(qbOpen)bullets.push('QB2 pressure remains');else bullets.push('Draft stays flexible');}
+    bullets.push(targetUrgency(p).action);
+    return `<article class="future-path ${recommended?'recommended':''}"><span>${label}</span><h4>${escapeHtml(p.name)}</h4>${bullets.map(x=>`<p>${x}</p>`).join('')}<button class="text-btn" data-player="${encodeURIComponent(p.name)}">Why?</button></article>`;
   };
-  document.getElementById('decisionPaths').innerHTML = path(primary,true) + (alternative ? path(alternative,false) : '');
+  document.getElementById('decisionPaths').innerHTML=makePath(primary,'DECISION A',true)+makePath(alternative,'DECISION B')+`<article class="future-path wait"><span>DECISION C</span><h4>Wait / Pivot</h4><p>Preserve optionality</p><p>${(counts.QB||0)<2?'Risk the QB tier':'Let value come to us'}</p><button class="text-btn" data-jump="board">See board</button></article>`;
 }
 
 
 function renderGooseThinking(list) {
-  const player = list[0];
-  const teams = teamsBeforeNextPick();
-  const counts = positionCounts(state.profile.teamName);
-  const qbThreats = teams.filter(t => teamNeedLabels(t).includes('QB2')).length;
-  let headline='We have one decision.';
-  let copy='';
-  if (!player) { headline='Draft complete.'; copy='The roster is built. Let’s review what changed and where the value landed.'; }
-  else if ((counts.QB||0)<2 && player.pos==='QB') {
-    headline=`Take ${player.name}.`;
-    copy=`He solves QB2 now. ${qbThreats ? `${qbThreats} QB-needy teams sit before your next turn.` : 'The room is calm, but the reliable tier is still the leverage point.'} Skill-position value remains healthy.`;
-  } else {
-    headline=`The best decision is ${player.name}.`;
-    copy=`This move improves the lineup without forcing the next round. I’m protecting flexibility more than chasing the highest raw projection.`;
+  const player=list[0];
+  const teams=teamsBeforeNextPick();
+  const counts=positionCounts(state.profile.teamName);
+  const qbThreats=teams.filter(t=>teamNeedLabels(t).includes('QB2')).length;
+  let headline='Draft complete.';
+  let copy='The roster is built. Review the journal and the value captured.';
+  if(player){
+    const qbOpen=(counts.QB||0)<2;
+    if(qbOpen&&player.pos==='QB'){
+      headline=`Take ${player.name}.`;
+      copy=`Solves QB2. ${qbThreats} QB-needy teams pick before your next turn. Skill-position value should survive.`;
+    } else {
+      headline=`Stay disciplined. ${player.name} is the move.`;
+      copy=`Best decision now—not just best player. It improves the roster while protecting the next turn.`;
+    }
   }
-  document.getElementById('gooseThinking').innerHTML = `<p class="gm-kicker">GM BRIEFING</p><h2>${escapeHtml(headline)}</h2><p>${escapeHtml(copy)}</p><div class="gm-prompts"><button class="chip-btn" data-jump="board">Explore other paths</button>${player?`<button class="chip-btn" data-player="${encodeURIComponent(player.name)}">Challenge GM</button>`:''}</div>`;
+  document.getElementById('gooseThinking').innerHTML=`<p class="gm-kicker">GOOSE</p><h2>${escapeHtml(headline)}</h2><p>${escapeHtml(copy)}</p>`;
 }
 
 
@@ -758,12 +781,13 @@ function renderBoard() {
   const position = document.getElementById('boardPos').value;
   const players = ranked().filter(player => (position === 'ALL' || player.pos === position) && `${player.name} ${player.team}`.toLowerCase().includes(query)).slice(0, 75);
   document.getElementById('availableCount').textContent = `${available().length} available`;
-  document.getElementById('boardTable').innerHTML = players.length ? players.map((player, index) => playerCard(player, index)).join('') : '<div class="empty">No players found.</div>';
+  document.getElementById('boardTable').innerHTML = players.length ? players.map((player,index)=>playerCard(player,index)).join('') : '<div class="empty">No players found.</div>';
 }
 
 function databaseCard(player) {
-  const status = playerStatus(player);
-  return `<div class="database-player" data-player="${encodeURIComponent(player.name)}">${playerPhoto(player, 'player-photo small')}<div><div class="player-name">${escapeHtml(player.name)}</div><div class="player-meta">${player.team} · ${player.pos} · #${player.posRank || '—'} · ${Math.round(player.proj)} pts</div></div><span class="status-chip ${status.key}">${status.label}${status.owner ? ` · ${escapeHtml(status.owner)}` : ''}</span>${compareButton(player)}${status.draftable ? `<button class="draft-btn" data-draft="${encodeURIComponent(player.name)}">Draft</button>` : ''}</div>`;
+  const status=playerStatus(player); const tag=scoutingTag(player);
+  const tags=[['must_have','★','Target'],['watch','◉','Watch'],['value_only','$','Value'],['fade','—','Fade']].map(([value,icon,label])=>`<button class="quick-scout ${tag===value?'active':''}" title="${label}" data-scout="${value}" data-scout-player="${encodeURIComponent(player.name)}"><span>${icon}</span></button>`).join('');
+  return `<article class="scout-player" data-player="${encodeURIComponent(player.name)}">${playerPhoto(player,'player-photo small')}<div class="scout-copy"><div class="player-name">${escapeHtml(player.name)}</div><div class="player-meta">${player.team} · ${player.pos} · ${microTier(player)}</div><small>${status.label}${status.owner?` · ${escapeHtml(status.owner)}`:''}</small></div><div class="quick-scout-row">${tags}</div><button class="text-btn" data-player="${encodeURIComponent(player.name)}">Profile</button></article>`;
 }
 
 function renderDatabase() {
@@ -790,11 +814,23 @@ function renderHistory() {
   document.getElementById('undoBtn').disabled = state.drafted.length === 0; document.getElementById('quickUndoBtn').disabled = state.drafted.length === 0;
 }
 
+
+function projectedDraft(list) {
+  const rounds = Math.min(6, Math.max(1, Number(state.profile.rosterSize||16) - rosterFor(state.profile.teamName).length));
+  const picks=[]; const used=new Set(); const counts={...positionCounts(state.profile.teamName)};
+  for(let r=1;r<=rounds;r++){
+    let desired = r===1 && (counts.QB||0)<2 ? 'QB' : r<=4 ? ((counts.WR||0)<3?'WR':'RB') : r===5 ? 'QB' : r===6 ? 'TE' : null;
+    let p=list.find(x=>!used.has(normalize(x.name)) && (!desired||x.pos===desired));
+    if(!p) p=list.find(x=>!used.has(normalize(x.name)));
+    if(!p) break; used.add(normalize(p.name)); counts[p.pos]=(counts[p.pos]||0)+1; picks.push({round:r,p});
+  }
+  return picks.map(({round,p})=>`<button data-player="${encodeURIComponent(p.name)}"><span>R${round}</span><b>${escapeHtml(p.name)}</b><small>${p.pos} · ${draftWindow(p)}</small></button>`).join('');
+}
 function render() {
   const pick = state.drafted.length + 1; const list = ranked();
   document.getElementById('clockTeam').textContent = currentTeam(); const foName=document.getElementById('frontOfficeTeamName'); if(foName) foName.textContent=state.profile.teamName; document.getElementById('clockPick').textContent = `Round ${Math.ceil(pick / (state.teams.length || 10))} · Pick ${pick}`; document.getElementById('pickBadge').textContent = pick; document.getElementById('versionLabel').textContent = `v${APP_VERSION}`;
-  renderRecommendation(list); renderGooseThinking(list); renderDecisionPaths(list); document.getElementById('nextFive').innerHTML = list.slice(1, 4).map(player => `<button class="alt-move" data-player="${encodeURIComponent(player.name)}"><span>${player.pos}</span><b>${escapeHtml(player.name)}</b><small>${escapeHtml(rosterImpactLabel(player))}</small></button>`).join('');
-  renderRosterSummary(); renderBlueprint(); renderScoutingSummary(); renderPositionTargets(); renderDraftPressure(); renderRoster(); renderBoard(); renderDatabase(); renderLeague(); renderHistory(); renderCompareTray();
+  renderRecommendation(list); renderGooseThinking(list); renderDecisionPaths(list); document.getElementById('nextFive').innerHTML = projectedDraft(list);
+  renderRosterSummary(); renderScoutingSummary(); renderPositionTargets(); renderDraftPressure(); renderRoster(); renderBoard(); renderDatabase(); renderLeague(); renderHistory(); renderCompareTray();
 }
 
 function populateSlots() {
@@ -808,7 +844,7 @@ function openSettings() {
   populateSlots();
   const p=state.profile || structuredClone(DEFAULT_PROFILE);
   setField('leagueNameInput',p.leagueName); setField('teamNameInput',p.teamName); setField('teamCountInput',p.teamCount);
-  setField('keeperCountInput',p.keeperCount); setField('benchInput',p.bench); setField('teamNamesInput',state.teams.join('\n'));
+  setField('keeperCountInput',p.keeperCount); setField('benchInput',p.bench); setField('rosterSizeInput',p.rosterSize||16); setField('starterCountInput',p.starterCount||10); setField('ownerSkillInput',p.ownerSkill||'Advanced'); setField('teamNamesInput',state.teams.join('\n'));
   ['QB','RB','WR','TE','K','DEF'].forEach(pos=>setField(`target${pos}`,p.rosterTargets[pos]));
   setField('primaryObjectiveInput',p.philosophy.primary); setField('secondaryObjectivesInput',p.philosophy.secondary);
   setField('avoidInput',p.philosophy.avoid); setField('lateTargetsInput',p.philosophy.late); setField('emergencyPlanInput',p.philosophy.emergency);
@@ -829,7 +865,7 @@ function applyProfile() {
   const withoutMe=teams.filter(t=>t!==teamName); withoutMe.splice(slot-1,0,teamName); teams=withoutMe.slice(0,teamCount);
   state.profile={
     leagueName:document.getElementById('leagueNameInput').value.trim()||'My League', teamName, teamCount,
-    keeperCount:Number(document.getElementById('keeperCountInput').value)||0, bench:Number(document.getElementById('benchInput').value)||0,
+    keeperCount:Number(document.getElementById('keeperCountInput').value)||0, bench:Number(document.getElementById('benchInput').value)||0, rosterSize:Number(document.getElementById('rosterSizeInput').value)||16, starterCount:Number(document.getElementById('starterCountInput').value)||10, ownerSkill:document.getElementById('ownerSkillInput').value||'Advanced',
     rosterTargets:Object.fromEntries(['QB','RB','WR','TE','K','DEF'].map(pos=>[pos,Math.max(0,Number(document.getElementById(`target${pos}`).value)||0)])),
     philosophy:{ primary:document.getElementById('primaryObjectiveInput').value.trim(), secondary:document.getElementById('secondaryObjectivesInput').value.trim(), avoid:document.getElementById('avoidInput').value.trim(), late:document.getElementById('lateTargetsInput').value.trim(), emergency:document.getElementById('emergencyPlanInput').value.trim() }
   };
@@ -844,6 +880,8 @@ document.addEventListener('click', event => {
   if (event.target.closest('[data-open-compare]')) { openComparison(); return; }
   if (event.target.closest('[data-clear-compare]')) { state.compare = []; save(); closeModal('compareModal'); render(); return; }
   const player = event.target.closest('[data-player]'); if (player) { openPlayerDetails(decodeURIComponent(player.dataset.player)); return; }
+  if (event.target.closest('#simulateDraftBtn')) { render(); showToast('What-if draft recalculated'); return; }
+  if (event.target.closest('#challengeBtn')) { const p=ranked()[0]; if(p) showToast(`Challenge noted: Goose is testing the strongest alternative to ${p.name}`); return; }
   const jump = event.target.closest('[data-jump]'); if (jump) { showView(jump.dataset.jump); return; }
   const tab = event.target.closest('.tab'); if (tab) showView(tab.dataset.view);
 });
