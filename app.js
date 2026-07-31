@@ -1,8 +1,8 @@
 'use strict';
 
-const APP_VERSION = '0.4.0';
-const STORAGE_KEY = 'the-board-v4';
-const LEGACY_STORAGE_KEYS = ['the-board-v3', 'the-board-v2', 'the-board-v1'];
+const APP_VERSION = '0.5.0';
+const STORAGE_KEY = 'the-board-v5';
+const LEGACY_STORAGE_KEYS = ['the-board-v4', 'the-board-v3', 'the-board-v2', 'the-board-v1'];
 const NAME_CORRECTIONS = {
   'George KittleO': 'George Kittle'
 };
@@ -11,6 +11,8 @@ let state = loadState();
 let pendingPlayerName = null;
 let livePlayerData = new Map();
 let liveDataStatus = 'loading';
+let marketPlayerData = new Map();
+let marketDataStatus = 'loading';
 
 function canonicalName(value) {
   const raw = String(value || '').replace(/\s+/g, ' ').trim();
@@ -48,6 +50,87 @@ const MASTER_PLAYERS = PLAYERS.map((source, index) => {
 
 function initials(name) {
   return canonicalName(name).split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase();
+}
+
+
+function marketInfo(player) {
+  return marketPlayerData.get(normalize(player.name)) || null;
+}
+
+function ordinal(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return '—';
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
+  return `${n}${({1:'st',2:'nd',3:'rd'})[n % 10] || 'th'}`;
+}
+
+function recommendationStrength(player) {
+  const score = comparisonScore(player);
+  if (score >= 116) return { label: 'SMASH PICK', detail: 'The value, roster fit and positional leverage all line up.' };
+  if (score >= 106) return { label: 'STRONG', detail: 'THE BOARD sees a meaningful advantage at this pick.' };
+  if (score >= 96) return { label: 'SOLID', detail: 'A sound selection without forcing the draft.' };
+  return { label: 'WATCH', detail: 'Useful player, but the price or roster fit is not ideal yet.' };
+}
+
+function tierCount(player) {
+  return available().filter(p => p.pos === player.pos && p.tier === player.tier).length;
+}
+
+function marketLine(player) {
+  const market = marketInfo(player);
+  if (!market) return 'FantasyPros market data will appear when the server API key is connected.';
+  const parts = [];
+  if (market.ecr) parts.push(`ECR ${market.ecr}`);
+  if (market.adp) parts.push(`ADP ${Number(market.adp).toFixed(1)}`);
+  if (market.tier) parts.push(`Market Tier ${market.tier}`);
+  return parts.join(' · ') || 'Market profile connected.';
+}
+
+function analystTake(player) {
+  const counts = positionCounts('The Butcher');
+  const live = liveInfo(player);
+  const market = marketInfo(player);
+  const tierLeft = tierCount(player);
+  const pos = player.pos;
+  let lead = '';
+  if (pos === 'QB') {
+    lead = (counts.QB || 0) < 2
+      ? `${player.name} gives you a weekly starter in the most punishing position to chase in a 2QB room.`
+      : `${player.name} gives the quarterback room another bankable weekly option and protects you from injury or matchup volatility.`;
+  } else if (pos === 'RB') {
+    lead = `${player.name} is a bet on touches, scoring chances and lineup flexibility—not merely another running back on the bench.`;
+  } else if (pos === 'WR') {
+    lead = `${player.name} adds weekly target volume and lineup ceiling, the two things that keep a PPR roster from becoming touchdown-dependent.`;
+  } else if (pos === 'TE') {
+    lead = `${player.name} matters because tight end value is about separating from the weekly streaming pile, not simply filling the position.`;
+  } else if (pos === 'K') {
+    lead = `${player.name} carries real lineup value in this league's elevated kicker scoring, where a top option can outscore ordinary flex depth.`;
+  } else if (pos === 'DEF') {
+    lead = `${player.name} offers a weekly scoring edge at a position your league rewards more heavily than standard formats.`;
+  } else {
+    lead = `${player.name} profiles as a useful roster piece at the current cost.`;
+  }
+  const context = [];
+  if (tierLeft <= 2) context.push(`Only ${tierLeft} player${tierLeft === 1 ? '' : 's'} remain in this ${pos} tier.`);
+  else context.push(`${tierLeft} players remain in this ${pos} tier, so you still have some room to maneuver.`);
+  if (market?.adp) context.push(`FantasyPros market cost sits around pick ${Number(market.adp).toFixed(1)}.`);
+  if (live?.depth_chart_order) context.push(`Sleeper currently lists him ${ordinal(live.depth_chart_order)} in the team depth-chart order.`);
+  if (injuryLabel(player) !== 'Healthy') context.push(`${injuryLabel(player)} is an active concern and should be priced into the pick.`);
+  return `${lead} ${context.join(' ')}`;
+}
+
+async function enrichMarketData() {
+  try {
+    const response = await fetch('/api/fantasypros');
+    if (!response.ok) throw new Error('FantasyPros feed unavailable');
+    const payload = await response.json();
+    marketPlayerData = new Map((payload.players || []).map(player => [normalize(player.name), player]));
+    marketDataStatus = 'live';
+    render();
+  } catch (error) {
+    marketDataStatus = 'offline';
+  }
 }
 
 function liveInfo(player) {
@@ -88,7 +171,6 @@ async function enrichPlayers() {
     liveDataStatus = 'live';
     if (badge) { badge.textContent = 'LIVE PLAYER FEED'; badge.className = 'data-status live'; }
     render();
-enrichPlayers();
   } catch (error) {
     liveDataStatus = 'offline';
     if (badge) { badge.textContent = 'BOARD DATA'; badge.className = 'data-status'; }
@@ -233,18 +315,22 @@ function showView(id) {
 function recommendationReasons(player) {
   const counts = positionCounts('The Butcher');
   const reasons = [];
-  if (player.pos === 'QB' && (counts.QB || 0) < 2) reasons.push(`You have ${counts.QB || 0} quarterback. In this 2QB league, ${escapeHtml(player.name)} fills a starting spot.`);
-  else if ((counts[player.pos] || 0) < targetCount(player.pos)) reasons.push(`${player.pos} is still a roster need; you currently have ${counts[player.pos] || 0}.`);
+  if (player.pos === 'QB' && (counts.QB || 0) < 2) {
+    reasons.push(`Starting-quarterback leverage: you currently have ${counts.QB || 0}, and this format starts two.`);
+  } else if ((counts[player.pos] || 0) < targetCount(player.pos)) {
+    reasons.push(`Roster construction: ${player.pos} remains a need with ${counts[player.pos] || 0} currently rostered.`);
+  } else {
+    reasons.push(`Roster construction: this is a depth-and-upside pick rather than an immediate lineup repair.`);
+  }
   const samePosition = available().filter(p => p.pos === player.pos).sort((a, b) => Number(b.proj || 0) - Number(a.proj || 0));
   const next = samePosition.find(p => normalize(p.name) !== normalize(player.name));
   if (next) {
-    const gap = Math.max(0, Math.round(player.proj - next.proj));
-    reasons.push(gap > 0 ? `${gap}-point projection edge over the next available ${player.pos}.` : `Near the top of the remaining ${player.pos} tier.`);
+    const gap = Math.round(Number(player.proj || 0) - Number(next.proj || 0));
+    reasons.push(gap > 4 ? `Tier pressure: a ${gap}-point projection drop follows at ${player.pos}.` : `Tier shape: comparable ${player.pos} value remains, so price discipline still matters.`);
   }
-  reasons.push(player.risk === 'Low' ? 'Low-risk profile fits your preference for dependable players.' : `${escapeHtml(player.risk)} risk lowers confidence and should affect the price.`);
+  reasons.push(player.risk === 'Low' ? 'Profile: dependable role and projection create a sturdy weekly floor.' : `${player.risk}-risk profile: the ceiling is useful, but the pick needs to be made at the right price.`);
   return reasons.slice(0, 3);
 }
-
 function compareButton(player) {
   const selected = state.compare.some(name => normalize(name) === normalize(player.name));
   return `<button class="compare-btn ${selected ? 'selected' : ''}" data-compare="${encodeURIComponent(player.name)}">${selected ? 'Selected' : 'Compare'}</button>`;
@@ -265,32 +351,35 @@ function renderRecommendation(list) {
   const player = list[0];
   const element = document.getElementById('recommend');
   if (!player) { element.innerHTML = '<div class="empty">Draft complete.</div>'; return; }
-  const reasons = recommendationReasons(player).map(reason => `<li>${reason}</li>`).join('');
-  const intel = intelFor(player).map(line => `<p>${escapeHtml(line)}</p>`).join('');
+  const reasons = recommendationReasons(player).map(reason => `<li>${escapeHtml(reason)}</li>`).join('');
+  const strength = recommendationStrength(player);
+  const market = marketInfo(player);
   element.innerHTML = `<div class="recommend-hero" data-player="${encodeURIComponent(player.name)}" role="button" tabindex="0">
       <div class="recommend-photo-wrap">${playerPhoto(player, 'player-photo hero-photo')}<span class="pos-float">${escapeHtml(player.pos)}</span></div>
-      <div class="recommend-copy"><div class="recommend-kicker">THE BOARD'S PICK</div><h2>${escapeHtml(player.name)}</h2><p>${escapeHtml(player.team)} · #${player.posRank || '—'} ${escapeHtml(player.pos)} · ${escapeHtml(player.tier)} tier</p><div class="confidence-line"><span>CONFIDENCE</span><strong>${Math.max(64, Math.min(96, Math.round(Number(player.score) - 18)))}%</strong></div></div>
+      <div class="recommend-copy"><div class="recommend-kicker">THE BOARD'S PICK</div><h2>${escapeHtml(player.name)}</h2><p>${escapeHtml(player.team)} · #${player.posRank || '—'} ${escapeHtml(player.pos)} · ${escapeHtml(player.tier)} tier</p><div class="strength-line"><span>RECOMMENDATION</span><strong>${strength.label}</strong><small>${escapeHtml(strength.detail)}</small></div></div>
     </div>
-    <div class="metrics"><div class="metric feature"><b>${player.score}</b><span>BOARD SCORE</span></div><div class="metric"><b>${Math.round(player.proj)}</b><span>PROJECTED PTS</span></div><div class="metric"><b>#${player.posRank || '—'}</b><span>POSITION</span></div><div class="metric"><b>${escapeHtml(player.risk)}</b><span>RISK</span></div></div>
-    <div class="intel-strip"><div><span class="eyebrow">LATEST PLAYER INTEL</span>${intel}</div><span class="health-chip ${injuryLabel(player) === 'Healthy' ? 'healthy' : 'alert'}">${escapeHtml(injuryLabel(player))}</span></div>
-    <div class="why-block"><h3>Why THE BOARD wants him</h3><ul>${reasons}</ul></div>
+    <div class="analyst-take"><span class="eyebrow">GOOSE'S TAKE</span><p>${escapeHtml(analystTake(player))}</p></div>
+    <div class="metrics"><div class="metric feature"><b>${player.score}</b><span>BOARD SCORE</span></div><div class="metric"><b>${Math.round(player.proj)}</b><span>PROJECTED PTS</span></div><div class="metric"><b>${market?.adp ? Number(market.adp).toFixed(1) : '—'}</b><span>FP ADP</span></div><div class="metric"><b>${market?.ecr ? `#${market.ecr}` : `#${player.posRank || '—'}`}</b><span>${market?.ecr ? 'FP ECR' : 'POSITION'}</span></div></div>
+    <div class="market-strip"><div><span class="eyebrow">MARKET & AVAILABILITY</span><p>${escapeHtml(marketLine(player))}</p></div><div class="tier-remaining"><b>${tierCount(player)}</b><span>LEFT IN TIER</span></div></div>
+    <div class="why-block"><h3>Why this pick works</h3><ul>${reasons}</ul></div>
     <div class="actions"><button class="btn primary" data-draft="${encodeURIComponent(player.name)}">Draft ${escapeHtml(player.name)}</button>${compareButton(player)}<button class="btn secondary" data-jump="board">Full Board</button></div>`;
 }
-
 function openPlayerDetails(name) {
   const player = playerByName(name); if (!player) return;
   const status = playerStatus(player);
-  const reasons = recommendationReasons(player).map(reason => `<li>${reason}</li>`).join('');
-  const intel = intelFor(player).map(line => `<div class="news-item"><span class="news-dot"></span><div><b>THE BOARD INTEL</b><p>${escapeHtml(line)}</p></div></div>`).join('');
+  const reasons = recommendationReasons(player).map(reason => `<li>${escapeHtml(reason)}</li>`).join('');
+  const market = marketInfo(player);
+  const intel = intelFor(player).map(line => `<div class="news-item"><span class="news-dot"></span><div><b>PLAYER INTEL</b><p>${escapeHtml(line)}</p></div></div>`).join('');
+  const marketNews = (market?.news || []).slice(0, 2).map(item => `<div class="news-item"><span class="news-dot"></span><div><b>FANTASYPROS · ${escapeHtml(item.category || 'NEWS')}</b><p>${escapeHtml(item.title)}</p></div></div>`).join('');
   document.getElementById('playerModalContent').innerHTML = `<div class="player-profile-head">${playerPhoto(player, 'player-photo profile-photo')}<div><span class="position-tag">${escapeHtml(player.pos)}</span><h2>${escapeHtml(player.name)}</h2><p>${escapeHtml(player.team)} · ${escapeHtml(player.tier)} tier</p></div></div>
     <div class="status-banner ${status.key}"><b>${status.label}</b>${status.owner ? `<span>${escapeHtml(status.owner)}</span>` : `<span class="health-chip ${injuryLabel(player) === 'Healthy' ? 'healthy' : 'alert'}">${escapeHtml(injuryLabel(player))}</span>`}</div>
-    <div class="detail-grid"><div><span>Projection</span><b>${Math.round(player.proj)}</b></div><div><span>Position Rank</span><b>#${player.posRank || '—'}</b></div><div><span>Board Score</span><b>${player.score}</b></div><div><span>Fit</span><b>${escapeHtml(player.fit)}</b></div><div><span>Risk</span><b>${escapeHtml(player.risk)}</b></div><div><span>Rostered</span><b>${Number(player.rost || 0).toFixed(1)}%</b></div></div>
-    <section class="news-panel"><div class="section-title"><span class="eyebrow">PLAYER NEWS & INTEL</span><span>${liveDataStatus === 'live' ? 'Live profile data' : 'Board evaluation'}</span></div>${intel}</section>
+    <div class="analyst-take"><span class="eyebrow">GOOSE'S TAKE</span><p>${escapeHtml(analystTake(player))}</p></div>
+    <div class="detail-grid"><div><span>Projection</span><b>${Math.round(player.proj)}</b></div><div><span>FP ADP</span><b>${market?.adp ? Number(market.adp).toFixed(1) : '—'}</b></div><div><span>FP ECR</span><b>${market?.ecr ? `#${market.ecr}` : '—'}</b></div><div><span>Board Score</span><b>${player.score}</b></div><div><span>Tier Left</span><b>${tierCount(player)}</b></div><div><span>Risk</span><b>${escapeHtml(player.risk)}</b></div></div>
+    <section class="news-panel"><div class="section-title"><span class="eyebrow">PLAYER NEWS & INTEL</span><span>${marketDataStatus === 'live' ? 'FantasyPros + Sleeper' : 'Sleeper + Board evaluation'}</span></div>${marketNews || ''}${intel}</section>
     <div class="why-block"><h3>Draft-room evaluation</h3><ul>${reasons}</ul></div>
     <div class="modal-actions">${compareButton(player)}${status.draftable ? `<button class="btn primary" data-draft="${encodeURIComponent(player.name)}">Draft ${escapeHtml(player.name)}</button>` : ''}</div>`;
   openModal('playerModal');
 }
-
 function toggleCompare(name) {
   const canonical = playerByName(name)?.name; if (!canonical) return;
   const existing = state.compare.findIndex(item => normalize(item) === normalize(canonical));
@@ -321,12 +410,12 @@ function openComparison() {
     return `<div class="compare-row"><span class="${lwin ? 'edge' : ''}">${escapeHtml(left)}${lwin ? ' ✓' : ''}</span><b>${label}</b><span class="${rwin ? 'edge' : ''}">${escapeHtml(right)}${rwin ? ' ✓' : ''}</span></div>`;
   };
   const statusA = playerStatus(a), statusB = playerStatus(b);
-  const verdictTitle = winner ? `${winner.name} gets the ${edge > 5 ? 'clear' : 'slight'} edge` : 'This is a roster-context decision';
+  const verdictTitle = winner ? `${edge > 12 ? 'Strong edge' : edge > 5 ? 'Moderate edge' : 'Slight edge'}: ${winner.name}` : 'No forced pick here';
   const verdictText = winner ? `${winner.name} is the better selection right now after combining production, roster need, risk, and position scarcity.` : 'The grades are nearly even. Let positional need and the chance each player survives to your next pick break the tie.';
   document.getElementById('compareModalContent').innerHTML = `<span class="eyebrow">WAR ROOM COMPARISON</span><div class="compare-head"><div>${playerPhoto(a, 'player-photo compare-photo')}<span class="position-tag">${a.pos}</span><h2>${escapeHtml(a.name)}</h2><p>${a.team} · ${statusA.label}</p></div><div class="versus">VS</div><div>${playerPhoto(b, 'player-photo compare-photo')}<span class="position-tag">${b.pos}</span><h2>${escapeHtml(b.name)}</h2><p>${b.team} · ${statusB.label}</p></div></div>
-    <div class="overall-edge"><span>OVERALL EDGE</span><strong>${winner ? escapeHtml(winner.name) : 'EVEN'}</strong><small>${winner ? `${edge.toFixed(1)} decision points` : 'Use draft context'}</small></div>
+    <div class="overall-edge"><span>OVERALL EDGE</span><strong>${winner ? escapeHtml(winner.name) : 'EVEN'}</strong><small>${winner ? `${edge > 12 ? 'Strong' : edge > 5 ? 'Moderate' : 'Slight'} recommendation advantage` : 'No meaningful separation'}</small></div>
     <div class="compare-table">${row('Projection', Math.round(a.proj), Math.round(b.proj))}${row('Position Rank', a.posRank || '—', b.posRank || '—', 'low')}${row('Board Score', a.score, b.score)}${row('Risk', a.risk, b.risk)}${row('Roster Need', rosterNeedScore(a).toFixed(1), rosterNeedScore(b).toFixed(1))}</div>
-    <div class="draft-impact-grid"><div><span class="eyebrow">IF YOU DRAFT ${escapeHtml(a.name).toUpperCase()}</span><p>${escapeHtml(recommendationReasons(a)[0])}</p><b>${Math.max(12, 72 - a.posRank * 2)}% chance similar value lasts</b></div><div><span class="eyebrow">IF YOU DRAFT ${escapeHtml(b.name).toUpperCase()}</span><p>${escapeHtml(recommendationReasons(b)[0])}</p><b>${Math.max(12, 72 - b.posRank * 2)}% chance similar value lasts</b></div></div>
+    <div class="draft-impact-grid"><div><span class="eyebrow">IF YOU DRAFT ${escapeHtml(a.name).toUpperCase()}</span><p>${escapeHtml(analystTake(a))}</p><b>${tierCount(a)} comparable ${a.pos} option${tierCount(a) === 1 ? '' : 's'} remain in tier</b></div><div><span class="eyebrow">IF YOU DRAFT ${escapeHtml(b.name).toUpperCase()}</span><p>${escapeHtml(analystTake(b))}</p><b>${tierCount(b)} comparable ${b.pos} option${tierCount(b) === 1 ? '' : 's'} remain in tier</b></div></div>
     <div class="verdict"><span class="eyebrow">THE BOARD VERDICT</span><h3>${escapeHtml(verdictTitle)}</h3><p>${escapeHtml(verdictText)}</p></div>
     <div class="modal-actions"><button class="btn secondary" data-clear-compare>Clear</button>${statusA.draftable ? `<button class="btn primary" data-draft="${encodeURIComponent(a.name)}">Draft ${escapeHtml(a.name)}</button>` : ''}${statusB.draftable ? `<button class="btn primary" data-draft="${encodeURIComponent(b.name)}">Draft ${escapeHtml(b.name)}</button>` : ''}</div>`;
   openModal('compareModal');
@@ -415,3 +504,4 @@ document.getElementById('resetBtn').addEventListener('click', () => { if (confir
 
 render();
 enrichPlayers();
+enrichMarketData();
