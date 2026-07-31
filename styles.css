@@ -43,3 +43,135 @@
 @media(max-width:1180px){.mission-grid{grid-template-columns:minmax(240px,.8fr) minmax(420px,1.2fr)}.front-office-right{grid-column:1/-1;grid-template-columns:1fr 1fr}.front-office-right .target-board{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:850px){.mission-grid{grid-template-columns:1fr}.front-office-right{grid-column:auto;grid-template-columns:1fr}.front-office-right .target-board{grid-template-columns:1fr}.front-office-header{align-items:flex-start}.front-office-player{grid-template-columns:110px 1fr}.player-stage .hero-photo{width:105px;height:105px}.why-now-grid{grid-template-columns:1fr}.front-office-center .decision-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.front-office-header{display:grid}.front-office-player{grid-template-columns:88px 1fr}.player-stage .hero-photo{width:84px;height:84px;border-radius:18px}.player-decision-copy h2{font-size:1.8rem}.decision-facts{display:grid}.front-office-center .decision-grid{grid-template-columns:1fr}}
+
+/* v0.8.1 — Mission Control containment hotfix */
+.mission-grid,
+.front-office-left,
+.front-office-center,
+.front-office-right,
+.command-panel,
+.on-clock-panel,
+#recommend,
+.front-office-player,
+.player-decision-copy,
+.analyst-take,
+.why-now-grid,
+.actions {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.on-clock-panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+#recommend {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  width: 100%;
+  overflow: hidden;
+}
+
+.front-office-player {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.player-decision-copy,
+.player-decision-copy h2,
+.player-decision-copy p,
+.analyst-take p,
+.decision-facts span,
+.why-now-grid b {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.modal[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 1180px) {
+  .mission-grid {
+    grid-template-columns: minmax(240px, .72fr) minmax(0, 1.28fr);
+  }
+
+  .front-office-center {
+    overflow: hidden;
+  }
+
+  .front-office-player {
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 15px;
+  }
+
+  .player-stage .hero-photo {
+    width: 108px;
+    height: 108px;
+  }
+
+  .player-decision-copy h2 {
+    font-size: clamp(1.8rem, 4vw, 2.7rem);
+  }
+}
+
+@media (max-width: 850px) {
+  .mission-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .front-office-center {
+    grid-row: 1;
+  }
+
+  .front-office-left {
+    grid-row: 2;
+  }
+
+  .front-office-right {
+    grid-row: 3;
+  }
+
+  .on-clock-panel {
+    padding: 14px;
+  }
+
+  .front-office-player {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .player-stage .hero-photo {
+    width: 84px;
+    height: 84px;
+  }
+
+  .player-decision-copy h2 {
+    font-size: 1.75rem;
+  }
+
+  .decision-facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .analyst-take.premium {
+    padding: 13px;
+  }
+}
+
+@media (max-width: 560px) {
+  .decision-facts,
+  .why-now-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions .btn {
+    flex: 1 1 100%;
+  }
+}
