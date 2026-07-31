@@ -27,62 +27,34 @@
       <div class="franchise-heading"><img class="franchise-logo" src="logo.png" alt="The Butcher franchise logo"><div><span class="eyebrow">PRIVATE FRONT OFFICE</span><h2 id="frontOfficeTeamName">The Butcher</h2></div></div>
       <div class="clock-inline"><span class="eyebrow">LIVE DRAFT</span><strong id="clockTeam">—</strong><span id="clockPick">—</span><b class="pick-badge" id="pickBadge">1</b></div>
     </header>
-
     <div class="front-office-layout">
       <aside class="fo-left">
         <section class="fo-panel organization-panel">
           <div class="panel-head"><div><span class="eyebrow">YOUR ORGANIZATION</span><h3>Roster Command</h3></div><button id="quickUndoBtn" class="text-btn">Undo</button></div>
-          <div id="rosterSummary" class="roster-command"></div>
-          <div id="myRoster" class="roster-list compact-roster"></div>
-          <div id="currentObjective" class="current-objective"></div>
+          <div id="rosterSummary" class="roster-command"></div><div id="myRoster" class="roster-list compact-roster"></div><div id="currentObjective" class="current-objective"></div>
         </section>
         <section class="fo-panel scouting-panel">
           <div class="panel-head"><div><span class="eyebrow">SCOUTING INPUT</span><h3>Your Signals</h3></div><button class="text-btn" data-jump="database">Scout Players</button></div>
           <div id="scoutingSummary" class="scouting-summary"></div>
         </section>
       </aside>
-
       <main class="fo-center" aria-live="polite">
-        <section class="goose-desk">
-          <div class="gm-identity"><div class="gm-mark">G</div><div><span class="eyebrow">AI GENERAL MANAGER</span><h3>Goose</h3></div><span id="briefingStatus" class="live-pill">LIVE</span></div>
-          <div id="gooseThinking" class="executive-briefing"></div>
-          <div id="recommend" class="briefing-actions"></div>
-        </section>
-        <section class="fo-panel decision-panel">
-          <div class="panel-head"><div><span class="eyebrow">DECISION PATHS</span><h3>What Happens If…</h3></div></div>
-          <div id="decisionPaths" class="decision-futures"></div>
-        </section>
-        <section class="fo-panel projection-panel">
-          <div class="panel-head"><div><span class="eyebrow">WHAT-IF DRAFT</span><h3>Projected Build</h3></div><button id="simulateDraftBtn" class="text-btn">Recalculate</button></div>
-          <div id="nextFive" class="projected-draft"></div>
-        </section>
+        <section class="goose-desk"><div class="gm-identity"><div class="gm-mark">G</div><div><span class="eyebrow">AI GENERAL MANAGER</span><h3>Goose</h3></div><span id="briefingStatus" class="live-pill">LIVE</span></div><div id="gooseThinking" class="executive-briefing"></div><div id="recommend" class="briefing-actions"></div></section>
+        <section class="fo-panel decision-panel"><div class="panel-head"><div><span class="eyebrow">DECISION PATHS</span><h3>What Happens If…</h3></div></div><div id="decisionPaths" class="decision-futures"></div></section>
+        <section class="fo-panel projection-panel"><div class="panel-head"><div><span class="eyebrow">WHAT-IF DRAFT</span><h3>Projected Build</h3></div><button id="simulateDraftBtn" class="text-btn">Recalculate</button></div><div id="nextFive" class="projected-draft"></div></section>
       </main>
-
       <aside class="fo-right">
-        <section class="fo-panel wishlist-panel">
-          <div class="panel-head"><div><span class="eyebrow">WISHLIST INTELLIGENCE</span><h3>Target Status</h3></div><button class="text-btn" data-jump="database">Edit</button></div>
-          <div id="positionTargets" class="wishlist-intel"></div>
-        </section>
-        <section class="fo-panel radar-panel">
-          <div class="panel-head"><div><span class="eyebrow">LEAGUE RADAR</span><h3>Room Movement</h3></div></div>
-          <div id="draftPressure" class="league-radar"></div>
-        </section>
+        <section class="fo-panel wishlist-panel"><div class="panel-head"><div><span class="eyebrow">WISHLIST INTELLIGENCE</span><h3>Target Status</h3></div><button class="text-btn" data-jump="database">Edit</button></div><div id="positionTargets" class="wishlist-intel"></div></section>
+        <section class="fo-panel radar-panel"><div class="panel-head"><div><span class="eyebrow">LEAGUE RADAR</span><h3>Room Movement</h3></div></div><div id="draftPressure" class="league-radar"></div></section>
       </aside>
     </div>
   </div>
 </section>
-<section id="board" class="view">
-  <div class="panel"><div class="panel-head"><div><span class="eyebrow">DRAFT EXECUTION</span><h2>The Board</h2></div><span id="availableCount" class="pill"></span></div>
-  <div class="filters"><input id="boardSearch" type="search" placeholder="Search player or team"><select id="boardPos"><option value="ALL">All positions</option><option>QB</option><option>RB</option><option>WR</option><option>TE</option><option>K</option><option>DEF</option></select></div>
-  <div id="boardTable" class="player-list"></div></div>
-</section>
-
+<section id="board" class="view"><div class="panel"><div class="panel-head"><div><span class="eyebrow">DRAFT EXECUTION</span><h2>The Board</h2></div><span id="availableCount" class="pill"></span></div><div class="filters"><input id="boardSearch" type="search" placeholder="Search player or team"><select id="boardPos"><option value="ALL">All positions</option><option>QB</option><option>RB</option><option>WR</option><option>TE</option><option>K</option><option>DEF</option></select></div><div id="boardTable" class="player-list"></div></div></section>
 <section id="database" class="view">
   <div class="scouting-hero"><div><span class="eyebrow">SCOUTING DEPARTMENT</span><h2>Build your player board.</h2><p>One tap tells Goose how you see a player. The AI handles timing, urgency and alternatives.</p></div><span id="databaseCount" class="pill"></span></div>
   <div class="scouting-toolbar"><input id="databaseSearch" type="search" placeholder="Search players, teams, owners or notes"><select id="databasePos" aria-label="Position"><option value="ALL">All positions</option><option>QB</option><option>RB</option><option>WR</option><option>TE</option><option>K</option><option>DEF</option></select><select id="databaseStatus" aria-label="League status"><option value="ALL">All statuses</option><option value="available">Available</option><option value="keeper">Keepers</option><option value="drafted">Drafted</option></select><select id="databaseScout" aria-label="Scouting signal"><option value="ALL">All signals</option><option value="must_have">Targets</option><option value="watch">Watch</option><option value="value_only">Value only</option><option value="fade">Fades</option><option value="untagged">Untagged</option></select><select id="databaseSort" aria-label="Sort players"><option value="BOARD">Board order</option><option value="PROJ">Projected points</option><option value="ADP">ADP</option><option value="POS">Position rank</option></select></div>
-  <div class="scouting-legend"><span><b>★</b> Target</span><span><b>◉</b> Watch</span><span><b>$</b> Value</span><span><b>—</b> Fade</span><small>Tap again to clear.</small></div>
-  <div id="databaseList" class="database-list scouting-list"></div>
-</section>
+  <div class="scouting-legend"><span><b>★</b> Target</span><span><b>◉</b> Watch</span><span><b>$</b> Value</span><span><b>—</b> Fade</span><small>Tap again to clear.</small></div><div id="databaseList" class="database-list scouting-list"></div>
 </section>
 <section id="league" class="view"><div class="panel"><div class="panel-head"><div><span class="eyebrow">LEAGUE ROOM</span><h2>All Rosters</h2></div></div><div id="rosters" class="team-grid"></div></div></section>
 <section id="history" class="view"><div class="panel"><div class="panel-head"><div><span class="eyebrow">DRAFT LOG</span><h2>Pick History</h2></div><button id="undoBtn" class="btn secondary">Undo Last</button></div><div id="draftHistory"></div></div></section>
@@ -91,30 +63,10 @@
 <div id="playerModal" class="modal" hidden><div class="modal-card player-modal-card"><button id="closePlayer" class="modal-close" aria-label="Close player details">×</button><div id="playerModalContent"></div></div></div>
 <div id="compareModal" class="modal" hidden><div class="modal-card compare-modal-card"><button id="closeCompare" class="modal-close" aria-label="Close comparison">×</button><div id="compareModalContent"></div></div></div>
 <div id="compareTray" class="compare-tray" hidden></div>
-<div id="settingsModal" class="modal" hidden><div class="modal-card settings-card">
-<button id="closeSettings" class="modal-close" aria-label="Close settings">×</button>
-<span class="eyebrow">FOOTBALL OPERATIONS</span><h2>Front Office Profile</h2>
-<p class="settings-note">These inputs power Goose. The Front Office shows the decisions—not the setup.</p>
-<div class="settings-section"><h3>League Setup</h3>
-<div class="settings-grid two"><label>League name<input id="leagueNameInput" type="text"></label><label>Your team<input id="teamNameInput" type="text"></label></div>
-<div class="settings-grid three"><label>Teams<input id="teamCountInput" type="number" min="4" max="20"></label><label>Your draft slot<select id="slotSelect"></select></label><label>Owner skill<select id="ownerSkillInput"><option>Beginner</option><option>Intermediate</option><option>Advanced</option><option>Expert</option></select></label></div><div class="settings-grid three"><label>Keepers per team<input id="keeperCountInput" type="number" min="0" max="15"></label><label>Total roster spots<input id="rosterSizeInput" type="number" min="8" max="30"></label><label>Starters<input id="starterCountInput" type="number" min="5" max="20"></label></div>
-<label>Team names <small>One per line, in draft order</small><textarea id="teamNamesInput" rows="5"></textarea></label>
-</div>
-<div class="settings-section"><h3>Roster Construction</h3><p class="settings-note">Targets guide roster balance. QB is capped at 3; all other bench spots remain flexible within the total roster size.</p>
-<div class="settings-grid roster-fields"><label>QB<input id="targetQB" type="number" min="0" max="6"></label><label>RB<input id="targetRB" type="number" min="0" max="10"></label><label>WR<input id="targetWR" type="number" min="0" max="10"></label><label>TE<input id="targetTE" type="number" min="0" max="5"></label><label>K<input id="targetK" type="number" min="0" max="3"></label><label>DEF<input id="targetDEF" type="number" min="0" max="3"></label><label>Bench<input id="benchInput" type="number" min="0" max="20"></label></div>
-</div>
-<div class="settings-section"><h3>Front Office Philosophy</h3>
-<label>Primary objective<textarea id="primaryObjectiveInput" rows="2"></textarea></label>
-<label>Secondary objectives<textarea id="secondaryObjectivesInput" rows="2"></textarea></label>
-<label>Avoid / downgrade<textarea id="avoidInput" rows="2"></textarea></label>
-<label>Late targets<textarea id="lateTargetsInput" rows="2"></textarea></label>
-<label>Emergency plan<textarea id="emergencyPlanInput" rows="2"></textarea></label>
-</div>
-<div class="modal-actions sticky-actions"><button id="saveSettings" class="btn primary">Save Profile</button></div>
-<button id="resetBtn" class="danger-link">Reset entire draft</button>
-</div></div>
+<div id="settingsModal" class="modal" hidden><div class="modal-card settings-card"><button id="closeSettings" class="modal-close" aria-label="Close settings">×</button><span class="eyebrow">FOOTBALL OPERATIONS</span><h2>Front Office Profile</h2><p class="settings-note">These inputs power Goose. The Front Office shows the decisions—not the setup.</p><div class="settings-section"><h3>League Setup</h3><div class="settings-grid two"><label>League name<input id="leagueNameInput" type="text"></label><label>Your team<input id="teamNameInput" type="text"></label></div><div class="settings-grid three"><label>Teams<input id="teamCountInput" type="number" min="4" max="20"></label><label>Your draft slot<select id="slotSelect"></select></label><label>Owner skill<select id="ownerSkillInput"><option>Beginner</option><option>Intermediate</option><option>Advanced</option><option>Expert</option></select></label></div><div class="settings-grid three"><label>Keepers per team<input id="keeperCountInput" type="number" min="0" max="15"></label><label>Total roster spots<input id="rosterSizeInput" type="number" min="8" max="30"></label><label>Starters<input id="starterCountInput" type="number" min="5" max="20"></label></div><label>Team names <small>One per line, in draft order</small><textarea id="teamNamesInput" rows="5"></textarea></label></div><div class="settings-section"><h3>Roster Construction</h3><p class="settings-note">Targets guide roster balance. QB is capped at 3; all other bench spots remain flexible within the total roster size.</p><div class="settings-grid roster-fields"><label>QB<input id="targetQB" type="number" min="0" max="6"></label><label>RB<input id="targetRB" type="number" min="0" max="10"></label><label>WR<input id="targetWR" type="number" min="0" max="10"></label><label>TE<input id="targetTE" type="number" min="0" max="5"></label><label>K<input id="targetK" type="number" min="0" max="3"></label><label>DEF<input id="targetDEF" type="number" min="0" max="3"></label><label>Bench<input id="benchInput" type="number" min="0" max="20"></label></div></div><div class="settings-section"><h3>Front Office Philosophy</h3><label>Primary objective<textarea id="primaryObjectiveInput" rows="2"></textarea></label><label>Secondary objectives<textarea id="secondaryObjectivesInput" rows="2"></textarea></label><label>Avoid / downgrade<textarea id="avoidInput" rows="2"></textarea></label><label>Late targets<textarea id="lateTargetsInput" rows="2"></textarea></label><label>Emergency plan<textarea id="emergencyPlanInput" rows="2"></textarea></label></div><div class="modal-actions sticky-actions"><button id="saveSettings" class="btn primary">Save Profile</button></div><button id="resetBtn" class="danger-link">Reset entire draft</button></div></div>
 <div id="toast" class="toast" aria-live="polite"></div>
 <script src="data.js"></script>
 <script src="app.js"></script>
+<script src="scouting-hotfix.js"></script>
 </body>
 </html>
