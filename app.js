@@ -1,14 +1,16 @@
 'use strict';
 
-const APP_VERSION = '0.3.0';
-const STORAGE_KEY = 'the-board-v3';
-const LEGACY_STORAGE_KEYS = ['the-board-v2', 'the-board-v1'];
+const APP_VERSION = '0.4.0';
+const STORAGE_KEY = 'the-board-v4';
+const LEGACY_STORAGE_KEYS = ['the-board-v3', 'the-board-v2', 'the-board-v1'];
 const NAME_CORRECTIONS = {
   'George KittleO': 'George Kittle'
 };
 const defaultState = { drafted: [], slot: 8, teams: [...BASE_TEAMS], compare: [] };
 let state = loadState();
 let pendingPlayerName = null;
+let livePlayerData = new Map();
+let liveDataStatus = 'loading';
 
 function canonicalName(value) {
   const raw = String(value || '').replace(/\s+/g, ' ').trim();
@@ -42,6 +44,56 @@ const MASTER_PLAYERS = PLAYERS.map((source, index) => {
     comparable: true
   };
 });
+
+
+function initials(name) {
+  return canonicalName(name).split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase();
+}
+
+function liveInfo(player) {
+  return livePlayerData.get(normalize(player.name)) || null;
+}
+
+function playerPhoto(player, className = 'player-photo') {
+  const live = liveInfo(player);
+  const src = live?.player_id ? `https://sleepercdn.com/content/nfl/players/thumb/${live.player_id}.jpg` : '';
+  return `<div class="${className}">${src ? `<img src="${src}" alt="${escapeHtml(player.name)}" loading="lazy" onerror="this.remove();this.parentElement.classList.add('photo-fallback')">` : ''}<span>${initials(player.name)}</span></div>`;
+}
+
+function injuryLabel(player) {
+  const live = liveInfo(player);
+  return live?.injury_status || live?.status === 'Inactive' ? (live.injury_status || 'Inactive') : 'Healthy';
+}
+
+function intelFor(player) {
+  const live = liveInfo(player);
+  const status = injuryLabel(player);
+  const lines = [];
+  if (status !== 'Healthy') lines.push(`${status} designation is active in the latest player feed.`);
+  if (live?.depth_chart_position) lines.push(`Listed ${live.depth_chart_position} on the current depth chart.`);
+  lines.push(player.note || `${player.tier} tier option with a ${player.risk.toLowerCase()}-risk profile.`);
+  return lines.slice(0, 2);
+}
+
+async function enrichPlayers() {
+  const badge = document.getElementById('dataStatus');
+  try {
+    const response = await fetch('https://api.sleeper.app/v1/players/nfl?active=true');
+    if (!response.ok) throw new Error('Player feed unavailable');
+    const payload = await response.json();
+    livePlayerData = new Map(Object.entries(payload).map(([player_id, player]) => {
+      const fullName = player.full_name || [player.first_name, player.last_name].filter(Boolean).join(' ');
+      return [normalize(fullName), { ...player, player_id }];
+    }));
+    liveDataStatus = 'live';
+    if (badge) { badge.textContent = 'LIVE PLAYER FEED'; badge.className = 'data-status live'; }
+    render();
+enrichPlayers();
+  } catch (error) {
+    liveDataStatus = 'offline';
+    if (badge) { badge.textContent = 'BOARD DATA'; badge.className = 'data-status'; }
+  }
+}
 
 function playerByName(name) {
   return MASTER_PLAYERS.find(player => normalize(player.name) === normalize(name));
@@ -199,13 +251,14 @@ function compareButton(player) {
 }
 
 function playerCard(player, index, compact = false) {
-  return `<div class="${compact ? 'mini-player' : 'player-card'}" data-player="${encodeURIComponent(player.name)}" role="button" tabindex="0" aria-label="View ${escapeHtml(player.name)}">
-    <div class="rank">${index + 1}</div>
-    <div><div class="player-name">${escapeHtml(player.name)}</div><div class="player-meta">${escapeHtml(player.team)} · ${escapeHtml(player.pos)} · ${escapeHtml(player.tier)}</div></div>
-    <div class="score projection">${Math.round(player.proj)}</div>
+  const injury = injuryLabel(player);
+  return `<article class="${compact ? 'mini-player' : 'player-card'}" data-player="${encodeURIComponent(player.name)}" role="button" tabindex="0" aria-label="View ${escapeHtml(player.name)}">
+    <div class="rank">${index + 1}</div>${playerPhoto(player, compact ? 'player-photo small' : 'player-photo')}
+    <div class="player-copy"><div class="player-title-line"><div class="player-name">${escapeHtml(player.name)}</div>${injury !== 'Healthy' ? `<span class="injury-badge">${escapeHtml(injury)}</span>` : ''}</div><div class="player-meta">${escapeHtml(player.team)} · ${escapeHtml(player.pos)} · ${escapeHtml(player.tier)} tier</div>${compact ? '' : `<div class="player-signal">#${player.posRank || '—'} ${player.pos} <span>•</span> ${Math.round(player.proj)} pts <span>•</span> ${escapeHtml(player.risk)} risk</div>`}</div>
+    <div class="score projection"><strong>${Number(player.score).toFixed(1)}</strong><span>BOARD</span></div>
     ${compact ? '' : compareButton(player)}
     <button class="draft-btn" data-draft="${encodeURIComponent(player.name)}" aria-label="Draft ${escapeHtml(player.name)}">${compact ? '+' : 'Draft'}</button>
-  </div>`;
+  </article>`;
 }
 
 function renderRecommendation(list) {
@@ -213,20 +266,27 @@ function renderRecommendation(list) {
   const element = document.getElementById('recommend');
   if (!player) { element.innerHTML = '<div class="empty">Draft complete.</div>'; return; }
   const reasons = recommendationReasons(player).map(reason => `<li>${reason}</li>`).join('');
-  element.innerHTML = `<div class="hero" data-player="${encodeURIComponent(player.name)}" role="button" tabindex="0"><div class="pos-badge">${escapeHtml(player.pos)}</div><div><h2>${escapeHtml(player.name)}</h2><div class="muted">${escapeHtml(player.team)} · ${escapeHtml(player.tier)} tier</div></div></div>
-    <div class="metrics"><div class="metric"><b>${player.score}</b><span>BOARD SCORE</span></div><div class="metric"><b>${Math.round(player.proj)}</b><span>PROJECTED PTS</span></div><div class="metric"><b>${escapeHtml(player.fit)}</b><span>BUTCHER FIT</span></div><div class="metric"><b>${escapeHtml(player.risk)}</b><span>RISK</span></div></div>
-    <div class="why-block"><h3>Why he's on the board</h3><ul>${reasons}</ul></div>
-    <div class="actions"><button class="btn primary" data-draft="${encodeURIComponent(player.name)}">Draft ${escapeHtml(player.name)}</button>${compareButton(player)}<button class="btn secondary" data-jump="board">View Board</button></div>`;
+  const intel = intelFor(player).map(line => `<p>${escapeHtml(line)}</p>`).join('');
+  element.innerHTML = `<div class="recommend-hero" data-player="${encodeURIComponent(player.name)}" role="button" tabindex="0">
+      <div class="recommend-photo-wrap">${playerPhoto(player, 'player-photo hero-photo')}<span class="pos-float">${escapeHtml(player.pos)}</span></div>
+      <div class="recommend-copy"><div class="recommend-kicker">THE BOARD'S PICK</div><h2>${escapeHtml(player.name)}</h2><p>${escapeHtml(player.team)} · #${player.posRank || '—'} ${escapeHtml(player.pos)} · ${escapeHtml(player.tier)} tier</p><div class="confidence-line"><span>CONFIDENCE</span><strong>${Math.max(64, Math.min(96, Math.round(Number(player.score) - 18)))}%</strong></div></div>
+    </div>
+    <div class="metrics"><div class="metric feature"><b>${player.score}</b><span>BOARD SCORE</span></div><div class="metric"><b>${Math.round(player.proj)}</b><span>PROJECTED PTS</span></div><div class="metric"><b>#${player.posRank || '—'}</b><span>POSITION</span></div><div class="metric"><b>${escapeHtml(player.risk)}</b><span>RISK</span></div></div>
+    <div class="intel-strip"><div><span class="eyebrow">LATEST PLAYER INTEL</span>${intel}</div><span class="health-chip ${injuryLabel(player) === 'Healthy' ? 'healthy' : 'alert'}">${escapeHtml(injuryLabel(player))}</span></div>
+    <div class="why-block"><h3>Why THE BOARD wants him</h3><ul>${reasons}</ul></div>
+    <div class="actions"><button class="btn primary" data-draft="${encodeURIComponent(player.name)}">Draft ${escapeHtml(player.name)}</button>${compareButton(player)}<button class="btn secondary" data-jump="board">Full Board</button></div>`;
 }
 
 function openPlayerDetails(name) {
   const player = playerByName(name); if (!player) return;
   const status = playerStatus(player);
   const reasons = recommendationReasons(player).map(reason => `<li>${reason}</li>`).join('');
-  document.getElementById('playerModalContent').innerHTML = `<div class="detail-head"><div class="pos-badge">${escapeHtml(player.pos)}</div><div><h2>${escapeHtml(player.name)}</h2><p>${escapeHtml(player.team)} · ${escapeHtml(player.tier)} tier</p></div></div>
-    <div class="status-banner ${status.key}"><b>${status.label}</b>${status.owner ? `<span>${escapeHtml(status.owner)}</span>` : ''}</div>
-    <div class="detail-grid"><div><span>Projection</span><b>${Math.round(player.proj)}</b></div><div><span>Position Rank</span><b>#${player.posRank || '—'}</b></div><div><span>Board Score</span><b>${player.score}</b></div><div><span>Butcher Fit</span><b>${escapeHtml(player.fit)}</b></div><div><span>Risk</span><b>${escapeHtml(player.risk)}</b></div><div><span>Rostered</span><b>${Number(player.rost || 0).toFixed(1)}%</b></div></div>
-    <div class="why-block"><h3>Current evaluation</h3><ul>${reasons}</ul></div>
+  const intel = intelFor(player).map(line => `<div class="news-item"><span class="news-dot"></span><div><b>THE BOARD INTEL</b><p>${escapeHtml(line)}</p></div></div>`).join('');
+  document.getElementById('playerModalContent').innerHTML = `<div class="player-profile-head">${playerPhoto(player, 'player-photo profile-photo')}<div><span class="position-tag">${escapeHtml(player.pos)}</span><h2>${escapeHtml(player.name)}</h2><p>${escapeHtml(player.team)} · ${escapeHtml(player.tier)} tier</p></div></div>
+    <div class="status-banner ${status.key}"><b>${status.label}</b>${status.owner ? `<span>${escapeHtml(status.owner)}</span>` : `<span class="health-chip ${injuryLabel(player) === 'Healthy' ? 'healthy' : 'alert'}">${escapeHtml(injuryLabel(player))}</span>`}</div>
+    <div class="detail-grid"><div><span>Projection</span><b>${Math.round(player.proj)}</b></div><div><span>Position Rank</span><b>#${player.posRank || '—'}</b></div><div><span>Board Score</span><b>${player.score}</b></div><div><span>Fit</span><b>${escapeHtml(player.fit)}</b></div><div><span>Risk</span><b>${escapeHtml(player.risk)}</b></div><div><span>Rostered</span><b>${Number(player.rost || 0).toFixed(1)}%</b></div></div>
+    <section class="news-panel"><div class="section-title"><span class="eyebrow">PLAYER NEWS & INTEL</span><span>${liveDataStatus === 'live' ? 'Live profile data' : 'Board evaluation'}</span></div>${intel}</section>
+    <div class="why-block"><h3>Draft-room evaluation</h3><ul>${reasons}</ul></div>
     <div class="modal-actions">${compareButton(player)}${status.draftable ? `<button class="btn primary" data-draft="${encodeURIComponent(player.name)}">Draft ${escapeHtml(player.name)}</button>` : ''}</div>`;
   openModal('playerModal');
 }
@@ -241,26 +301,33 @@ function toggleCompare(name) {
   if (state.compare.length === 2) openComparison();
 }
 
+function comparisonScore(player) {
+  return Number(player.score || 0) + rosterNeedScore(player) - (player.risk === 'High' ? 4 : player.risk === 'Medium' ? 2 : 0);
+}
+
 function comparisonWinner(a, b) {
-  const scoreA = Number(a.score || 0) + rosterNeedScore(a) - (a.risk === 'High' ? 4 : a.risk === 'Medium' ? 2 : 0);
-  const scoreB = Number(b.score || 0) + rosterNeedScore(b) - (b.risk === 'High' ? 4 : b.risk === 'Medium' ? 2 : 0);
-  if (Math.abs(scoreA - scoreB) < 1.5) return null;
-  return scoreA > scoreB ? a : b;
+  const diff = comparisonScore(a) - comparisonScore(b);
+  return Math.abs(diff) < 1.5 ? null : diff > 0 ? a : b;
 }
 
 function openComparison() {
   const [a, b] = state.compare.map(playerByName).filter(Boolean); if (!a || !b) return;
   const winner = comparisonWinner(a, b);
+  const edge = Math.abs(comparisonScore(a) - comparisonScore(b));
   const row = (label, left, right, prefer = 'high') => {
     const ln = Number(left), rn = Number(right);
     const lwin = Number.isFinite(ln) && Number.isFinite(rn) && (prefer === 'high' ? ln > rn : ln < rn);
     const rwin = Number.isFinite(ln) && Number.isFinite(rn) && (prefer === 'high' ? rn > ln : rn < ln);
-    return `<div class="compare-row"><span>${escapeHtml(left)}${lwin ? ' ✓' : ''}</span><b>${label}</b><span>${escapeHtml(right)}${rwin ? ' ✓' : ''}</span></div>`;
+    return `<div class="compare-row"><span class="${lwin ? 'edge' : ''}">${escapeHtml(left)}${lwin ? ' ✓' : ''}</span><b>${label}</b><span class="${rwin ? 'edge' : ''}">${escapeHtml(right)}${rwin ? ' ✓' : ''}</span></div>`;
   };
   const statusA = playerStatus(a), statusB = playerStatus(b);
-  document.getElementById('compareModalContent').innerHTML = `<span class="eyebrow">PLAYER COMPARISON</span><div class="compare-head"><div><div class="pos-badge">${a.pos}</div><h2>${escapeHtml(a.name)}</h2><p>${a.team} · ${statusA.label}</p></div><div class="versus">VS</div><div><div class="pos-badge">${b.pos}</div><h2>${escapeHtml(b.name)}</h2><p>${b.team} · ${statusB.label}</p></div></div>
-    <div class="compare-table">${row('Projection', Math.round(a.proj), Math.round(b.proj))}${row('Position Rank', a.posRank || '—', b.posRank || '—', 'low')}${row('Board Score', a.score, b.score)}${row('Risk', a.risk, b.risk)}${row('Butcher Fit', a.fit, b.fit)}</div>
-    <div class="verdict"><span class="eyebrow">THE BOARD VERDICT</span><h3>${winner ? `${escapeHtml(winner.name)} has the edge` : 'This is a roster-context decision'}</h3><p>${winner ? `${escapeHtml(winner.name)} grades better after combining board score, your current roster need, and risk.` : 'Their grades are close. Use positional need and how long each player is likely to remain available as the tiebreaker.'}</p></div>
+  const verdictTitle = winner ? `${winner.name} gets the ${edge > 5 ? 'clear' : 'slight'} edge` : 'This is a roster-context decision';
+  const verdictText = winner ? `${winner.name} is the better selection right now after combining production, roster need, risk, and position scarcity.` : 'The grades are nearly even. Let positional need and the chance each player survives to your next pick break the tie.';
+  document.getElementById('compareModalContent').innerHTML = `<span class="eyebrow">WAR ROOM COMPARISON</span><div class="compare-head"><div>${playerPhoto(a, 'player-photo compare-photo')}<span class="position-tag">${a.pos}</span><h2>${escapeHtml(a.name)}</h2><p>${a.team} · ${statusA.label}</p></div><div class="versus">VS</div><div>${playerPhoto(b, 'player-photo compare-photo')}<span class="position-tag">${b.pos}</span><h2>${escapeHtml(b.name)}</h2><p>${b.team} · ${statusB.label}</p></div></div>
+    <div class="overall-edge"><span>OVERALL EDGE</span><strong>${winner ? escapeHtml(winner.name) : 'EVEN'}</strong><small>${winner ? `${edge.toFixed(1)} decision points` : 'Use draft context'}</small></div>
+    <div class="compare-table">${row('Projection', Math.round(a.proj), Math.round(b.proj))}${row('Position Rank', a.posRank || '—', b.posRank || '—', 'low')}${row('Board Score', a.score, b.score)}${row('Risk', a.risk, b.risk)}${row('Roster Need', rosterNeedScore(a).toFixed(1), rosterNeedScore(b).toFixed(1))}</div>
+    <div class="draft-impact-grid"><div><span class="eyebrow">IF YOU DRAFT ${escapeHtml(a.name).toUpperCase()}</span><p>${escapeHtml(recommendationReasons(a)[0])}</p><b>${Math.max(12, 72 - a.posRank * 2)}% chance similar value lasts</b></div><div><span class="eyebrow">IF YOU DRAFT ${escapeHtml(b.name).toUpperCase()}</span><p>${escapeHtml(recommendationReasons(b)[0])}</p><b>${Math.max(12, 72 - b.posRank * 2)}% chance similar value lasts</b></div></div>
+    <div class="verdict"><span class="eyebrow">THE BOARD VERDICT</span><h3>${escapeHtml(verdictTitle)}</h3><p>${escapeHtml(verdictText)}</p></div>
     <div class="modal-actions"><button class="btn secondary" data-clear-compare>Clear</button>${statusA.draftable ? `<button class="btn primary" data-draft="${encodeURIComponent(a.name)}">Draft ${escapeHtml(a.name)}</button>` : ''}${statusB.draftable ? `<button class="btn primary" data-draft="${encodeURIComponent(b.name)}">Draft ${escapeHtml(b.name)}</button>` : ''}</div>`;
   openModal('compareModal');
 }
@@ -269,7 +336,7 @@ function renderCompareTray() {
   const tray = document.getElementById('compareTray');
   if (!state.compare.length) { tray.hidden = true; return; }
   tray.hidden = false;
-  tray.innerHTML = `<div><span class="eyebrow">COMPARE</span><b>${state.compare.map(escapeHtml).join(' vs. ')}</b></div><div class="tray-actions">${state.compare.length === 2 ? '<button class="btn primary compact" data-open-compare>Compare Now</button>' : '<span class="muted">Choose one more</span>'}<button class="btn secondary compact" data-clear-compare>Clear</button></div>`;
+  tray.innerHTML = `<div><span class="eyebrow">WAR ROOM COMPARE</span><b>${state.compare.map(escapeHtml).join(' vs. ')}</b></div><div class="tray-actions">${state.compare.length === 2 ? '<button class="btn primary compact" data-open-compare>Compare Now</button>' : '<span class="muted">Choose one more</span>'}<button class="btn secondary compact" data-clear-compare>Clear</button></div>`;
 }
 
 function renderRoster() {
@@ -286,7 +353,7 @@ function renderBoard() {
 
 function databaseCard(player) {
   const status = playerStatus(player);
-  return `<div class="database-player" data-player="${encodeURIComponent(player.name)}"><div><div class="player-name">${escapeHtml(player.name)}</div><div class="player-meta">${player.team} · ${player.pos} · #${player.posRank || '—'} · ${Math.round(player.proj)} pts</div></div><span class="status-chip ${status.key}">${status.label}${status.owner ? ` · ${escapeHtml(status.owner)}` : ''}</span>${compareButton(player)}${status.draftable ? `<button class="draft-btn" data-draft="${encodeURIComponent(player.name)}">Draft</button>` : ''}</div>`;
+  return `<div class="database-player" data-player="${encodeURIComponent(player.name)}">${playerPhoto(player, 'player-photo small')}<div><div class="player-name">${escapeHtml(player.name)}</div><div class="player-meta">${player.team} · ${player.pos} · #${player.posRank || '—'} · ${Math.round(player.proj)} pts</div></div><span class="status-chip ${status.key}">${status.label}${status.owner ? ` · ${escapeHtml(status.owner)}` : ''}</span>${compareButton(player)}${status.draftable ? `<button class="draft-btn" data-draft="${encodeURIComponent(player.name)}">Draft</button>` : ''}</div>`;
 }
 
 function renderDatabase() {
@@ -347,3 +414,4 @@ document.querySelectorAll('.modal').forEach(modal => modal.addEventListener('cli
 document.getElementById('resetBtn').addEventListener('click', () => { if (confirm('Reset every drafted player? Keepers remain.')) { state.drafted = []; save(); closeModal('settingsModal'); render(); showToast('Draft reset'); } });
 
 render();
+enrichPlayers();

@@ -1,22 +1,23 @@
-# THE BOARD v0.3.0 — Master Database Foundation
+# THE BOARD — v0.4.0 Visual Intelligence
 
-## New
-- Added a searchable master player database containing available players, keepers, and drafted players.
-- Keepers remain available for player comparisons but are excluded from the live draft board.
-- Added two-player comparison from player cards, the live board, recommendations, and the player database.
-- Added draft/keeper/available status labels and owner visibility.
-- Added a persistent comparison tray.
+## What changed
 
-## Fixed
-- James Cook is explicitly identified as Patti's keeper and cannot appear on Best Available or the live draft board.
-- Corrected `George KittleO` to `George Kittle`.
-- Replaced unsafe name normalization that could alter legitimate player names.
-- Migrates existing v0.2 draft state into v0.3 local storage.
+- Complete visual redesign with a more premium war-room presentation
+- Live NFL player profile enrichment from Sleeper's read-only player feed
+- Player headshots with initials-based fallback
+- Live injury/status and depth-chart profile fields when available
+- Larger recommendation hero with confidence, board score, rank, risk, and health
+- New Player News & Intel presentation inside every player profile
+- Redesigned player cards across the Board, Next Five, and Player Database
+- War Room comparison redesign with:
+  - player photos
+  - overall edge
+  - roster-need score
+  - draft-impact cards
+  - clearer verdict language
+- Improved responsive layout for phones, tablets, and the draft-room television
+- Existing v0.3 master-player database, keepers, drafted statuses, comparisons, undo, and saved draft state remain intact
 
-## Architecture
-- Introduced `MASTER_PLAYERS` as the single player universe.
-- Draft availability is now computed from player status rather than deleting keepers from the database.
-- Added stable internal player IDs and a provider-ready record shape for future ESPN/news/projection integrations.
+## Data note
 
-## Not yet live
-- ESPN sync, live injury updates, live news, headshots, and category projections require a server-side provider layer and are planned for a later release.
+Sleeper supplies read-only player profile data such as player IDs, headshots, injury status, and depth-chart information. THE BOARD's projections and draft evaluations remain based on the league-specific local database. The news/intel presentation is provider-ready; a true article/news feed is the next data integration rather than fabricated live headlines.

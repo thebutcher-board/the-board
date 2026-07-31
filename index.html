@@ -11,6 +11,7 @@
 <header class="topbar">
   <img class="logo" src="logo.png" alt="The Butcher bull logo">
   <div class="brand"><h1>THE BOARD</h1><p>WIN BEFORE THE CLOCK STARTS. <span id="versionLabel"></span></p></div>
+  <span id="dataStatus" class="data-status">CONNECTING PLAYER FEED</span>
   <button id="settingsBtn" class="icon-btn" aria-label="Draft settings">⚙</button>
 </header>
 <nav class="tabs" aria-label="Main navigation">
@@ -28,7 +29,7 @@
   <div class="panel"><div class="panel-head"><h3>The Butcher Roster</h3><span class="pill">5 Keepers</span></div><div id="myRoster" class="roster-list"></div></div>
 </section>
 <section id="board" class="view">
-  <div class="panel"><div class="panel-head"><div><span class="eyebrow">LIVE DRAFT BOARD</span><h2>The Butcher 50</h2></div><span id="availableCount" class="pill"></span></div>
+  <div class="panel"><div class="panel-head"><div><span class="eyebrow">LIVE DRAFT BOARD</span><h2>The Butcher Big Board</h2></div><span id="availableCount" class="pill"></span></div>
   <div class="filters"><input id="boardSearch" type="search" placeholder="Search player or team"><select id="boardPos"><option value="ALL">All positions</option><option>QB</option><option>RB</option><option>WR</option><option>TE</option><option>K</option><option>DEF</option></select></div>
   <div id="boardTable" class="player-list"></div></div>
 </section>
