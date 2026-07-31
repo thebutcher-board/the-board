@@ -1,9 +1,18 @@
-# THE BOARD v0.5.0 — Market Intelligence
+# THE BOARD v0.6.0 — Front Office War Room
 
-- Replaces unexplained confidence percentages with plain-English recommendation strength.
-- Removes fake "chance similar value lasts" percentages and "decision points."
-- Adds analyst-style Goose's Take copy based on league format, roster construction, tiers, market cost, depth-chart context, and injuries.
-- Adds FantasyPros server integration scaffolding for ECR, ADP, tiers, and player news.
-- Keeps the FantasyPros API key private in a Vercel environment variable.
-- Adds market and tier context to recommendation and player-detail cards.
-- Changes visual direction to Tennessee orange, white, Smokey gray, charcoal, and black without brown/orange gradient washes.
+## Product architecture
+- War Room is now the private strategy brain: roster construction, draft blueprint, positional shortlists, pick-window pressure, and current decision set.
+- Board remains the live draftable pool.
+- Players remains the master scouting/trade database, including keepers and drafted players.
+
+## UX and integrity
+- Removed the dead Live Player Feed header control.
+- Comparison draft actions now close the comparison overlay before showing the confirmation flow.
+- Replaced broad generic tiers with positional micro-tiers.
+- Removed exposed Board Score and numeric Roster Need from primary decision views.
+- Pressure indicators are clearly labeled as roster signals, not unsupported probabilities.
+
+## Analysis foundation
+- Added player-specific strategic profiles based on position rank, role class, market context, injury status, and risk.
+- Added draft-window team pressure and position-needs analysis.
+- Added a visible roadmap boundary for future situational splits: weather, venue, time-of-day, opponent trends, schedule, and historical performance.

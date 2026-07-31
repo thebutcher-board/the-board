@@ -11,7 +11,6 @@
 <header class="topbar">
   <img class="logo" src="logo.png" alt="The Butcher bull logo">
   <div class="brand"><h1>THE BOARD</h1><p>WIN BEFORE THE CLOCK STARTS. <span id="versionLabel"></span></p></div>
-  <span id="dataStatus" class="data-status">CONNECTING PLAYER FEED</span>
   <button id="settingsBtn" class="icon-btn" aria-label="Draft settings">⚙</button>
 </header>
 <nav class="tabs" aria-label="Main navigation">
@@ -23,10 +22,39 @@
 </nav>
 <main>
 <section id="warroom" class="view active">
-  <div class="clock panel"><div><span class="eyebrow">ON THE CLOCK</span><h2 id="clockTeam">—</h2><p id="clockPick">—</p></div><div class="pick-badge" id="pickBadge">1</div></div>
-  <div class="panel recommendation"><div class="panel-head"><span class="eyebrow">ON THE BOARD</span><button id="quickUndoBtn" class="btn secondary compact">Undo Last</button></div><div id="recommend"></div></div>
-  <div class="panel"><div class="panel-head"><h3>Next Five</h3><button class="text-btn" data-jump="board">View board</button></div><div id="nextFive" class="stack"></div></div>
-  <div class="panel"><div class="panel-head"><h3>The Butcher Roster</h3><span class="pill">5 Keepers</span></div><div id="myRoster" class="roster-list"></div></div>
+  <div class="warroom-hero panel">
+    <div><span class="eyebrow">PRIVATE FRONT OFFICE</span><h2>The Butcher War Room</h2><p id="strategyHeadline" class="warroom-lead">Building your draft plan…</p></div>
+    <div class="clock-inline"><span class="eyebrow">ON THE CLOCK</span><strong id="clockTeam">—</strong><span id="clockPick">—</span><b class="pick-badge" id="pickBadge">1</b></div>
+  </div>
+  <div class="warroom-grid">
+    <section class="panel roster-command">
+      <div class="panel-head"><div><span class="eyebrow">ROSTER COMMAND</span><h3>Your Competitive Position</h3></div><button id="quickUndoBtn" class="btn secondary compact">Undo Last</button></div>
+      <div id="rosterSummary" class="roster-summary"></div>
+      <div id="myRoster" class="roster-list compact-roster"></div>
+    </section>
+    <section class="panel strategy-panel">
+      <div class="panel-head"><div><span class="eyebrow">DRAFT BLUEPRINT</span><h3>How We Build the 2026 Roster</h3></div></div>
+      <div id="draftBlueprint" class="blueprint"></div>
+    </section>
+  </div>
+  <section class="panel recommendation warroom-recommendation">
+    <div class="panel-head"><div><span class="eyebrow">THE CALL</span><h3>Best Move Right Now</h3></div><button class="text-btn" data-jump="board">Open live board</button></div>
+    <div id="recommend"></div>
+  </section>
+  <div class="warroom-grid lower">
+    <section class="panel">
+      <div class="panel-head"><div><span class="eyebrow">POSITION TARGETS</span><h3>Your Shortlist</h3></div></div>
+      <div id="positionTargets" class="target-board"></div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><span class="eyebrow">DRAFT PRESSURE</span><h3>What Happens Before You Pick Again</h3></div></div>
+      <div id="draftPressure" class="pressure-board"></div>
+    </section>
+  </div>
+  <section class="panel">
+    <div class="panel-head"><div><span class="eyebrow">NEXT DECISION SET</span><h3>Players Who Matter Now</h3></div><button class="text-btn" data-jump="board">View all</button></div>
+    <div id="nextFive" class="decision-grid"></div>
+  </section>
 </section>
 <section id="board" class="view">
   <div class="panel"><div class="panel-head"><div><span class="eyebrow">LIVE DRAFT BOARD</span><h2>The Butcher Big Board</h2></div><span id="availableCount" class="pill"></span></div>
