@@ -39,13 +39,12 @@
   function valueScore(player){
     const boardRank=Number(player.butcherRank||999);
     const posRank=Number(player.posRank||999);
-    const rankScore=boardRank<999?clamp(105-boardRank*2):clamp(85-posRank*1.5);
-    return rankScore;
+    return boardRank<999?clamp(105-boardRank*2):clamp(85-posRank*1.5);
   }
   function scoutingScore(player){
     try{return 50+(TAG_BONUS[scoutingTag(player)]||0)*5;}catch{return 50;}
   }
-  function riskScore(player){return 100-(RISK_PENALTY[String(player.risk||'medium').toLowerCase()]||2)*12;}
+  function safetyScore(player){return 100-(RISK_PENALTY[String(player.risk||'medium').toLowerCase()]||2)*12;}
 
   function evaluate(player,pool){
     const factors={
@@ -54,7 +53,7 @@
       scarcity:scarcityScore(player,pool),
       value:valueScore(player),
       scouting:scoutingScore(player),
-      risk:riskScore(player)
+      risk:safetyScore(player)
     };
     const score=Object.entries(WEIGHTS).reduce((sum,[key,weight])=>sum+factors[key]*(weight/100),0);
     const reasons=[];
@@ -66,7 +65,7 @@
     if(tag==='must_have')reasons.push('matches your Target signal');
     if(tag==='value_only')reasons.push('fits your Value Only signal at the right price');
     if(tag==='fade')reasons.push('is downgraded by your Fade signal');
-    if(String(player.risk||'').toLowerCase()==='low')reasons.push('offers a comparatively stable risk profile');
+    if(String(player.risk||'').toLowerCase()==='low')reasons.push('offers a comparatively stable profile');
     return{player,score:Math.round(score),factors,reasons:reasons.slice(0,3)};
   }
 
@@ -97,7 +96,7 @@
       const thinking=document.getElementById('gooseThinking');
       if(thinking){
         const action=typeof currentTeam==='function'&&currentTeam()===state.profile.teamName?'Take':'Track';
-        thinking.innerHTML=`<p class="gm-kicker">DECISION ENGINE · ${confidenceValue}% CONFIDENCE</p><h2>${action} ${escapeHtml(top.player.name)}.</h2><p>${escapeHtml(explanation(top))}</p><div class="engine-factor-line"><span>Need ${Math.round(top.factors.need)}</span><span>Scarcity ${Math.round(top.factors.scarcity)}</span><span>Projection ${Math.round(top.factors.projection)}</span><span>Risk ${Math.round(top.factors.risk)}</span></div>`;
+        thinking.innerHTML=`<p class="gm-kicker">DECISION EDGE · ${confidenceValue}%</p><h2>${action} ${escapeHtml(top.player.name)}.</h2><p>${escapeHtml(explanation(top))}</p><div class="engine-factor-line"><span>Need ${Math.round(top.factors.need)}</span><span>Scarcity ${Math.round(top.factors.scarcity)}</span><span>Projection ${Math.round(top.factors.projection)}</span><span>Safety ${Math.round(top.factors.risk)}</span></div><p class="engine-legend">Decision Edge shows how clearly this player separates from the next-best option. Factor scores run 0–100; higher is better.</p>`;
       }
       const paths=document.getElementById('decisionPaths');
       if(paths){
