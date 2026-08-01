@@ -1,0 +1,1 @@
+Rollback v3 visual redesign. Stable fast runtime restored before targeted navigation and photo fixes.
