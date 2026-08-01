@@ -4,7 +4,7 @@
 // inline overrides while leaving the fast application runtime untouched.
 const uiLink=document.createElement('link');
 uiLink.rel='stylesheet';
-uiLink.href='fortune-ui.css?v=2';
+uiLink.href='fortune-ui.css?v=3';
 document.head.appendChild(uiLink);
 
 // Final targeted corrections based on desktop QA.
@@ -29,8 +29,46 @@ qaStyle.textContent=`
     main{padding-left:24px!important;padding-right:24px!important}
     .front-office-layout{grid-template-columns:minmax(390px,24%) minmax(760px,1fr) minmax(420px,25%)!important;gap:22px!important}
   }
+
+  /* AVAILABLE / KEEPER / DRAFTED already communicates status. */
+  .status-line>span:not(.status-chip){display:none!important}
+  .scout-context span:first-child{font-weight:760!important;color:#2d3035!important}
 `;
 document.head.appendChild(qaStyle);
+
+// THE BOARD role taxonomy: one clear fantasy role plus an optional upside trait.
+function boardRole(player){
+  const pos=String(player?.pos||'').toUpperCase();
+  const rank=Number(player?.posRank||999);
+  const risk=String(player?.risk||'Medium').toLowerCase();
+  const name=String(player?.name||'');
+  const projection=Number(player?.proj||0);
+
+  let primary='Bench';
+  if(pos==='QB') primary=rank<=10?'QB1':rank<=20?'QB2':rank<=28?'Flex':'Bench';
+  else if(pos==='RB') primary=rank<=12?'RB1':rank<=26?'RB2':rank<=42?'Flex':'Bench';
+  else if(pos==='WR') primary=rank<=15?'WR1':rank<=32?'WR2':rank<=52?'Flex':'Bench';
+  else if(pos==='TE') primary=rank<=8?'TE1':rank<=16?'TE2':rank<=24?'Flex':'Bench';
+  else if(pos==='K'||pos==='DEF') primary=rank<=10?`${pos}1`:'Bench';
+
+  const developmentalNames=['Fernando Mendoza','Drew Allar','Nico Iamaleava','Dante Moore','LaNorris Sellers'];
+  const highUpsideNames=['Jaxson Dart','Tyler Shough','Jeremiyah Love','Cam Skattebo','TreVeyon Henderson','Quinshon Judkins'];
+  const opportunityNames=['Malik Willis','Michael Penix Jr.','Shedeur Sanders'];
+
+  let secondary='';
+  if(developmentalNames.includes(name)) secondary='Developmental';
+  else if(highUpsideNames.includes(name)) secondary='High Upside';
+  else if(opportunityNames.includes(name)) secondary='Upside if Starts';
+  else if(primary==='Bench'&&risk==='high'&&projection>0) secondary='High Upside';
+
+  return secondary?`${primary} · ${secondary}`:primary;
+}
+
+// Replace the original prototype labels before views render.
+try{
+  microTier=boardRole;
+  roleLabel=boardRole;
+}catch{}
 
 // Migrate the old owner key so the League page and keeper ownership use the
 // current franchise name everywhere.
