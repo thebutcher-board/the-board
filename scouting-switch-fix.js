@@ -10,7 +10,7 @@ qaStyle.textContent=`
 .scout-metrics span{color:#6b7078!important;opacity:1!important;font-weight:750!important}.scout-metrics b{color:#24262a!important;opacity:1!important;font-weight:800!important}.scout-metrics>div{border-color:#cfd3d8!important}
 .modal{padding-top:78px!important;padding-bottom:24px!important;align-items:start!important;overflow-y:auto!important}.player-modal-card{margin:0 auto 28px!important;max-height:none!important;overflow:visible!important}.player-profile-head{padding-top:8px!important}
 .status-line>span:not(.status-chip){display:none!important}.scout-context span:first-child{font-weight:760!important;color:#2d3035!important}
-.engine-factor-line{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.engine-factor-line span{padding:6px 9px;border:1px solid #d8dce1;border-radius:999px;background:#fff;color:#555a62;font-size:11px;font-weight:750}.future-path small{display:block;min-height:34px;margin:8px 0 12px;color:#676c74;line-height:1.35}
+.engine-factor-line{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.engine-factor-line span{padding:6px 9px;border:1px solid #d8dce1;border-radius:999px;background:#fff;color:#555a62;font-size:11px;font-weight:750}.engine-legend{margin-top:10px!important;font-size:11px!important;line-height:1.4!important;color:#747982!important}.future-path small{display:block;min-height:34px;margin:8px 0 12px;color:#676c74;line-height:1.35}
 @media(min-width:1200px){main{padding-left:20px!important;padding-right:20px!important}.front-office-layout{grid-template-columns:minmax(350px,24%) minmax(620px,1fr) minmax(380px,26%)!important;gap:18px!important}}@media(min-width:1500px){main{padding-left:24px!important;padding-right:24px!important}.front-office-layout{grid-template-columns:minmax(390px,24%) minmax(760px,1fr) minmax(420px,25%)!important;gap:22px!important}}
 `;
 document.head.appendChild(qaStyle);
@@ -36,5 +36,12 @@ function applyPlayerPhotos(root=document){root.querySelectorAll('.player-photo')
 async function loadPlayerPhotosLazily(){if(photoLoadStarted)return;photoLoadStarted=true;loadCachedPhotoMap();applyPlayerPhotos();if(playerPhotoMap.size>200)return;try{const response=await fetch('https://api.sleeper.app/v1/players/nfl?active=true');if(!response.ok)return;const payload=await response.json(),compact={};Object.entries(payload).forEach(([id,p])=>{const name=p.full_name||[p.first_name,p.last_name].filter(Boolean).join(' ');if(name)compact[normalizePhotoName(name)]=id;});playerPhotoMap=new Map(Object.entries(compact));try{localStorage.setItem(PHOTO_CACHE_KEY,JSON.stringify(compact));}catch{}applyPlayerPhotos();}catch{}}
 const observer=new MutationObserver(ms=>{for(const m of ms)m.addedNodes.forEach(node=>{if(!(node instanceof Element))return;if(node.matches('.player-photo')||node.querySelector('.player-photo'))applyPlayerPhotos(node.matches('.player-photo')?(node.parentElement||node):node);});});observer.observe(document.body,{childList:true,subtree:true});
 
-function loadDecisionEngine(){if(document.querySelector('script[data-decision-engine]'))return;const script=document.createElement('script');script.src='decision-engine.js?v=1';script.dataset.decisionEngine='true';script.addEventListener('load',()=>{if(typeof activeView!=='undefined'&&activeView==='warroom'&&typeof renderWarroom==='function')renderWarroom();},{once:true});document.body.appendChild(script);}
-window.addEventListener('load',()=>{migratePattiMayo();loadDecisionEngine();const schedule=window.requestIdleCallback||(cb=>setTimeout(cb,1800));schedule(loadPlayerPhotosLazily,{timeout:4500});},{once:true});
+function setProjectionSortDefault(){
+  const sort=document.getElementById('databaseSort');
+  if(!sort)return;
+  sort.value='PROJ';
+  if(typeof renderDatabase==='function')renderDatabase();
+}
+
+function loadDecisionEngine(){if(document.querySelector('script[data-decision-engine]'))return;const script=document.createElement('script');script.src='decision-engine.js?v=2';script.dataset.decisionEngine='true';script.addEventListener('load',()=>{if(typeof activeView!=='undefined'&&activeView==='warroom'&&typeof renderWarroom==='function')renderWarroom();},{once:true});document.body.appendChild(script);}
+window.addEventListener('load',()=>{migratePattiMayo();setProjectionSortDefault();loadDecisionEngine();const schedule=window.requestIdleCallback||(cb=>setTimeout(cb,1800));schedule(loadPlayerPhotosLazily,{timeout:4500});},{once:true});
