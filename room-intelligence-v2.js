@@ -37,7 +37,6 @@
     const rank=Number(player.posRank||99);
     const picks=context.picksAway;
 
-    // League-specific hard guardrail: top QBs do not survive long turns in this 2QB room.
     if(player.pos==='QB'&&rank<=8&&picks>=5)return{available:picks<=7?8:2,threats,label:'Almost certainly gone'};
     if(player.pos==='QB'&&rank<=12&&picks>=7)return{available:12,threats,label:'Very unlikely'};
 
@@ -72,9 +71,34 @@
     }));
   }
 
-  function fallbackBoard(results,top,context){
-    const same=results.filter(item=>item.player.name!==top.player.name&&item.player.pos===top.player.pos);
-    return same.slice(0,4).map(item=>({item,forecast:survival(item.player,context)}));
+  function currentAlternatives(results,top){
+    const samePosition=results.filter(item=>item.player.name!==top.player.name&&item.player.pos===top.player.pos).slice(0,2);
+    const overall=results.filter(item=>item.player.name!==top.player.name&&!samePosition.some(x=>x.player.name===item.player.name)).slice(0,2);
+    return [...samePosition,...overall].slice(0,4);
+  }
+
+  function realisticNextPickFallbacks(results,top,context){
+    const samePosition=results
+      .filter(item=>item.player.name!==top.player.name&&item.player.pos===top.player.pos)
+      .map(item=>({item,forecast:survival(item.player,context)}))
+      .filter(entry=>entry.forecast.available>=40)
+      .sort((a,b)=>b.item.score-a.item.score||b.forecast.available-a.forecast.available)
+      .slice(0,4);
+    return samePosition;
+  }
+
+  function rosterFit(item){
+    const value=Number(item?.factors?.need||0);
+    return value>=85?'Immediate need':value>=55?'Useful fit':'Best-value option';
+  }
+
+  function decisionReason(item,top){
+    if(item.player.pos===top.player.pos){
+      if(Number(item.player.proj||0)>=Number(top.player.proj||0))return'Higher projection at the same position';
+      if(String(item.player.risk||'Medium')==='Low')return'Safer profile at the same position';
+      return'Preserves the same roster construction';
+    }
+    return item.reasons?.[0]||`Best available ${item.player.pos} alternative`;
   }
 
   function draftConsequence(top,results){
@@ -94,7 +118,8 @@
 
     const context=nextPickContext();
     const topForecast=survival(top.player,context);
-    const fallbacks=fallbackBoard(results,top,context);
+    const alternatives=currentAlternatives(results,top);
+    const fallbacks=realisticNextPickFallbacks(results,top,context);
     const threats=ownerThreats(top.player,context);
     const consequence=draftConsequence(top,results);
 
@@ -120,10 +145,16 @@
         ${threats.length?threats.map(t=>`<div class="threat-row"><span><b>${esc(t.team)}</b><small>${esc(t.reason)}</small></span><strong>${t.level}</strong></div>`).join(''):'<p>No clear same-position threat before your next pick.</p>'}
       </article>
 
-      <article class="decision-scenario fallback-plan">
-        <span class="eyebrow">IF WE MISS</span>
-        <h4>Fallback board</h4>
-        ${fallbacks.length?fallbacks.map((f,index)=>`<button data-player="${encodeURIComponent(f.item.player.name)}"><span><b>${index+1}. ${esc(f.item.player.name)}</b><small>${f.item.player.pos} · ${Math.round(f.item.player.proj||0)} pts</small></span><strong>${f.forecast.label}</strong></button>`).join(''):'<p>No same-position fallback grades closely enough.</p>'}
+      <article class="decision-scenario other-options">
+        <span class="eyebrow">OTHER CHOICES RIGHT NOW</span>
+        <h4>If you do not want ${esc(top.player.name)}</h4>
+        ${alternatives.length?alternatives.map((item,index)=>`<button data-player="${encodeURIComponent(item.player.name)}"><span><b>${index+1}. ${esc(item.player.name)}</b><small>${item.player.pos} · ${Math.round(item.player.proj||0)} pts · ${esc(item.player.risk||'Medium')} risk</small><em>${esc(decisionReason(item,top))}</em></span><strong>${esc(rosterFit(item))}</strong></button>`).join(''):'<p>No close alternatives are currently graded.</p>'}
+      </article>
+
+      <article class="decision-scenario next-pick-plan">
+        <span class="eyebrow">NEXT-PICK FALLBACK PLAN</span>
+        <h4>${top.player.pos}s realistically projected to survive</h4>
+        ${fallbacks.length?fallbacks.map((f,index)=>`<button data-player="${encodeURIComponent(f.item.player.name)}"><span><b>${index+1}. ${esc(f.item.player.name)}</b><small>${f.item.player.pos} · ${Math.round(f.item.player.proj||0)} pts · ${esc(f.item.player.risk||'Medium')} risk</small></span><strong>${f.forecast.label}</strong></button>`).join(''):`<p>No ${top.player.pos} in the current preferred tier is projected to survive. Goose should treat the position as a take-now decision or plan for a lower tier.</p>`}
       </article>`;
   }
 
@@ -145,11 +176,11 @@
       .decision-scenario.take-now{border-top:5px solid #f47a00}.decision-scenario.pass-now{border-top:5px solid #3f444b}
       .decision-scenario h4{font-size:21px;margin:8px 0}.decision-scenario p{font-size:13px;line-height:1.5;color:#60666f}
       .scenario-consequence{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;margin-top:13px;border-radius:11px;background:#f3f4f6}.scenario-consequence b,.scenario-consequence span{font-size:12px}
-      .scenario-list{margin-top:13px}.scenario-list>small{display:block;margin-bottom:6px;color:#767b83}.scenario-list button,.fallback-plan button{display:flex;justify-content:space-between;gap:12px;width:100%;padding:10px 0;border:0;border-bottom:1px solid #e1e4e7;background:transparent;text-align:left}.scenario-list button:last-child,.fallback-plan button:last-child{border-bottom:0}.scenario-list button span,.fallback-plan small{color:#777c84;font-size:10px}
+      .scenario-list{margin-top:13px}.scenario-list>small{display:block;margin-bottom:6px;color:#767b83}.scenario-list button,.other-options button,.next-pick-plan button{display:flex;justify-content:space-between;gap:12px;width:100%;padding:11px 0;border:0;border-bottom:1px solid #e1e4e7;background:transparent;text-align:left}.scenario-list button:last-child,.other-options button:last-child,.next-pick-plan button:last-child{border-bottom:0}.scenario-list button span,.other-options small,.next-pick-plan small{color:#777c84;font-size:10px}
       .threat-row{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid #e1e4e7}.threat-row:last-child{border-bottom:0}.threat-row span,.threat-row b,.threat-row small{display:block}.threat-row small{margin-top:3px;color:#737880}.threat-row strong{align-self:center;font-size:11px;color:#9f4b00}
-      .fallback-plan button{align-items:center}.fallback-plan button span,.fallback-plan button b,.fallback-plan button small{display:block}.fallback-plan button strong{font-size:11px;color:#9f4b00;text-align:right;max-width:120px}
+      .other-options,.next-pick-plan{grid-column:1/-1}.other-options button,.next-pick-plan button{align-items:center}.other-options button span,.other-options button b,.other-options button small,.other-options button em,.next-pick-plan button span,.next-pick-plan button b,.next-pick-plan button small{display:block}.other-options button em{margin-top:4px;font-size:11px;line-height:1.35;color:#4f555d;font-style:normal}.other-options button strong,.next-pick-plan button strong{font-size:11px;color:#9f4b00;text-align:right;max-width:140px}
       .room-pulse-card{padding:17px;background:#fff;border:1px solid #d5d9de;border-radius:14px}.room-pulse-card h4{font-size:19px;margin:7px 0 14px}.pulse-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(80px,120px) auto;gap:10px;align-items:center;padding:9px 0}.pulse-row div:first-child b,.pulse-row div:first-child small{display:block}.pulse-row small{color:#777c84;font-size:10px}.pulse-track{height:10px;border-radius:999px;background:#e7e9ec;overflow:hidden}.pulse-track i{display:block;height:100%;border-radius:999px;background:#f47a00}.pulse-row strong{font-size:10px;min-width:42px;text-align:right}.model-note{display:block;margin-top:10px;line-height:1.4;color:#777c84}
-      @media(max-width:800px){.decision-futures{grid-template-columns:1fr!important}.pulse-row{grid-template-columns:1fr auto}.pulse-track{grid-column:1/-1}}
+      @media(max-width:800px){.decision-futures{grid-template-columns:1fr!important}.other-options,.next-pick-plan{grid-column:auto}.pulse-row{grid-template-columns:1fr auto}.pulse-track{grid-column:1/-1}}
     `;
     document.head.appendChild(style);
   }
