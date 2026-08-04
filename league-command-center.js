@@ -1,14 +1,14 @@
 'use strict';
 (function(){
-  const BOOT_VERSION='phase1-owned-mount-13.0';
-  let ownedShell=null;
+  const BOOT_VERSION='phase1-single-app-14.0';
   let observer=null;
+  let renderTimer=null;
 
   function loadScript(src,key){
     return new Promise((resolve,reject)=>{
       const existing=document.querySelector(`script[data-phase-one-key="${key}"]`);
       if(existing){
-        if(existing.dataset.loaded==='true') resolve();
+        if(existing.dataset.loaded==='true')resolve();
         else existing.addEventListener('load',resolve,{once:true});
         return;
       }
@@ -21,85 +21,61 @@
     });
   }
 
-  function createOwnedMount(){
+  function mount(){
     const war=document.getElementById('warroom');
-    if(!war) return null;
-
-    // The original HTML contained a complete legacy Front Office. Remove that
-    // markup entirely so old render functions have no visible DOM to repaint.
-    war.replaceChildren();
-    war.className='view active war-room-v12';
-
-    ownedShell=document.createElement('div');
-    ownedShell.className='front-office-shell';
-    ownedShell.dataset.phaseOneOwner='true';
-    war.appendChild(ownedShell);
-    return ownedShell;
-  }
-
-  function enforceSingleMount(){
-    const war=document.getElementById('warroom');
-    if(!war) return;
-
-    if(!ownedShell || !ownedShell.isConnected){
-      createOwnedMount();
-      window.WarRoomV12?.render?.();
-      return;
+    if(!war)return null;
+    let root=document.getElementById('phaseOneMount');
+    if(!root){
+      war.replaceChildren();
+      war.className='view active';
+      root=document.createElement('div');
+      root.id='phaseOneMount';
+      root.dataset.frontOfficeOwner='phase-one';
+      war.appendChild(root);
     }
-
-    [...war.children].forEach(node=>{
-      if(node!==ownedShell) node.remove();
-    });
-
-    [...ownedShell.children].forEach(node=>{
-      if(node.id!=='warRoomV12') node.remove();
-    });
-
-    document.querySelectorAll(
-      '#warRoomV11,#warRoomV10,#warRoomV9,#warRoomV8,#decisionArenaV7,'+
-      '#warRoomLive,#cockpitV5,.draft-track,.draft-heartbeat-summary,'+
-      '.front-office-topline,.front-office-layout,.projection-panel'
-    ).forEach(node=>node.remove());
+    [...war.children].forEach(node=>{if(node!==root)node.remove()});
+    return root;
   }
 
-  function ownedRender(){
-    enforceSingleMount();
-    window.WarRoomV12?.render?.();
-    enforceSingleMount();
+  function render(){
+    mount();
+    const ok=window.PhaseOneWarRoom?.render?.();
+    if(!ok){
+      clearTimeout(renderTimer);
+      renderTimer=setTimeout(render,120);
+    }
   }
 
   async function boot(){
-    if(window.__THE_BOARD_FRONT_OFFICE_BOOT__===BOOT_VERSION) return;
+    if(window.__THE_BOARD_FRONT_OFFICE_BOOT__===BOOT_VERSION)return;
     window.__THE_BOARD_FRONT_OFFICE_BOOT__=BOOT_VERSION;
 
     document.querySelectorAll(
       'script[src*="front-office-v8"],script[src*="front-office-v9"],'+
       'script[src*="front-office-v10"],script[src*="front-office-v11"],'+
-      'script[src*="war-room-phase1-lock"]'
+      'script[src*="front-office-v12"],script[src*="war-room-phase1-lock"]'
     ).forEach(script=>script.remove());
 
-    createOwnedMount();
-    await loadScript('front-office-v12.js?v=13.0.0','front-office-v13');
+    mount();
+    await loadScript('front-office-phase1.js?v=14.0.0','front-office-phase1');
 
-    // Replace the legacy global render entry point instead of racing it.
-    window.renderWarroom=ownedRender;
-    ownedRender();
+    window.renderWarroom=render;
+    render();
 
     const war=document.getElementById('warroom');
     observer?.disconnect();
-    observer=new MutationObserver(()=>queueMicrotask(enforceSingleMount));
-    if(war) observer.observe(war,{childList:true,subtree:true});
-
-    // Cover delayed legacy timers during the first load without maintaining a
-    // permanent polling loop.
-    [250,750,1500,3000,5000,7500,10000,15000].forEach(delay=>{
-      setTimeout(()=>{
-        enforceSingleMount();
-        if(!document.getElementById('warRoomV12')) ownedRender();
-      },delay);
+    observer=new MutationObserver(()=>{
+      const root=document.getElementById('phaseOneMount');
+      if(!root||war.children.length!==1||war.firstElementChild!==root){
+        mount();
+        render();
+      }
     });
+    if(war)observer.observe(war,{childList:true});
+
+    [250,750,1500,3000,5000,7500,10000,15000].forEach(delay=>setTimeout(render,delay));
   }
 
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
   else boot();
 })();
