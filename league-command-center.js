@@ -1,6 +1,6 @@
 'use strict';
 (function(){
-  const BOOT_VERSION='phase1-single-app-14.1';
+  const BOOT_VERSION='phase1-single-app-14.2';
   let observer=null;
   let renderTimer=null;
 
@@ -57,8 +57,9 @@
     ).forEach(script=>script.remove());
 
     mount();
-    await loadScript('front-office-phase1.js?v=14.1.0','front-office-phase1');
-    await loadScript('front-office-depth-charts.js?v=14.1.0','front-office-depth-charts');
+    await loadScript('front-office-phase1.js?v=14.2.0','front-office-phase1');
+    await loadScript('front-office-depth-charts.js?v=14.2.0','front-office-depth-charts');
+    await loadScript('front-office-visual-stabilizer.js?v=14.2.0','front-office-visual-stabilizer');
 
     window.renderWarroom=render;
     render();
