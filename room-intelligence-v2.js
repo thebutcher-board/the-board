@@ -2,203 +2,183 @@
 
 (function(){
   const STARTERS={QB:2,RB:2,WR:2,TE:1,K:1,DEF:1};
+  let selectedPlayerName='';
 
-  function clamp(value,min=0,max=100){return Math.max(min,Math.min(max,value));}
-  function esc(value){return typeof escapeHtml==='function'?escapeHtml(value):String(value||'');}
+  const esc=value=>typeof escapeHtml==='function'?escapeHtml(value):String(value||'');
+  const clamp=(value,min=0,max=100)=>Math.max(min,Math.min(max,value));
 
+  function results(){return window.BoardDecisionEngine?.results?.()||[];}
+  function selectedItem(all=results()){
+    return all.find(item=>item.player.name===selectedPlayerName)||all[0]||null;
+  }
   function nextPickContext(){
-    const current=state.drafted.length;
-    const mine=state.profile.teamName;
-    const limit=(state.teams.length||10)*2+2;
+    const current=state.drafted.length,mine=state.profile.teamName,limit=(state.teams.length||10)*2+2;
     let next=current;
-    for(let i=current+1;i<=current+limit;i++){
-      if(draftOrderAt(i)===mine){next=i;break;}
-    }
-    const teams=[];
-    for(let i=current+1;i<next;i++)teams.push(draftOrderAt(i));
+    for(let i=current+1;i<=current+limit;i++){if(draftOrderAt(i)===mine){next=i;break;}}
+    const teams=[];for(let i=current+1;i<next;i++)teams.push(draftOrderAt(i));
     return{current,next,picksAway:Math.max(0,next-current),teams};
   }
-
-  function teamNeeds(team,pos){
-    try{return Number(positionCounts(team)?.[pos]||0)<Number(STARTERS[pos]||1);}catch{return false;}
+  function teamNeeds(team,pos,extraPlayer){
+    try{
+      const counts={...positionCounts(team)};
+      if(team===state.profile.teamName&&extraPlayer)counts[extraPlayer.pos]=Number(counts[extraPlayer.pos]||0)+1;
+      return Number(counts[pos]||0)<Number(STARTERS[pos]||1);
+    }catch{return false;}
   }
-
   function uniqueThreats(player,context){
     const seen=new Set();
     return context.teams.filter(team=>{
       if(!team||team===state.profile.teamName||seen.has(team))return false;
-      seen.add(team);
-      return teamNeeds(team,player.pos);
+      seen.add(team);return teamNeeds(team,player.pos);
     });
   }
-
   function survival(player,context){
-    const threats=uniqueThreats(player,context);
-    const rank=Number(player.posRank||99);
-    const picks=context.picksAway;
-
-    if(player.pos==='QB'&&rank<=8&&picks>=5)return{available:picks<=7?8:2,threats,label:'Almost certainly gone'};
-    if(player.pos==='QB'&&rank<=12&&picks>=7)return{available:12,threats,label:'Very unlikely'};
-
+    const threats=uniqueThreats(player,context),rank=Number(player.posRank||99),picks=context.picksAway;
+    if(player.pos==='QB'&&rank<=8&&picks>=5)return{available:picks<=7?8:2,label:'Almost certainly gone',threats};
+    if(player.pos==='QB'&&rank<=12&&picks>=7)return{available:12,label:'Very unlikely',threats};
     let pressure=.03;
     if(player.pos==='QB')pressure=rank<=12?.13:rank<=20?.085:rank<=28?.05:.025;
     else if(player.pos==='RB')pressure=rank<=12?.075:rank<=26?.05:.028;
     else if(player.pos==='WR')pressure=rank<=15?.065:rank<=32?.045:.025;
     else if(player.pos==='TE')pressure=rank<=8?.055:.025;
-
-    const base=1-Math.pow(1-pressure,Math.max(1,picks));
-    const threatBoost=Math.min(.55,threats.length*(player.pos==='QB'?.12:.07));
-    const gone=clamp(Math.round((base+threatBoost)*100),5,96);
+    const gone=clamp(Math.round(((1-Math.pow(1-pressure,Math.max(1,picks)))+Math.min(.55,threats.length*(player.pos==='QB'?.12:.07)))*100),5,96);
     const available=100-gone;
-    return{available,threats,label:available>=70?'Likely available':available>=40?'Toss-up':available>=15?'Unlikely':'Almost certainly gone'};
+    return{available,label:available>=70?'Likely available':available>=40?'Toss-up':available>=15?'Unlikely':'Almost certainly gone',threats};
   }
-
-  function roomPulse(context){
-    const positions=['QB','RB','WR','TE'];
-    return positions.map(pos=>{
-      const unique=[...new Set(context.teams.filter(Boolean))];
-      const needing=unique.filter(team=>teamNeeds(team,pos)).length;
-      const base=pos==='QB'?28:pos==='RB'?18:pos==='WR'?16:10;
-      return{pos,score:clamp(base+needing*(pos==='QB'?14:10)+Math.min(context.picksAway,10)*2,5,96),needing,total:unique.length};
-    }).sort((a,b)=>b.score-a.score);
-  }
-
-  function ownerThreats(player,context){
-    return uniqueThreats(player,context).slice(0,4).map((team,index)=>({
-      team,
-      level:index===0?'High':index===1?'Medium':'Watch',
-      reason:`Needs ${player.pos} before your next selection`
-    }));
-  }
-
-  function currentAlternatives(results,top){
-    const samePosition=results.filter(item=>item.player.name!==top.player.name&&item.player.pos===top.player.pos).slice(0,2);
-    const overall=results.filter(item=>item.player.name!==top.player.name&&!samePosition.some(x=>x.player.name===item.player.name)).slice(0,2);
-    return [...samePosition,...overall].slice(0,4);
-  }
-
-  function realisticNextPickFallbacks(results,top,context){
-    const samePosition=results
-      .filter(item=>item.player.name!==top.player.name&&item.player.pos===top.player.pos)
-      .map(item=>({item,forecast:survival(item.player,context)}))
-      .filter(entry=>entry.forecast.available>=40)
-      .sort((a,b)=>b.item.score-a.item.score||b.forecast.available-a.forecast.available)
-      .slice(0,4);
-    return samePosition;
-  }
-
   function rosterFit(item){
     const value=Number(item?.factors?.need||0);
-    return value>=85?'Immediate need':value>=55?'Useful fit':'Best-value option';
+    return value>=85?'Immediate need':value>=55?'Useful fit':'Best value';
+  }
+  function urgency(item){
+    const value=Number(item?.factors?.scarcity||0);
+    return value>=70?'Act now':value>=45?'Monitor':'Can wait';
+  }
+  function alternatives(all,focus){
+    const same=all.filter(x=>x.player.name!==focus.player.name&&x.player.pos===focus.player.pos).slice(0,2);
+    const overall=all.filter(x=>x.player.name!==focus.player.name&&!same.some(y=>y.player.name===x.player.name)).slice(0,2);
+    return [...same,...overall].slice(0,4);
+  }
+  function nextPickPlayers(all,focus,context){
+    return all.filter(x=>x.player.name!==focus.player.name)
+      .map(item=>({item,forecast:survival(item.player,context)}))
+      .filter(x=>x.forecast.available>=40)
+      .sort((a,b)=>b.item.score-a.item.score||b.forecast.available-a.forecast.available)
+      .slice(0,5);
+  }
+  function nextPriority(focus){
+    const counts={...positionCounts(state.profile.teamName)};
+    counts[focus.player.pos]=Number(counts[focus.player.pos]||0)+1;
+    return ['QB','RB','WR','TE','K','DEF'].find(pos=>Number(counts[pos]||0)<Number(STARTERS[pos]||1))||'Best value';
+  }
+  function recommendationCopy(item){
+    const reasons=item.reasons?.length?item.reasons.join(', '):'creates the strongest overall roster outcome';
+    return `${item.player.name} ${reasons}.`;
   }
 
-  function decisionReason(item,top){
-    if(item.player.pos===top.player.pos){
-      if(Number(item.player.proj||0)>=Number(top.player.proj||0))return'Higher projection at the same position';
-      if(String(item.player.risk||'Medium')==='Low')return'Safer profile at the same position';
-      return'Preserves the same roster construction';
+  function renderHero(focus,all,context){
+    const thinking=document.getElementById('gooseThinking');if(!thinking)return;
+    const forecast=survival(focus.player,context);
+    const isEngineChoice=focus===all[0];
+    thinking.innerHTML=`
+      <p class="gm-kicker">${isEngineChoice?'GOOSE RECOMMENDATION':'EXPLORING ANOTHER PATH'} · ${rosterFit(focus)}</p>
+      <h2>${typeof currentTeam==='function'&&currentTeam()===state.profile.teamName?'Draft':'Track'} ${esc(focus.player.name)}.</h2>
+      <p>${esc(recommendationCopy(focus))}</p>
+      <div class="engine-factor-line">
+        <span><b>Roster Fit</b> ${rosterFit(focus)}</span>
+        <span><b>Timing</b> ${urgency(focus)}</span>
+        <span><b>Projected</b> ${Math.round(focus.player.proj||0)} pts</span>
+        <span><b>Risk</b> ${esc(focus.player.risk||'Medium')}</span>
+      </div>
+      <div class="cockpit-pass-line"><b>If you pass:</b> ${forecast.label} to reach your next pick after ${context.picksAway} selections.</div>`;
+    const actions=document.getElementById('recommend');
+    if(actions){
+      actions.innerHTML=`<button class="btn primary" data-player="${encodeURIComponent(focus.player.name)}">Open Player</button><button class="btn secondary" data-jump="board">Open Board</button>${!isEngineChoice?'<button class="btn ghost" data-cockpit-reset="true">Reset to Goose</button>':''}`;
     }
-    return item.reasons?.[0]||`Best available ${item.player.pos} alternative`;
   }
 
-  function draftConsequence(top,results){
-    const roster=positionCounts(state.profile.teamName);
-    const nextPriority=['QB','RB','WR','TE'].map(pos=>({pos,open:Math.max(0,Number(STARTERS[pos]||1)-Number(roster[pos]||0))}))
-      .filter(x=>x.pos!==top.player.pos&&x.open>0)[0]?.pos||'Best value';
-    const pool=results.filter(item=>item.player.pos===nextPriority).slice(0,3);
-    return{nextPriority,pool};
+  function renderDecisionCockpit(focus,all,context){
+    const root=document.getElementById('decisionPaths');if(!root)return;
+    const alts=alternatives(all,focus),next=nextPickPlayers(all,focus,context),priority=nextPriority(focus);
+    root.innerHTML=`
+      <section class="cockpit-alternatives">
+        <div class="cockpit-section-head"><div><span class="eyebrow">ALTERNATIVE STRATEGIES</span><h4>Other choices right now</h4></div><small>Click a player to recalculate the entire Front Office.</small></div>
+        <div class="alternative-grid">${alts.map(item=>`<button data-cockpit-player="${encodeURIComponent(item.player.name)}"><span><b>${esc(item.player.name)}</b><small>${item.player.pos} · ${Math.round(item.player.proj||0)} pts · ${esc(item.player.risk||'Medium')} risk</small></span><em>${rosterFit(item)}</em></button>`).join('')}</div>
+      </section>
+      <section class="cockpit-next-pick">
+        <div class="cockpit-section-head"><div><span class="eyebrow">PROJECTED AVAILABLE NEXT PICK</span><h4>Best realistic survivors</h4></div><small>Assumes you draft ${esc(focus.player.name)} now.</small></div>
+        <div class="next-pick-list">${next.length?next.map(({item,forecast})=>`<button data-cockpit-player="${encodeURIComponent(item.player.name)}"><span><b>${esc(item.player.name)}</b><small>${item.player.pos} · ${Math.round(item.player.proj||0)} pts</small></span><em>${forecast.label}</em></button>`).join(''):'<p>No preferred-tier player is currently projected to survive.</p>'}</div>
+        <div class="next-priority"><b>Next roster priority after this pick</b><span>${esc(priority)}</span></div>
+      </section>`;
   }
 
-  function renderDecisionCenter(){
-    if(!window.BoardDecisionEngine)return;
-    const results=window.BoardDecisionEngine.results();
-    const top=results[0];
-    const paths=document.getElementById('decisionPaths');
-    if(!top||!paths)return;
+  function perfectDraft(focus,all){
+    const counts={...positionCounts(state.profile.teamName)};
+    const chosen=[focus.player];counts[focus.player.pos]=Number(counts[focus.player.pos]||0)+1;
+    const pool=all.filter(x=>x.player.name!==focus.player.name);
+    const target=state.profile?.targets||{};
+    const desired={QB:Number(target.QB||3),RB:Number(target.RB||4),WR:Number(target.WR||5),TE:Number(target.TE||2),K:Number(target.K||1),DEF:Number(target.DEF||1)};
+    for(const pos of ['QB','RB','WR','TE','K','DEF']){
+      let need=Math.max(0,desired[pos]-Number(counts[pos]||0));
+      for(const item of pool.filter(x=>x.player.pos===pos)){
+        if(need<=0||chosen.length>=10)break;
+        if(chosen.some(p=>p.name===item.player.name))continue;
+        chosen.push(item.player);need--;
+      }
+    }
+    return chosen.slice(0,10);
+  }
+  function renderPerfectDraft(focus,all){
+    const root=document.getElementById('nextFive');if(!root)return;
+    const panel=root.closest('.projection-panel');
+    const title=panel?.querySelector('h3');if(title)title.textContent='Perfect Draft';
+    const eyebrow=panel?.querySelector('.eyebrow');if(eyebrow)eyebrow.textContent='LIVE ROSTER PLAN';
+    const button=panel?.querySelector('#simulateDraftBtn');if(button)button.textContent='Recalculate';
+    const plan=perfectDraft(focus,all);
+    root.innerHTML=plan.map((player,index)=>`<button data-cockpit-player="${encodeURIComponent(player.name)}"><span>${index+1}</span><b>${esc(player.name)}</b><small>${player.pos} · ${Math.round(player.proj||0)} pts${index===0?' · Current path':''}</small></button>`).join('');
+  }
+  function renderLeagueIntel(focus,context){
+    const root=document.getElementById('draftPressure');if(!root)return;
+    const threats=uniqueThreats(focus.player,context).slice(0,4);
+    const positions=['QB','RB','WR','TE'].map(pos=>{
+      const teams=[...new Set(context.teams.filter(Boolean))],needing=teams.filter(team=>teamNeeds(team,pos)).length;
+      return{pos,needing,total:teams.length,score:clamp((pos==='QB'?30:15)+needing*(pos==='QB'?15:10),5,95)};
+    }).sort((a,b)=>b.score-a.score);
+    root.innerHTML=`<div class="league-intel-stack"><section><span class="eyebrow">OWNER THREATS</span><h4>Who can beat us to ${esc(focus.player.name)}</h4>${threats.length?threats.map((team,index)=>`<div class="intel-row"><span><b>${esc(team)}</b><small>Needs ${focus.player.pos} before your next pick</small></span><strong>${index===0?'High':index===1?'Medium':'Watch'}</strong></div>`).join(''):'<p>No clear same-position threat before your next pick.</p>'}</section><section><span class="eyebrow">ROOM PULSE</span><h4>${positions[0]?.pos||'Draft'} market is hottest</h4>${positions.map(item=>`<div class="pulse-row"><div><b>${item.pos}</b><small>${item.needing} of ${item.total} upcoming owners need help</small></div><div class="pulse-track"><i style="width:${item.score}%"></i></div><strong>${item.score>=70?'Hot':item.score>=45?'Heating':'Calm'}</strong></div>`).join('')}</section></div>`;
+  }
 
+  function renderCockpit(){
+    const all=results(),focus=selectedItem(all);if(!focus)return;
     const context=nextPickContext();
-    const topForecast=survival(top.player,context);
-    const alternatives=currentAlternatives(results,top);
-    const fallbacks=realisticNextPickFallbacks(results,top,context);
-    const threats=ownerThreats(top.player,context);
-    const consequence=draftConsequence(top,results);
-
-    paths.innerHTML=`
-      <article class="decision-scenario take-now">
-        <span class="eyebrow">IF YOU TAKE HIM</span>
-        <h4>${esc(top.player.name)}</h4>
-        <p>Locks in ${top.player.pos} with ${Math.round(top.player.proj||0)} projected points and closes the immediate roster need.</p>
-        <div class="scenario-consequence"><b>Next priority</b><span>${esc(consequence.nextPriority)}</span></div>
-        ${consequence.pool.length?`<div class="scenario-list"><small>Likely targets after this pick</small>${consequence.pool.map(x=>`<button data-player="${encodeURIComponent(x.player.name)}">${esc(x.player.name)} <span>${x.player.pos} · ${Math.round(x.player.proj||0)} pts</span></button>`).join('')}</div>`:''}
-      </article>
-
-      <article class="decision-scenario pass-now">
-        <span class="eyebrow">IF YOU PASS</span>
-        <h4>${topForecast.label}</h4>
-        <p>${topForecast.available}% model estimate that ${esc(top.player.name)} reaches your next pick after ${context.picksAway} selections.</p>
-        <div class="scenario-consequence"><b>Room effect</b><span>${top.player.pos==='QB'&&Number(top.player.posRank||99)<=8?'Top-eight QB tier likely closes':'Tier pressure increases'}</span></div>
-      </article>
-
-      <article class="decision-scenario owner-threats">
-        <span class="eyebrow">WHO CAN BEAT US TO HIM</span>
-        <h4>Owner threats</h4>
-        ${threats.length?threats.map(t=>`<div class="threat-row"><span><b>${esc(t.team)}</b><small>${esc(t.reason)}</small></span><strong>${t.level}</strong></div>`).join(''):'<p>No clear same-position threat before your next pick.</p>'}
-      </article>
-
-      <article class="decision-scenario other-options">
-        <span class="eyebrow">OTHER CHOICES RIGHT NOW</span>
-        <h4>If you do not want ${esc(top.player.name)}</h4>
-        ${alternatives.length?alternatives.map((item,index)=>`<button data-player="${encodeURIComponent(item.player.name)}"><span><b>${index+1}. ${esc(item.player.name)}</b><small>${item.player.pos} · ${Math.round(item.player.proj||0)} pts · ${esc(item.player.risk||'Medium')} risk</small><em>${esc(decisionReason(item,top))}</em></span><strong>${esc(rosterFit(item))}</strong></button>`).join(''):'<p>No close alternatives are currently graded.</p>'}
-      </article>
-
-      <article class="decision-scenario next-pick-plan">
-        <span class="eyebrow">NEXT-PICK FALLBACK PLAN</span>
-        <h4>${top.player.pos}s realistically projected to survive</h4>
-        ${fallbacks.length?fallbacks.map((f,index)=>`<button data-player="${encodeURIComponent(f.item.player.name)}"><span><b>${index+1}. ${esc(f.item.player.name)}</b><small>${f.item.player.pos} · ${Math.round(f.item.player.proj||0)} pts · ${esc(f.item.player.risk||'Medium')} risk</small></span><strong>${f.forecast.label}</strong></button>`).join(''):`<p>No ${top.player.pos} in the current preferred tier is projected to survive. Goose should treat the position as a take-now decision or plan for a lower tier.</p>`}
-      </article>`;
-  }
-
-  function renderRoomPulse(){
-    const root=document.getElementById('draftPressure');
-    if(!root)return;
-    const context=nextPickContext();
-    const pulse=roomPulse(context);
-    root.innerHTML=`<div class="room-pulse-card"><span class="eyebrow">ROOM PULSE</span><h4>${pulse[0]?.pos||'Draft'} market is hottest</h4>${pulse.map(item=>`<div class="pulse-row"><div><b>${item.pos}</b><small>${item.needing} of ${item.total} upcoming owners need help</small></div><div class="pulse-track"><i style="width:${item.score}%"></i></div><strong>${item.score>=70?'Hot':item.score>=45?'Heating':'Calm'}</strong></div>`).join('')}<small class="model-note">Live model estimate from draft order and current roster needs. Owner-history tendencies come next.</small></div>`;
+    renderHero(focus,all,context);renderDecisionCockpit(focus,all,context);renderPerfectDraft(focus,all);renderLeagueIntel(focus,context);
   }
 
   function injectStyles(){
-    if(document.getElementById('room-intelligence-v2-style'))return;
-    const style=document.createElement('style');
-    style.id='room-intelligence-v2-style';
-    style.textContent=`
-      .decision-futures{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
-      .decision-scenario{padding:19px;border:1px solid #d5d9de;border-radius:15px;background:#fff;min-width:0}
-      .decision-scenario.take-now{border-top:5px solid #f47a00}.decision-scenario.pass-now{border-top:5px solid #3f444b}
-      .decision-scenario h4{font-size:21px;margin:8px 0}.decision-scenario p{font-size:13px;line-height:1.5;color:#60666f}
-      .scenario-consequence{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;margin-top:13px;border-radius:11px;background:#f3f4f6}.scenario-consequence b,.scenario-consequence span{font-size:12px}
-      .scenario-list{margin-top:13px}.scenario-list>small{display:block;margin-bottom:6px;color:#767b83}.scenario-list button,.other-options button,.next-pick-plan button{display:flex;justify-content:space-between;gap:12px;width:100%;padding:11px 0;border:0;border-bottom:1px solid #e1e4e7;background:transparent;text-align:left}.scenario-list button:last-child,.other-options button:last-child,.next-pick-plan button:last-child{border-bottom:0}.scenario-list button span,.other-options small,.next-pick-plan small{color:#777c84;font-size:10px}
-      .threat-row{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid #e1e4e7}.threat-row:last-child{border-bottom:0}.threat-row span,.threat-row b,.threat-row small{display:block}.threat-row small{margin-top:3px;color:#737880}.threat-row strong{align-self:center;font-size:11px;color:#9f4b00}
-      .other-options,.next-pick-plan{grid-column:1/-1}.other-options button,.next-pick-plan button{align-items:center}.other-options button span,.other-options button b,.other-options button small,.other-options button em,.next-pick-plan button span,.next-pick-plan button b,.next-pick-plan button small{display:block}.other-options button em{margin-top:4px;font-size:11px;line-height:1.35;color:#4f555d;font-style:normal}.other-options button strong,.next-pick-plan button strong{font-size:11px;color:#9f4b00;text-align:right;max-width:140px}
-      .room-pulse-card{padding:17px;background:#fff;border:1px solid #d5d9de;border-radius:14px}.room-pulse-card h4{font-size:19px;margin:7px 0 14px}.pulse-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(80px,120px) auto;gap:10px;align-items:center;padding:9px 0}.pulse-row div:first-child b,.pulse-row div:first-child small{display:block}.pulse-row small{color:#777c84;font-size:10px}.pulse-track{height:10px;border-radius:999px;background:#e7e9ec;overflow:hidden}.pulse-track i{display:block;height:100%;border-radius:999px;background:#f47a00}.pulse-row strong{font-size:10px;min-width:42px;text-align:right}.model-note{display:block;margin-top:10px;line-height:1.4;color:#777c84}
-      @media(max-width:800px){.decision-futures{grid-template-columns:1fr!important}.other-options,.next-pick-plan{grid-column:auto}.pulse-row{grid-template-columns:1fr auto}.pulse-track{grid-column:1/-1}}
-    `;
-    document.head.appendChild(style);
+    if(document.getElementById('front-office-v4-style'))return;
+    const style=document.createElement('style');style.id='front-office-v4-style';style.textContent=`
+      .cockpit-pass-line{margin-top:15px;padding:11px 13px;border-radius:12px;background:#f2f3f5;border:1px solid #dde0e4;color:#555b63;font-size:12px}
+      .decision-futures{display:grid!important;grid-template-columns:1fr!important;gap:14px!important}
+      .cockpit-alternatives,.cockpit-next-pick{padding:20px;border:1px solid #d5d9de;border-radius:16px;background:#fff}
+      .cockpit-alternatives{border-top:5px solid #f47a00}.cockpit-section-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:13px}.cockpit-section-head h4{font-size:21px;margin:6px 0 0}.cockpit-section-head>small{max-width:250px;text-align:right;color:#757a82;line-height:1.35}
+      .alternative-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.alternative-grid button,.next-pick-list button{display:flex;justify-content:space-between;gap:12px;width:100%;padding:13px;border:1px solid #d9dde1;border-radius:12px;background:#f8f9fa;text-align:left;transition:.15s ease}.alternative-grid button:hover,.next-pick-list button:hover{border-color:#f0a15d;background:#fff7ef;transform:translateY(-1px)}
+      .alternative-grid span,.alternative-grid b,.alternative-grid small,.next-pick-list span,.next-pick-list b,.next-pick-list small{display:block}.alternative-grid small,.next-pick-list small{margin-top:4px;color:#737880;font-size:10px}.alternative-grid em,.next-pick-list em{align-self:center;font-size:10px;font-style:normal;color:#9f4b00;text-align:right}
+      .next-pick-list{display:grid;gap:8px}.next-pick-list button{background:#fff}.next-priority{display:flex;justify-content:space-between;gap:14px;margin-top:13px;padding:12px 13px;border-radius:12px;background:#30343a;color:#fff}.next-priority b,.next-priority span{font-size:12px;color:#fff}
+      .league-intel-stack{display:grid;gap:14px}.league-intel-stack>section{padding:16px;border:1px solid #d5d9de;border-radius:14px;background:#fff}.league-intel-stack h4{font-size:18px;margin:7px 0 12px}.intel-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #e1e4e7}.intel-row:last-child{border-bottom:0}.intel-row span,.intel-row b,.intel-row small{display:block}.intel-row small{margin-top:3px;color:#737880;font-size:10px}.intel-row strong{align-self:center;font-size:10px;color:#9f4b00}
+      .pulse-row{display:grid;grid-template-columns:minmax(0,1fr) 90px auto;gap:9px;align-items:center;padding:8px 0}.pulse-row div:first-child b,.pulse-row div:first-child small{display:block}.pulse-row small{color:#777c84;font-size:9px}.pulse-track{height:9px;border-radius:999px;background:#e7e9ec;overflow:hidden}.pulse-track i{display:block;height:100%;background:#f47a00;border-radius:999px}.pulse-row strong{font-size:9px;min-width:38px;text-align:right}
+      @media(max-width:800px){.alternative-grid{grid-template-columns:1fr}.cockpit-section-head{display:block}.cockpit-section-head>small{display:block;text-align:left;margin-top:6px}.pulse-row{grid-template-columns:1fr auto}.pulse-track{grid-column:1/-1}}
+    `;document.head.appendChild(style);
   }
 
   function wrapRender(){
-    if(typeof renderWarroom!=='function'||renderWarroom.__roomV2)return false;
+    if(typeof renderWarroom!=='function'||renderWarroom.__cockpitV4)return false;
     const base=renderWarroom;
-    const wrapped=function(){base();renderDecisionCenter();renderRoomPulse();};
-    wrapped.__roomV2=true;
-    renderWarroom=wrapped;
-    return true;
+    renderWarroom=function(){base();renderCockpit();};renderWarroom.__cockpitV4=true;return true;
   }
+  document.addEventListener('click',event=>{
+    const choice=event.target.closest('[data-cockpit-player]');
+    if(choice){event.preventDefault();event.stopPropagation();selectedPlayerName=decodeURIComponent(choice.dataset.cockpitPlayer||'');renderCockpit();return;}
+    if(event.target.closest('[data-cockpit-reset]')){event.preventDefault();selectedPlayerName='';renderCockpit();}
+  },true);
 
-  function init(){
-    injectStyles();
-    if(wrapRender()&&typeof activeView!=='undefined'&&activeView==='warroom')renderWarroom();
-    else if(!window.BoardDecisionEngine)setTimeout(init,120);
-  }
-
+  function init(){injectStyles();if(wrapRender()&&typeof activeView!=='undefined'&&activeView==='warroom')renderWarroom();else if(!window.BoardDecisionEngine)setTimeout(init,100);}
   init();
 })();
