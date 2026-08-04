@@ -3,7 +3,7 @@
   function loadWarRoomV9(){
     if(document.querySelector('script[data-front-office-v9]'))return;
     const script=document.createElement('script');
-    script.src='front-office-v9.js?v=1';
+    script.src='front-office-v9.js?v=2';
     script.dataset.frontOfficeV9='true';
     script.addEventListener('load',()=>{
       if(typeof activeView!=='undefined'&&activeView==='warroom'&&typeof renderWarroom==='function')renderWarroom();
