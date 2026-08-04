@@ -1,16 +1,15 @@
 'use strict';
 (function(){
-  function loadWarRoomV11(){
-    if(document.querySelector('script[data-front-office-v11]'))return;
+  function loadWarRoomV12(){
+    if(document.querySelector('script[data-front-office-v12]'))return;
     const script=document.createElement('script');
-    script.src='front-office-v11.js?v=1';
-    script.dataset.frontOfficeV11='true';
+    script.src='front-office-v12.js?v=1';
+    script.dataset.frontOfficeV12='true';
     script.addEventListener('load',()=>{
       if(typeof activeView!=='undefined'&&activeView==='warroom'&&typeof renderWarroom==='function')renderWarroom();
-      window.WarRoomV11?.render?.();
     },{once:true});
     document.body.appendChild(script);
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadWarRoomV11,{once:true});
-  else loadWarRoomV11();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadWarRoomV12,{once:true});
+  else loadWarRoomV12();
 })();
