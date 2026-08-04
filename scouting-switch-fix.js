@@ -36,21 +36,7 @@ function applyPlayerPhotos(root=document){root.querySelectorAll('.player-photo')
 async function loadPlayerPhotosLazily(){if(photoLoadStarted)return;photoLoadStarted=true;loadCachedPhotoMap();applyPlayerPhotos();if(playerPhotoMap.size>200)return;try{const response=await fetch('https://api.sleeper.app/v1/players/nfl?active=true');if(!response.ok)return;const payload=await response.json(),compact={};Object.entries(payload).forEach(([id,p])=>{const name=p.full_name||[p.first_name,p.last_name].filter(Boolean).join(' ');if(name)compact[normalizePhotoName(name)]=id;});playerPhotoMap=new Map(Object.entries(compact));try{localStorage.setItem(PHOTO_CACHE_KEY,JSON.stringify(compact));}catch{}applyPlayerPhotos();}catch{}}
 const observer=new MutationObserver(ms=>{for(const m of ms)m.addedNodes.forEach(node=>{if(!(node instanceof Element))return;if(node.matches('.player-photo')||node.querySelector('.player-photo'))applyPlayerPhotos(node.matches('.player-photo')?(node.parentElement||node):node);});});observer.observe(document.body,{childList:true,subtree:true});
 
-function setProjectionSortDefault(){
-  const sort=document.getElementById('databaseSort');
-  if(!sort)return;
-  sort.value='PROJ';
-  if(typeof renderDatabase==='function')renderDatabase();
-}
-
-function loadRoomIntelligence(){
-  if(document.querySelector('script[data-room-intelligence]'))return;
-  const room=document.createElement('script');
-  room.src='room-intelligence-v2.js?v=1';
-  room.dataset.roomIntelligence='true';
-  room.addEventListener('load',()=>{if(typeof activeView!=='undefined'&&activeView==='warroom'&&typeof renderWarroom==='function')renderWarroom();},{once:true});
-  document.body.appendChild(room);
-}
-
+function setProjectionSortDefault(){const sort=document.getElementById('databaseSort');if(!sort)return;sort.value='PROJ';if(typeof renderDatabase==='function')renderDatabase();}
+function loadRoomIntelligence(){if(document.querySelector('script[data-room-intelligence]'))return;const room=document.createElement('script');room.src='room-intelligence-v2.js?v=4';room.dataset.roomIntelligence='true';room.addEventListener('load',()=>{if(typeof activeView!=='undefined'&&activeView==='warroom'&&typeof renderWarroom==='function')renderWarroom();},{once:true});document.body.appendChild(room);}
 function loadDecisionEngine(){if(document.querySelector('script[data-decision-engine]'))return;const script=document.createElement('script');script.src='decision-engine.js?v=3';script.dataset.decisionEngine='true';script.addEventListener('load',()=>{loadRoomIntelligence();if(typeof activeView!=='undefined'&&activeView==='warroom'&&typeof renderWarroom==='function')renderWarroom();},{once:true});document.body.appendChild(script);}
 window.addEventListener('load',()=>{migratePattiMayo();setProjectionSortDefault();loadDecisionEngine();const schedule=window.requestIdleCallback||(cb=>setTimeout(cb,1800));schedule(loadPlayerPhotosLazily,{timeout:4500});},{once:true});
