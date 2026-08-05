@@ -1,1 +1,1 @@
-Draft Cockpit v17.1.0 projected picks, live board, team metrics deployment
+Draft Cockpit v18.0.0 full release: projected rail, clean decision stage, My Team metrics, draft order settings
