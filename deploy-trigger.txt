@@ -1,1 +1,1 @@
-Command Surface v13 final Front Office polish deployment trigger
+Command Surface v14 side-card architecture deployment trigger
