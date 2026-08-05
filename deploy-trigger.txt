@@ -1,1 +1,1 @@
-Draft Cockpit v16.2.0 universal live-pick microcards deployment trigger
+Draft Cockpit v17.0.0 unified cockpit architecture deployment trigger
