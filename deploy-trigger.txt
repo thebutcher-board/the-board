@@ -1,1 +1,1 @@
-Command Surface v14 side-card architecture deployment trigger
+Command Surface portrait resolver deployment trigger
