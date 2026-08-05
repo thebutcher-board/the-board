@@ -132,6 +132,17 @@
   50% { transform: scale(1.12); opacity: 1; }
 }
 
+/* Desktop optical alignment: reclaim the unused left gutter and give the
+   right rail the same amount of breathing room without changing card geometry. */
+@media (min-width: 981px) {
+  #frontOfficeRoot > .tb-war-room {
+    width: calc(100% + 12px) !important;
+    max-width: 1500px !important;
+    margin-left: -12px !important;
+    margin-right: 0 !important;
+  }
+}
+
 /* Respect accessibility and battery-saving preferences */
 @media (prefers-reduced-motion: reduce) {
   .tb-hero-photo,
