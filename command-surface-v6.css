@@ -1,0 +1,143 @@
+/* THE BOARD — Command Surface v6
+   Final visual layer for the connected Press Your Luck-style war room. */
+#frontOfficeRoot .tb-command-surface{
+  padding:0!important;
+  border-radius:28px!important;
+  background:
+    radial-gradient(ellipse at 50% 45%,rgba(255,133,0,.105),transparent 33%),
+    radial-gradient(ellipse at 6% 9%,rgba(38,191,111,.15),transparent 31%),
+    radial-gradient(ellipse at 95% 48%,rgba(86,71,148,.07),transparent 27%),
+    linear-gradient(155deg,#172028 0%,#0f151c 49%,#0a0e14 100%)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.045),0 24px 70px rgba(0,0,0,.28)!important;
+}
+#frontOfficeRoot .tb-command-surface:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius:inherit;
+  background:
+    linear-gradient(180deg,rgba(47,184,106,.055),transparent 23%),
+    linear-gradient(90deg,rgba(47,184,106,.045),transparent 18%,transparent 82%,rgba(255,133,0,.035));
+  mix-blend-mode:screen;
+}
+
+/* One connected perimeter, not stacked widgets. */
+#frontOfficeRoot .tb-roster-banner,
+#frontOfficeRoot .tb-perfect-banner,
+#frontOfficeRoot .tb-decision-grid{
+  position:relative;
+  z-index:2;
+  margin:0!important;
+  border:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+#frontOfficeRoot .tb-roster-banner{padding:22px 22px 12px!important}
+#frontOfficeRoot .tb-decision-grid{padding:18px 18px 12px!important}
+#frontOfficeRoot .tb-perfect-banner{padding:16px 22px 22px!important}
+#frontOfficeRoot .tb-roster-banner:after,
+#frontOfficeRoot .tb-perfect-banner:before{display:none!important}
+
+/* Thin live intelligence pulse integrated into the surface. */
+#frontOfficeRoot .tb-live-ribbon{
+  position:relative;
+  z-index:3;
+  min-height:26px;
+  margin:0 18px!important;
+  padding:5px 12px!important;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  overflow:hidden;
+  border:0!important;
+  border-radius:7px!important;
+  background:linear-gradient(90deg,rgba(7,11,16,.84),rgba(14,20,27,.48),rgba(7,11,16,.72))!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.035)!important;
+  font-size:11px;
+  white-space:nowrap;
+}
+#frontOfficeRoot .tb-live-ribbon:before{
+  content:"";
+  width:6px;height:6px;flex:0 0 6px;border-radius:50%;
+  background:#ff8a00;
+  box-shadow:0 0 11px rgba(255,138,0,.95);
+}
+#frontOfficeRoot .tb-live-ribbon b{
+  color:#f5a154;
+  font-size:9px;
+  letter-spacing:.13em;
+  flex:0 0 auto;
+}
+#frontOfficeRoot .tb-live-ribbon span{
+  color:#c7ced6;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#frontOfficeRoot .tb-live-ribbon span+span:before{
+  content:"•";
+  margin-right:16px;
+  color:rgba(255,255,255,.28);
+}
+
+/* Hero hierarchy: position upper-left, score upper-right. */
+#frontOfficeRoot .tb-hero{border-radius:18px!important;background:linear-gradient(145deg,rgba(55,65,78,.72),rgba(24,30,39,.74))!important}
+#frontOfficeRoot .tb-hero-player{overflow:visible!important;background:linear-gradient(150deg,#414b59,#252c35)!important}
+#frontOfficeRoot .tb-hero-photo{overflow:hidden;border-radius:14px!important}
+#frontOfficeRoot .tb-position{
+  top:-5px!important;
+  left:-5px!important;
+  right:auto!important;
+  z-index:5;
+  box-shadow:0 7px 16px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.22);
+}
+#frontOfficeRoot .tb-hero-identity h2{letter-spacing:-.025em}
+#frontOfficeRoot .tb-goose-call{
+  min-height:0!important;
+  margin:12px 0 10px!important;
+  padding:11px 14px!important;
+  background:linear-gradient(90deg,rgba(5,9,14,.66),rgba(8,12,18,.48))!important;
+}
+#frontOfficeRoot .tb-goose-call p{max-width:none!important}
+
+/* Supporting cards: names win, metadata stays secondary. */
+#frontOfficeRoot .tb-support-card{height:94px!important;padding:8px!important;gap:7px!important}
+#frontOfficeRoot .tb-support-copy{min-width:0!important}
+#frontOfficeRoot .tb-support-copy small{font-size:7px!important;line-height:1!important}
+#frontOfficeRoot .tb-support-copy strong{
+  font-size:11px!important;
+  line-height:1.08!important;
+  display:block!important;
+  white-space:normal!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  max-height:24px!important;
+}
+#frontOfficeRoot .tb-support-copy span{font-size:8px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#frontOfficeRoot .tb-support-copy footer{display:flex!important;gap:5px!important;justify-content:space-between!important}
+#frontOfficeRoot .tb-support-copy footer i{font-size:7px!important;white-space:nowrap!important}
+#frontOfficeRoot .tb-support-photo{flex:0 0 52px!important;width:52px!important;height:62px!important;border-radius:10px!important}
+#frontOfficeRoot .tb-grade{align-self:flex-start!important;font-size:19px!important;line-height:1!important}
+
+/* Bottom projection grows from the same surface rather than beginning a new card. */
+#frontOfficeRoot .tb-perfect-banner{
+  background:linear-gradient(180deg,rgba(20,27,36,.05),rgba(25,32,42,.26))!important;
+}
+#frontOfficeRoot .tb-perfect-banner .tb-banner-head{padding-top:6px}
+#frontOfficeRoot .tb-perfect-banner .tb-banner-metrics{background:rgba(7,11,16,.23)!important}
+#frontOfficeRoot .tb-league-row{margin-top:10px!important;background:rgba(9,14,20,.34)!important}
+
+@media (max-width:980px){
+  #frontOfficeRoot .tb-roster-banner{padding:14px 12px 10px!important}
+  #frontOfficeRoot .tb-decision-grid{padding:12px!important}
+  #frontOfficeRoot .tb-perfect-banner{padding:12px!important}
+  #frontOfficeRoot .tb-live-ribbon{margin:0 12px!important;overflow-x:auto;scrollbar-width:none}
+  #frontOfficeRoot .tb-live-ribbon::-webkit-scrollbar{display:none}
+}
+@media (max-width:680px){
+  #frontOfficeRoot .tb-command-surface{border-radius:16px!important}
+  #frontOfficeRoot .tb-live-ribbon{min-height:24px;padding:4px 9px!important;gap:10px;font-size:9px}
+  #frontOfficeRoot .tb-live-ribbon span+span:before{margin-right:10px}
+  #frontOfficeRoot .tb-position{top:-4px!important;left:-4px!important}
+  #frontOfficeRoot .tb-support-card{height:88px!important}
+}
