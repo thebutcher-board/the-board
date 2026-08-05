@@ -1,0 +1,140 @@
+/* THE BOARD — Command Surface v8
+   Shared roster-band component, clean badges, readable names, and compact hero polish. */
+#frontOfficeRoot .tb-roster-banner{padding:18px 20px 8px!important}
+#frontOfficeRoot .tb-perfect-banner{padding:8px 20px 18px!important}
+
+/* Top and bottom banners now use the same full-width roster band. */
+#frontOfficeRoot .tb-depth-line{
+  display:block!important;
+  width:100%!important;
+  margin-top:12px!important;
+}
+#frontOfficeRoot .tb-depth-title{
+  display:flex!important;
+  align-items:baseline!important;
+  gap:10px!important;
+  padding:0 0 6px!important;
+  min-width:0!important;
+}
+#frontOfficeRoot .tb-depth-title small{font-size:8px!important;letter-spacing:.12em!important}
+#frontOfficeRoot .tb-depth-title b{font-size:11px!important;margin:0!important;color:#f5f7f9!important}
+#frontOfficeRoot .tb-depth-chart{
+  display:grid!important;
+  grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  gap:8px!important;
+  width:100%!important;
+  min-width:0!important;
+  align-items:start!important;
+}
+#frontOfficeRoot .tb-depth-group{min-width:0!important}
+#frontOfficeRoot .tb-depth-group>label{margin:0 0 4px!important;font-size:7px!important}
+#frontOfficeRoot .tb-depth-group>div{display:grid!important;grid-template-columns:1fr!important;gap:5px!important}
+#frontOfficeRoot .tb-depth-bench>div{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#frontOfficeRoot .tb-depth-bench{min-width:0!important}
+
+/* Every tiny roster slot follows one card grammar. */
+#frontOfficeRoot .tb-depth-card{
+  min-height:48px!important;
+  height:48px!important;
+  padding:5px 7px 5px 5px!important;
+  gap:7px!important;
+  border-radius:9px!important;
+  overflow:hidden!important;
+}
+#frontOfficeRoot .tb-depth-photo{width:34px!important;height:38px!important;flex:0 0 34px!important;border-radius:7px!important}
+#frontOfficeRoot .tb-depth-card>div{padding-top:2px!important}
+#frontOfficeRoot .tb-depth-card small{font-size:6px!important;line-height:1!important}
+#frontOfficeRoot .tb-depth-card strong{font-size:9px!important;line-height:1.1!important;max-width:100%!important}
+#frontOfficeRoot .tb-depth-card span{font-size:6.5px!important;line-height:1.1!important}
+#frontOfficeRoot .tb-mini-pos{
+  left:4px!important;
+  top:4px!important;
+  min-width:18px!important;
+  height:14px!important;
+  padding:0 4px!important;
+  font-size:6px!important;
+  border-radius:5px!important;
+}
+#frontOfficeRoot .tb-depth-card.is-empty{position:relative!important;padding-top:17px!important}
+#frontOfficeRoot .tb-depth-card.is-empty .tb-mini-pos{display:grid!important}
+
+/* Side cards: top-left position badge, consistent image crop, readable full names. */
+#frontOfficeRoot .tb-support-card{
+  height:88px!important;
+  padding:8px 7px 7px!important;
+  grid-template-columns:44px minmax(0,1fr) 28px!important;
+  gap:7px!important;
+  align-items:start!important;
+}
+#frontOfficeRoot .tb-support-photo{width:44px!important;height:54px!important;flex:0 0 44px!important;margin-top:8px!important;border-radius:8px!important}
+#frontOfficeRoot .tb-support-pos{
+  left:7px!important;
+  top:6px!important;
+  min-width:19px!important;
+  height:14px!important;
+  padding:0 4px!important;
+  font-size:6px!important;
+  border-radius:5px!important;
+  box-shadow:0 3px 8px rgba(0,0,0,.3)!important;
+}
+#frontOfficeRoot .tb-support-copy{padding-top:1px!important}
+#frontOfficeRoot .tb-support-copy small{font-size:6px!important;margin-left:0!important}
+#frontOfficeRoot .tb-support-copy strong{
+  font-size:9.5px!important;
+  line-height:1.08!important;
+  max-height:22px!important;
+  margin:2px 0 1px!important;
+  display:-webkit-box!important;
+  -webkit-line-clamp:2!important;
+  -webkit-box-orient:vertical!important;
+  overflow:hidden!important;
+}
+#frontOfficeRoot .tb-support-copy>span{font-size:6.5px!important;line-height:1.1!important}
+#frontOfficeRoot .tb-support-copy footer{left:7px!important;right:7px!important;bottom:5px!important}
+#frontOfficeRoot .tb-support-copy footer i{font-size:6px!important}
+#frontOfficeRoot .tb-grade{font-size:17px!important;line-height:1!important;text-align:right!important}
+
+/* Hero: a little denser without sacrificing decision clarity. */
+#frontOfficeRoot .tb-hero{padding:14px!important}
+#frontOfficeRoot .tb-hero-head{gap:12px!important}
+#frontOfficeRoot .tb-hero-player{flex-basis:142px!important;height:116px!important}
+#frontOfficeRoot .tb-position{left:5px!important;top:5px!important;padding:7px 9px!important;border-radius:9px!important}
+#frontOfficeRoot .tb-hero-identity h2{font-size:31px!important}
+#frontOfficeRoot .tb-goose-call{margin:8px 0 7px!important;padding:9px 13px!important}
+#frontOfficeRoot .tb-hero-stats{margin-top:6px!important}
+#frontOfficeRoot .tb-hero-stats span{padding:8px!important}
+#frontOfficeRoot .tb-decision-compare{margin-top:8px!important}
+#frontOfficeRoot .tb-decision-compare section{padding:9px 12px!important}
+#frontOfficeRoot .tb-hero-actions{margin-top:8px!important}
+
+/* Remove visual drift between Current Team and Perfect Draft. */
+#frontOfficeRoot .tb-perfect-banner .tb-depth-card,
+#frontOfficeRoot .tb-roster-banner .tb-depth-card{background:rgba(8,13,18,.72)!important}
+#frontOfficeRoot .tb-perfect-banner .tb-depth-line,
+#frontOfficeRoot .tb-roster-banner .tb-depth-line{width:100%!important}
+
+@media (min-width:981px) and (max-width:1320px){
+  #frontOfficeRoot .tb-depth-chart{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:6px!important}
+  #frontOfficeRoot .tb-depth-card{height:45px!important;min-height:45px!important;padding-right:5px!important}
+  #frontOfficeRoot .tb-depth-photo{width:31px!important;height:35px!important;flex-basis:31px!important}
+  #frontOfficeRoot .tb-depth-card strong{font-size:8px!important}
+  #frontOfficeRoot .tb-depth-bench>div{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #frontOfficeRoot .tb-support-card{height:84px!important;grid-template-columns:40px minmax(0,1fr) 25px!important}
+  #frontOfficeRoot .tb-support-photo{width:40px!important;height:50px!important}
+}
+
+@media (max-width:980px){
+  #frontOfficeRoot .tb-depth-title{padding-bottom:8px!important}
+  #frontOfficeRoot .tb-depth-chart{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
+  #frontOfficeRoot .tb-depth-bench{grid-column:1/-1!important}
+  #frontOfficeRoot .tb-depth-bench>div{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+
+@media (max-width:680px){
+  #frontOfficeRoot .tb-depth-chart{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #frontOfficeRoot .tb-depth-bench>div{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #frontOfficeRoot .tb-depth-title{display:block!important}
+  #frontOfficeRoot .tb-depth-title b{display:block!important;margin-top:2px!important}
+  #frontOfficeRoot .tb-hero-player{flex:0 0 100%!important;height:176px!important}
+  #frontOfficeRoot .tb-support-card{flex-basis:170px!important}
+}
