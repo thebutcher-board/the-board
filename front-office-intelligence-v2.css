@@ -1,0 +1,102 @@
+/* THE BOARD — Phase 2 decision intelligence */
+#frontOfficeRoot .tb-support-card.is-selected{
+  border-color:#ff8a00!important;
+  box-shadow:0 0 0 2px rgba(255,138,0,.18),0 12px 30px rgba(0,0,0,.28)!important;
+}
+#frontOfficeRoot .tb-support-card.is-selected::after{
+  content:'IN HERO';
+  position:absolute;
+  top:6px;
+  left:6px;
+  z-index:3;
+  padding:3px 6px;
+  border-radius:999px;
+  background:#ff8500;
+  color:#fff;
+  font-size:6px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+#frontOfficeRoot .tb-card-signal{
+  position:absolute;
+  right:7px;
+  top:33px;
+  color:#f6b56f;
+  font-size:6px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  opacity:.86;
+}
+#frontOfficeRoot .tb-fallout{
+  display:grid;
+  grid-template-columns:1.05fr repeat(4,minmax(0,1fr));
+  margin-top:12px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:13px;
+  overflow:hidden;
+  background:linear-gradient(90deg,rgba(255,133,0,.08),rgba(9,12,17,.42));
+}
+#frontOfficeRoot .tb-fallout>div{
+  min-width:0;
+  padding:10px 11px;
+  border-right:1px solid rgba(255,255,255,.08);
+}
+#frontOfficeRoot .tb-fallout>div:last-child{border-right:0}
+#frontOfficeRoot .tb-fallout small,
+#frontOfficeRoot .tb-fallout b,
+#frontOfficeRoot .tb-fallout strong{display:block}
+#frontOfficeRoot .tb-fallout small{
+  color:#9ca5af;
+  font-size:6px;
+  line-height:1.2;
+  letter-spacing:.05em;
+}
+#frontOfficeRoot .tb-fallout b,
+#frontOfficeRoot .tb-fallout strong{
+  margin-top:4px;
+  font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#frontOfficeRoot .tb-fallout-title small{color:#f5a154}
+#frontOfficeRoot .tb-fallout-title strong{font-size:13px}
+.tb-run-alert{
+  position:fixed;
+  top:88px;
+  left:50%;
+  z-index:99999;
+  width:min(430px,calc(100vw - 28px));
+  transform:translate(-50%,-24px) scale(.96);
+  opacity:0;
+  padding:14px 18px;
+  border:1px solid rgba(255,138,0,.65);
+  border-radius:14px;
+  background:rgba(12,15,21,.96);
+  box-shadow:0 22px 60px rgba(0,0,0,.5),0 0 32px rgba(255,133,0,.16);
+  color:#fff;
+  pointer-events:none;
+  transition:opacity .24s ease,transform .24s ease;
+}
+.tb-run-alert.is-live{opacity:1;transform:translate(-50%,0) scale(1)}
+.tb-run-alert small{display:block;color:#ff9a31;font-size:9px;letter-spacing:.13em}
+.tb-run-alert strong{display:block;font-size:18px;margin:3px 0}
+.tb-run-alert span{display:block;color:#b9c1cb;font-size:12px;line-height:1.35}
+
+@media (min-width:981px) and (max-width:1320px){
+  #frontOfficeRoot .tb-fallout>div{padding:8px 7px}
+  #frontOfficeRoot .tb-fallout b,#frontOfficeRoot .tb-fallout strong{font-size:11px}
+}
+@media (max-width:680px){
+  #frontOfficeRoot .tb-fallout{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  #frontOfficeRoot .tb-fallout-title{grid-column:1/-1}
+  #frontOfficeRoot .tb-fallout>div{
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  #frontOfficeRoot .tb-fallout>div:nth-child(odd){border-right:0}
+  #frontOfficeRoot .tb-fallout>div:last-child{border-bottom:0}
+  #frontOfficeRoot .tb-card-signal{display:none}
+  .tb-run-alert{top:70px}
+}
