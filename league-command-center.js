@@ -1,36 +1,16 @@
 'use strict';
 (function(){
-  const BOOT_VERSION='draft-cockpit-18.0.0';
-  function addStyle(href,key){
-    document.querySelectorAll(`link[data-front-office-style="${key}"]`).forEach(n=>n.remove());
-    const link=document.createElement('link');link.rel='stylesheet';link.href=href;link.dataset.frontOfficeStyle=key;document.head.appendChild(link);
-  }
-  function addScript(src,key){
-    return new Promise((resolve,reject)=>{document.querySelectorAll(`script[data-front-office-script="${key}"]`).forEach(n=>n.remove());const script=document.createElement('script');script.src=src;script.dataset.frontOfficeScript=key;script.onload=resolve;script.onerror=reject;document.body.appendChild(script);});
-  }
-  function mount(){
-    const war=document.getElementById('warroom');if(!war)return null;war.replaceChildren();war.className='view active';const root=document.createElement('div');root.id='frontOfficeRoot';war.appendChild(root);return root;
-  }
+  const BOOT_VERSION='draft-cockpit-18.1.0';
+  function addStyle(href,key){document.querySelectorAll(`link[data-front-office-style="${key}"]`).forEach(n=>n.remove());const link=document.createElement('link');link.rel='stylesheet';link.href=href;link.dataset.frontOfficeStyle=key;document.head.appendChild(link)}
+  function addScript(src,key){return new Promise((resolve,reject)=>{document.querySelectorAll(`script[data-front-office-script="${key}"]`).forEach(n=>n.remove());const script=document.createElement('script');script.src=src;script.dataset.frontOfficeScript=key;script.onload=resolve;script.onerror=reject;document.body.appendChild(script)})}
+  function mount(){const war=document.getElementById('warroom');if(!war)return null;war.replaceChildren();war.className='view active';const root=document.createElement('div');root.id='frontOfficeRoot';war.appendChild(root);return root}
   async function boot(){
     if(window.__THE_BOARD_FRONT_OFFICE_BOOT__===BOOT_VERSION)return;
     window.__THE_BOARD_FRONT_OFFICE_BOOT__=BOOT_VERSION;
     document.querySelectorAll('script[src*="front-office-phase1"],script[src*="front-office-polish"],script[src*="front-office-photo-fix"],script[src*="front-office-photo-integrity"],script[src*="command-surface"],script[src*="cockpit-v1"],script[src*="cockpit-v2"],script[src*="cockpit-v3"],style#phaseOneStyles,link[data-front-office-clean],link[data-front-office-style],script[data-front-office-clean],script[data-front-office-script]').forEach(n=>n.remove());
-    document.body.className=document.body.className.replace(/\btbv\S+/g,'').trim();
-    mount();
-    addStyle('front-office-clean.css?v=18.0.0','base');
-    addStyle('front-office-layout-v2.css?v=18.0.0','layout');
-    addStyle('front-office-intelligence-v2.css?v=18.0.0','intelligence');
-    addStyle('front-office-liquid.css?v=18.0.0','liquid');
-    addStyle('command-surface-v14.css?v=18.0.0','sidecards');
-    addStyle('command-surface-v15.css?v=18.0.0','hero');
-    addStyle('cockpit-v3.css?v=18.0.0','draft-cockpit-v3');
-    await addScript('front-office-clean.js?v=18.0.0','renderer');
-    window.renderWarroom=()=>window.CleanFrontOffice?.render?.();window.renderWarroom();
-    await addScript('front-office-position-colors.js?v=18.0.0','position-colors');
-    await addScript('front-office-photo-integrity.js?v=18.0.0','photo-integrity');
-    await addScript('front-office-intelligence-v2.js?v=18.0.0','intelligence');
-    await addScript('cockpit-v3.js?v=18.0.0','draft-cockpit-v3');
-    window.BoardCockpitV3?.apply?.();
+    document.body.className=document.body.className.replace(/\btbv\S+/g,'').trim();mount();
+    addStyle('front-office-clean.css?v=18.1.0','base');addStyle('front-office-layout-v2.css?v=18.1.0','layout');addStyle('front-office-intelligence-v2.css?v=18.1.0','intelligence');addStyle('front-office-liquid.css?v=18.1.0','liquid');addStyle('command-surface-v14.css?v=18.1.0','sidecards');addStyle('command-surface-v15.css?v=18.1.0','hero');addStyle('cockpit-v3.css?v=18.1.0','draft-cockpit-v3');addStyle('cockpit-v3-1.css?v=18.1.0','draft-cockpit-v3-1');
+    await addScript('front-office-clean.js?v=18.1.0','renderer');window.renderWarroom=()=>window.CleanFrontOffice?.render?.();window.renderWarroom();await addScript('front-office-position-colors.js?v=18.1.0','position-colors');await addScript('front-office-photo-integrity.js?v=18.1.0','photo-integrity');await addScript('front-office-intelligence-v2.js?v=18.1.0','intelligence');await addScript('cockpit-v3.js?v=18.1.0','draft-cockpit-v3');window.BoardCockpitV3?.apply?.();await addScript('cockpit-v3-1.js?v=18.1.0','draft-cockpit-v3-1');window.BoardCockpitV31?.apply?.();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
