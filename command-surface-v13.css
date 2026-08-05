@@ -1,0 +1,141 @@
+/* THE BOARD — Command Surface v13
+   Final Front Office v1 polish: horizontal side-card identity, resilient portraits,
+   and a restrained interactive position glow. */
+
+#frontOfficeRoot .tb-support-card{
+  position:relative!important;
+  display:block!important;
+  height:94px!important;
+  min-height:94px!important;
+  padding:8px 42px 8px 8px!important;
+  overflow:hidden!important;
+  writing-mode:horizontal-tb!important;
+  text-orientation:mixed!important;
+  transition:border-color .16s ease,box-shadow .16s ease,filter .16s ease!important;
+}
+
+#frontOfficeRoot .tb-support-card:hover,
+#frontOfficeRoot .tb-support-card:focus-visible{
+  outline:none!important;
+  border-color:var(--position-color)!important;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--position-color) 54%,transparent),0 10px 24px rgba(0,0,0,.22)!important;
+  filter:brightness(1.045)!important;
+}
+
+#frontOfficeRoot .tb-support-photo{
+  position:absolute!important;
+  left:8px!important;
+  bottom:7px!important;
+  width:43px!important;
+  height:58px!important;
+  margin:0!important;
+  z-index:1!important;
+}
+
+#frontOfficeRoot .tb-support-pos{
+  left:8px!important;
+  top:7px!important;
+  z-index:3!important;
+}
+
+#frontOfficeRoot .tb-grade{
+  position:absolute!important;
+  right:9px!important;
+  top:8px!important;
+  width:32px!important;
+  text-align:right!important;
+  margin:0!important;
+  z-index:4!important;
+}
+
+#frontOfficeRoot .tb-support-copy{
+  position:absolute!important;
+  inset:8px 43px 7px 58px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-start!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  overflow:hidden!important;
+  writing-mode:horizontal-tb!important;
+  text-orientation:mixed!important;
+}
+
+#frontOfficeRoot .tb-support-copy small{
+  display:block!important;
+  flex:0 0 auto!important;
+  margin:0 0 3px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+#frontOfficeRoot .tb-support-copy strong,
+#frontOfficeRoot .tb-support-copy b{
+  display:block!important;
+  flex:0 0 auto!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  font-size:10px!important;
+  line-height:1.12!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+  writing-mode:horizontal-tb!important;
+  text-orientation:mixed!important;
+}
+
+#frontOfficeRoot .tb-support-copy>span{
+  display:block!important;
+  flex:0 0 auto!important;
+  width:100%!important;
+  margin-top:4px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  writing-mode:horizontal-tb!important;
+}
+
+#frontOfficeRoot .tb-support-copy footer{
+  position:static!important;
+  display:flex!important;
+  align-items:flex-end!important;
+  justify-content:space-between!important;
+  gap:5px!important;
+  width:100%!important;
+  margin-top:auto!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
+
+#frontOfficeRoot .tb-support-copy footer i{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+/* Portraits always occupy the same stable visual area. */
+#frontOfficeRoot .tb-support-photo.is-fallback b{
+  font-size:17px!important;
+  line-height:1!important;
+}
+
+@media (min-width:981px) and (max-width:1320px){
+  #frontOfficeRoot .tb-support-card{height:90px!important;min-height:90px!important;padding-right:38px!important}
+  #frontOfficeRoot .tb-support-photo{width:39px!important;height:52px!important}
+  #frontOfficeRoot .tb-support-copy{inset:7px 39px 6px 53px!important}
+  #frontOfficeRoot .tb-support-copy strong,#frontOfficeRoot .tb-support-copy b{font-size:9px!important}
+  #frontOfficeRoot .tb-grade{right:7px!important;font-size:17px!important}
+}
+
+@media (max-width:980px){
+  #frontOfficeRoot .tb-support-card{flex:0 0 184px!important;height:102px!important;min-height:102px!important}
+  #frontOfficeRoot .tb-support-copy strong,#frontOfficeRoot .tb-support-copy b{font-size:10px!important}
+}
