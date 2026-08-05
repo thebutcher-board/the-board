@@ -1,1 +1,1 @@
-Command Surface v7 deployment trigger
+Command Surface v8 deployment trigger
