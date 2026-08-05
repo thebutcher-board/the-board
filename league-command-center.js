@@ -1,6 +1,6 @@
 'use strict';
 (function(){
-  const BOOT_VERSION='liquid-front-office-15.0.6';
+  const BOOT_VERSION='draft-cockpit-16.0.0';
   function addStyle(href,key){
     document.querySelectorAll(`link[data-front-office-style="${key}"]`).forEach(n=>n.remove());
     const link=document.createElement('link');link.rel='stylesheet';link.href=href;link.dataset.frontOfficeStyle=key;document.head.appendChild(link);
@@ -14,26 +14,29 @@
   async function boot(){
     if(window.__THE_BOARD_FRONT_OFFICE_BOOT__===BOOT_VERSION)return;
     window.__THE_BOARD_FRONT_OFFICE_BOOT__=BOOT_VERSION;
-    document.querySelectorAll('script[src*="front-office-phase1"],script[src*="front-office-polish"],script[src*="front-office-photo-fix"],script[src*="front-office-photo-integrity"],script[src*="command-surface"],style#phaseOneStyles,link[data-front-office-clean],link[data-front-office-style],script[data-front-office-clean],script[data-front-office-script]').forEach(n=>n.remove());
+    document.querySelectorAll('script[src*="front-office-phase1"],script[src*="front-office-polish"],script[src*="front-office-photo-fix"],script[src*="front-office-photo-integrity"],script[src*="command-surface"],script[src*="cockpit-v1"],style#phaseOneStyles,link[data-front-office-clean],link[data-front-office-style],script[data-front-office-clean],script[data-front-office-script]').forEach(n=>n.remove());
     mount();
-    addStyle('front-office-clean.css?v=15.0.6','base');
-    addStyle('front-office-layout-v2.css?v=15.0.6','layout');
-    addStyle('front-office-intelligence-v2.css?v=15.0.6','intelligence');
-    addStyle('front-office-liquid.css?v=15.0.6','liquid');
-    addStyle('command-surface-v7.css?v=15.0.6','command-surface');
-    addStyle('command-surface-v8.css?v=15.0.6','command-surface-polish');
-    addStyle('command-surface-v9.css?v=15.0.6','command-surface-final-polish');
-    addStyle('command-surface-v10.css?v=15.0.6','command-surface-sketch-polish');
-    addStyle('command-surface-v11.css?v=15.0.6','command-surface-microcards');
-    addStyle('command-surface-v12.css?v=15.0.6','command-surface-integrity');
-    addStyle('command-surface-v13.css?v=15.0.6','command-surface-final');
-    addStyle('command-surface-v14.css?v=15.0.6','command-surface-sidecard-rebuild');
-    addStyle('command-surface-v15.css?v=15.0.6','command-surface-final-touches');
-    await addScript('front-office-clean.js?v=15.0.6','renderer');
+    addStyle('front-office-clean.css?v=16.0.0','base');
+    addStyle('front-office-layout-v2.css?v=16.0.0','layout');
+    addStyle('front-office-intelligence-v2.css?v=16.0.0','intelligence');
+    addStyle('front-office-liquid.css?v=16.0.0','liquid');
+    addStyle('command-surface-v7.css?v=16.0.0','command-surface');
+    addStyle('command-surface-v8.css?v=16.0.0','command-surface-polish');
+    addStyle('command-surface-v9.css?v=16.0.0','command-surface-final-polish');
+    addStyle('command-surface-v10.css?v=16.0.0','command-surface-sketch-polish');
+    addStyle('command-surface-v11.css?v=16.0.0','command-surface-microcards');
+    addStyle('command-surface-v12.css?v=16.0.0','command-surface-integrity');
+    addStyle('command-surface-v13.css?v=16.0.0','command-surface-final');
+    addStyle('command-surface-v14.css?v=16.0.0','command-surface-sidecard-rebuild');
+    addStyle('command-surface-v15.css?v=16.0.0','command-surface-final-touches');
+    addStyle('cockpit-v1.css?v=16.0.0','draft-cockpit');
+    await addScript('front-office-clean.js?v=16.0.0','renderer');
     window.renderWarroom=()=>window.CleanFrontOffice?.render?.();window.renderWarroom();
-    await addScript('front-office-position-colors.js?v=15.0.6','position-colors');
-    await addScript('front-office-photo-integrity.js?v=15.0.6','photo-integrity');
-    await addScript('front-office-intelligence-v2.js?v=15.0.6','intelligence');
+    await addScript('front-office-position-colors.js?v=16.0.0','position-colors');
+    await addScript('front-office-photo-integrity.js?v=16.0.0','photo-integrity');
+    await addScript('front-office-intelligence-v2.js?v=16.0.0','intelligence');
+    await addScript('cockpit-v1.js?v=16.0.0','draft-cockpit');
+    window.BoardCockpitV1?.apply?.();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
