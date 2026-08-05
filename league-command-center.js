@@ -1,6 +1,6 @@
 'use strict';
 (function(){
-  const BOOT_VERSION='clean-front-office-2.0.0';
+  const BOOT_VERSION='clean-front-office-3.0.0';
   function addStyle(href,key){
     document.querySelectorAll(`link[data-front-office-style="${key}"]`).forEach(n=>n.remove());
     const link=document.createElement('link');
@@ -35,13 +35,13 @@
     window.__THE_BOARD_FRONT_OFFICE_BOOT__=BOOT_VERSION;
     document.querySelectorAll('script[src*="front-office-phase1"],script[src*="front-office-polish"],script[src*="front-office-photo-fix"],style#phaseOneStyles,link[data-front-office-clean],link[data-front-office-style],script[data-front-office-clean],script[data-front-office-script]').forEach(n=>n.remove());
     mount();
-    addStyle('front-office-clean.css?v=2.0.0','base');
-    addStyle('front-office-layout-v2.css?v=2.0.0','layout');
-    addStyle('front-office-intelligence-v2.css?v=2.0.0','intelligence');
-    await addScript('front-office-clean.js?v=2.0.0','renderer');
+    addStyle('front-office-clean.css?v=3.0.0','base');
+    addStyle('front-office-layout-v2.css?v=3.0.0','layout');
+    addStyle('front-office-intelligence-v2.css?v=3.0.0','intelligence');
+    await addScript('front-office-clean.js?v=3.0.0','renderer');
     window.renderWarroom=()=>window.CleanFrontOffice?.render?.();
     window.renderWarroom();
-    await addScript('front-office-intelligence-v2.js?v=2.0.0','intelligence');
+    await addScript('front-office-intelligence-v2.js?v=3.0.0','intelligence');
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
