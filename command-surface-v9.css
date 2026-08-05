@@ -1,0 +1,183 @@
+/* THE BOARD — Command Surface v9
+   Universal compact roster cards, readable bye markers, balanced bench slots,
+   normalized side cards, and franchise-logo integration. */
+
+/* Shared top + bottom roster band geometry. */
+#frontOfficeRoot .tb-roster-banner,
+#frontOfficeRoot .tb-perfect-banner{padding-left:18px!important;padding-right:18px!important}
+#frontOfficeRoot .tb-depth-line{margin-top:9px!important}
+#frontOfficeRoot .tb-depth-title{padding-bottom:5px!important}
+#frontOfficeRoot .tb-depth-chart{
+  grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  gap:6px!important;
+  align-items:start!important;
+}
+#frontOfficeRoot .tb-depth-group>label{margin-bottom:3px!important}
+#frontOfficeRoot .tb-depth-group>div{gap:4px!important}
+#frontOfficeRoot .tb-depth-bench>div{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important}
+
+/* Universal compact player slot: starters and bench have identical visual weight. */
+#frontOfficeRoot .tb-depth-card{
+  position:relative!important;
+  height:38px!important;
+  min-height:38px!important;
+  padding:4px 6px 4px 4px!important;
+  gap:5px!important;
+  border-radius:8px!important;
+  display:flex!important;
+  align-items:center!important;
+}
+#frontOfficeRoot .tb-depth-photo{
+  width:27px!important;
+  height:30px!important;
+  flex:0 0 27px!important;
+  border-radius:6px!important;
+  object-fit:cover!important;
+  object-position:center top!important;
+}
+#frontOfficeRoot .tb-depth-card>div{
+  min-width:0!important;
+  width:100%!important;
+  padding:0!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-rows:auto auto!important;
+  column-gap:4px!important;
+  align-items:center!important;
+}
+#frontOfficeRoot .tb-depth-card small{
+  grid-column:1!important;
+  grid-row:1!important;
+  font-size:5.5px!important;
+  line-height:1!important;
+  color:#c58a48!important;
+}
+#frontOfficeRoot .tb-depth-card strong{
+  grid-column:1!important;
+  grid-row:2!important;
+  font-size:8px!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#frontOfficeRoot .tb-depth-card>div>span{
+  grid-column:2!important;
+  grid-row:2!important;
+  font-size:5.5px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  color:#9da7b2!important;
+}
+#frontOfficeRoot .tb-depth-card>div>span::first-letter{font-weight:700}
+#frontOfficeRoot .tb-mini-pos{
+  left:3px!important;
+  top:3px!important;
+  min-width:16px!important;
+  height:12px!important;
+  padding:0 3px!important;
+  font-size:5.5px!important;
+  border-radius:4px!important;
+  z-index:3!important;
+}
+#frontOfficeRoot .tb-depth-card.is-empty{
+  height:38px!important;
+  min-height:38px!important;
+  padding:15px 4px 3px!important;
+  display:grid!important;
+  place-items:center!important;
+}
+#frontOfficeRoot .tb-depth-card.is-empty small{font-size:5.5px!important}
+#frontOfficeRoot .tb-depth-card.is-empty>span:last-child{font-size:6px!important}
+
+/* Convert verbose team/bye line to a compact B-number scan target. */
+#frontOfficeRoot .tb-depth-card>div>span{
+  max-width:44px!important;
+  overflow:hidden!important;
+  text-overflow:clip!important;
+}
+
+/* Keep side cards aligned and readable at every desktop width. */
+#frontOfficeRoot .tb-support-grid{gap:7px!important}
+#frontOfficeRoot .tb-support-card{
+  height:82px!important;
+  min-height:82px!important;
+  padding:7px 6px 6px!important;
+  grid-template-columns:39px minmax(0,1fr) 25px!important;
+  gap:6px!important;
+  overflow:hidden!important;
+}
+#frontOfficeRoot .tb-support-photo{
+  width:39px!important;
+  height:48px!important;
+  flex-basis:39px!important;
+  margin-top:8px!important;
+  object-fit:cover!important;
+  object-position:center top!important;
+}
+#frontOfficeRoot .tb-support-pos{left:6px!important;top:5px!important}
+#frontOfficeRoot .tb-support-copy{min-width:0!important;overflow:hidden!important}
+#frontOfficeRoot .tb-support-copy strong{
+  font-size:9px!important;
+  line-height:1.05!important;
+  max-height:20px!important;
+  overflow:hidden!important;
+  word-break:normal!important;
+}
+#frontOfficeRoot .tb-support-copy>span{
+  display:block!important;
+  max-width:100%!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#frontOfficeRoot .tb-support-copy footer{gap:4px!important}
+#frontOfficeRoot .tb-support-copy footer i{
+  max-width:50%!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#frontOfficeRoot .tb-grade{font-size:16px!important}
+
+/* Logo becomes part of the green surface instead of a pasted black tile. */
+#frontOfficeRoot .tb-franchise img{
+  background:transparent!important;
+  border-radius:50%!important;
+  mix-blend-mode:screen!important;
+  filter:contrast(1.06) saturate(1.05)!important;
+  box-shadow:none!important;
+}
+
+/* Slightly reclaim vertical space without touching the locked architecture. */
+#frontOfficeRoot .tb-banner-head{gap:14px!important}
+#frontOfficeRoot .tb-roster-banner{padding-top:15px!important;padding-bottom:7px!important}
+#frontOfficeRoot .tb-perfect-banner{padding-top:7px!important;padding-bottom:15px!important}
+
+@media (min-width:981px) and (max-width:1320px){
+  #frontOfficeRoot .tb-depth-chart{gap:5px!important}
+  #frontOfficeRoot .tb-depth-card{height:36px!important;min-height:36px!important}
+  #frontOfficeRoot .tb-depth-photo{width:25px!important;height:28px!important;flex-basis:25px!important}
+  #frontOfficeRoot .tb-depth-card strong{font-size:7.5px!important}
+  #frontOfficeRoot .tb-depth-card>div>span{font-size:5px!important;max-width:38px!important}
+  #frontOfficeRoot .tb-support-card{height:78px!important;min-height:78px!important;grid-template-columns:36px minmax(0,1fr) 23px!important}
+  #frontOfficeRoot .tb-support-photo{width:36px!important;height:44px!important;flex-basis:36px!important}
+}
+
+@media (max-width:980px){
+  #frontOfficeRoot .tb-depth-chart{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #frontOfficeRoot .tb-depth-bench{grid-column:1/-1!important}
+  #frontOfficeRoot .tb-depth-bench>div{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #frontOfficeRoot .tb-depth-card{height:42px!important;min-height:42px!important}
+  #frontOfficeRoot .tb-depth-photo{width:30px!important;height:34px!important;flex-basis:30px!important}
+}
+
+@media (max-width:680px){
+  #frontOfficeRoot .tb-depth-chart{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #frontOfficeRoot .tb-depth-bench>div{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #frontOfficeRoot .tb-depth-card{height:46px!important;min-height:46px!important}
+  #frontOfficeRoot .tb-depth-photo{width:34px!important;height:38px!important;flex-basis:34px!important}
+  #frontOfficeRoot .tb-depth-card strong{font-size:8.5px!important}
+  #frontOfficeRoot .tb-depth-card>div>span{font-size:5.5px!important;max-width:48px!important}
+  #frontOfficeRoot .tb-support-card{height:86px!important;min-height:86px!important;flex-basis:164px!important}
+}
