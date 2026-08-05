@@ -50,10 +50,11 @@
 }
 
 /* Goose confidence ring */
-.tb-hero-grade {
+#frontOfficeRoot .tb-hero .tb-hero-grade {
   --goose-confidence: 87%;
   position: relative;
-  top: -34px;
+  top: auto !important;
+  transform: translateY(-44px) !important;
   width: 92px;
   height: 92px;
   display: grid;
@@ -68,8 +69,8 @@
   box-shadow: 0 0 0 1px rgba(255, 138, 0, .18), 0 0 24px rgba(255, 138, 0, .12);
   transition: transform .2s ease, box-shadow .2s ease;
 }
-.tb-hero-grade:hover {
-  transform: scale(1.035);
+#frontOfficeRoot .tb-hero .tb-hero-grade:hover {
+  transform: translateY(-44px) scale(1.035) !important;
   box-shadow: 0 0 0 1px rgba(255, 138, 0, .28), 0 0 30px rgba(255, 138, 0, .20);
 }
 .tb-hero-grade b {
@@ -167,14 +168,15 @@
 
 /* Keep the confidence treatment compact on phones */
 @media (max-width: 720px) {
-  .tb-hero-grade {
-    top: -20px;
+  #frontOfficeRoot .tb-hero .tb-hero-grade {
+    top: auto !important;
+    transform: translateY(-26px) !important;
     width: 72px;
     height: 72px;
     row-gap: 3px;
   }
-  .tb-hero-grade:hover {
-    transform: scale(1.035);
+  #frontOfficeRoot .tb-hero .tb-hero-grade:hover {
+    transform: translateY(-26px) scale(1.035) !important;
   }
   .tb-hero-photo {
     transform: scale(1.04);
