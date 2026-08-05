@@ -1,143 +1,55 @@
-/* THE BOARD — Cockpit refinement v1.1 */
-:root{
-  --tb-cockpit-top:132px;
-}
+/* THE BOARD — Cockpit refinement v1.2 */
+:root{--tb-cockpit-top:126px;}
 
-/* Taller, more readable live draft rail */
-.tb-command-surface{
-  grid-template-rows:var(--tb-cockpit-top) 88px minmax(0,1fr) var(--tb-drawer-collapsed) !important;
-}
-.tb-live-rail{
-  grid-template-columns:190px minmax(0,1fr) 150px !important;
-  padding:12px 16px !important;
-  gap:10px !important;
-}
-.tb-live-franchise{
-  display:grid;
-  grid-template-columns:58px minmax(0,1fr);
-  align-items:center;
-  gap:10px;
-  min-width:0;
-}
-.tb-live-franchise img{
-  width:58px;
-  height:58px;
-  object-fit:contain;
-  border-radius:12px;
-}
-.tb-live-franchise-copy{min-width:0;}
-.tb-live-franchise-copy small{
-  display:block;
-  color:#d29b62;
-  font-size:9px;
-  font-weight:800;
-  letter-spacing:.14em;
-  text-transform:uppercase;
-}
-.tb-live-franchise-copy strong{
-  display:block;
-  margin-top:3px;
-  font-size:20px;
-  line-height:1.05;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.tb-live-franchise-copy span{
-  display:block;
-  margin-top:5px;
-  color:#9ca7b7;
-  font-size:11px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.tb-pick-track{gap:6px !important;}
-.tb-pick-tile{
-  min-height:86px;
-  padding:9px 9px !important;
-  justify-content:flex-start !important;
-}
-.tb-pick-tile small{font-size:9px !important;}
-.tb-pick-tile b{
-  font-size:13px !important;
-  line-height:1.15;
-  margin-top:8px !important;
-}
-.tb-pick-tile span{margin-top:auto !important;padding-top:7px;}
-.tb-draft-next b{font-size:19px !important;line-height:1.05;}
+.tb-command-surface{grid-template-rows:var(--tb-cockpit-top) 72px minmax(0,1fr) var(--tb-drawer-collapsed)!important;}
+.tb-live-rail{grid-template-columns:190px minmax(0,1fr) 150px!important;padding:10px 14px!important;gap:10px!important;}
+.tb-live-franchise{display:grid;grid-template-columns:54px minmax(0,1fr);align-items:center;gap:10px;min-width:0;}
+.tb-live-franchise img{width:54px;height:54px;object-fit:contain;border-radius:12px;}
+.tb-live-franchise-copy{min-width:0;}.tb-live-franchise-copy small{display:block;color:#d29b62;font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;}
+.tb-live-franchise-copy strong{display:block;margin-top:3px;font-size:20px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tb-live-franchise-copy span{display:block;margin-top:5px;color:#9ca7b7;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-/* The franchise identity now lives in the draft rail. Keep only metrics + roster here. */
-.tb-roster-banner{
-  padding:7px 18px 6px !important;
-  min-height:0 !important;
-}
-.tb-roster-banner .tb-banner-head{
-  height:28px !important;
-  min-height:28px !important;
-  margin:0 0 4px !important;
-}
-.tb-roster-banner .tb-franchise{display:none !important;}
-.tb-roster-banner .tb-banner-metrics{
-  width:100% !important;
-  height:28px !important;
-  margin-left:0 !important;
-}
-.tb-roster-banner .tb-banner-metrics span{padding:4px 12px !important;}
-.tb-roster-banner .tb-depth-line{min-height:45px !important;}
-.tb-roster-banner .tb-depth-title{display:none !important;}
-.tb-roster-banner .tb-depth-chart{width:100% !important;}
-.tb-roster-banner .tb-depth-card{height:34px !important;min-height:34px !important;}
-.tb-roster-banner .tb-depth-photo{width:29px !important;height:31px !important;}
+.tb-pick-track{display:grid!important;grid-template-columns:repeat(10,minmax(0,1fr))!important;gap:6px!important;min-width:0;}
+.tb-pick-tile{position:relative;min-width:0;min-height:96px;padding:7px 7px 6px!important;border-radius:11px!important;display:grid!important;grid-template-rows:auto minmax(0,1fr) auto!important;overflow:hidden;background:linear-gradient(160deg,rgba(31,40,58,.97),rgba(19,26,39,.96))!important;border:1px solid rgba(255,255,255,.1)!important;box-shadow:inset 3px 0 0 var(--pos,#778294);}
+.tb-pick-tile.is-current{border-color:#ff8a00!important;box-shadow:inset 3px 0 0 var(--pos,#778294),0 0 0 1px rgba(255,138,0,.45),0 0 18px rgba(255,138,0,.14)!important;}
+.tb-pick-tile.is-yours{background:linear-gradient(150deg,rgba(24,100,73,.58),rgba(18,35,43,.96))!important;border-color:rgba(73,207,145,.66)!important;}
+.tb-pick-tile.pos-qb{--pos:#f3ca4c}.tb-pick-tile.pos-rb{--pos:#45c77b}.tb-pick-tile.pos-wr{--pos:#3998ff}.tb-pick-tile.pos-te{--pos:#ff4fa3}.tb-pick-tile.pos-k{--pos:#ef5058}.tb-pick-tile.pos-def,.tb-pick-tile.pos-dst{--pos:#8b95a4}
+.tb-live-pick-top{display:flex;align-items:center;justify-content:space-between;gap:4px;min-width:0;}
+.tb-live-pos{font-size:7px;font-weight:900;line-height:1;padding:3px 4px;border-radius:4px;background:var(--pos,#778294);color:#0b1018;}
+.tb-live-pick-top small{font-size:8px!important;color:#8d99aa!important;white-space:nowrap;}
+.tb-live-pick-main{display:grid;grid-template-columns:30px minmax(0,1fr);align-items:center;gap:6px;min-width:0;margin-top:5px;}
+.tb-live-pick-avatar{width:30px;height:34px;border-radius:7px;background:linear-gradient(145deg,#354052,#202938);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.tb-live-pick-photo{width:100%;height:100%;object-fit:cover;object-position:center top;}
+.tb-live-pick-fallback{font-size:12px;font-weight:900;color:#eef3fa;}
+.tb-live-pick-copy{min-width:0;display:flex;flex-direction:column;}
+.tb-live-pick-copy b{font-size:10px!important;line-height:1.08!important;margin:0!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;}
+.tb-live-pick-copy em{font-style:normal;font-size:7px;color:#9aa5b5;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tb-live-pick-copy small{font-size:7px!important;color:#727f91!important;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tb-live-pick-status{font-size:7px!important;font-weight:800;color:#d29b62;margin-top:4px!important;letter-spacing:.04em;}
+.tb-pick-tile.is-yours .tb-live-pick-status{color:#78dda9;}
+.tb-draft-next b{font-size:18px!important;line-height:1.05;}
 
-/* Pull the decision stage upward and let the hero dominate. */
-.tb-decision-grid{
-  padding:8px 16px 8px !important;
-  gap:10px !important;
-}
-.tb-center{grid-template-rows:minmax(0,1fr) 26px !important;gap:4px !important;}
-.tb-hero{padding:12px 16px !important;}
-.tb-hero-head{min-height:80px !important;}
-.tb-hero-photo{width:112px !important;height:112px !important;}
-.tb-goose-call{margin-top:5px !important;padding:10px 14px !important;}
-.tb-hero-stats,.tb-decision-compare,.tb-hero-actions{margin-top:6px !important;}
-.tb-draft-pulse{height:26px !important;min-height:26px !important;}
+/* Duplicate franchise identity is removed. This is now one thin metrics + roster band. */
+.tb-roster-banner{padding:5px 16px 5px!important;min-height:0!important;border-radius:0!important;overflow:hidden!important;}
+.tb-roster-banner .tb-banner-head{height:24px!important;min-height:24px!important;margin:0 0 3px!important;}
+.tb-roster-banner .tb-franchise{display:none!important;}
+.tb-roster-banner .tb-banner-metrics{width:100%!important;height:24px!important;margin:0!important;}
+.tb-roster-banner .tb-banner-metrics span{padding:3px 11px!important;}
+.tb-roster-banner .tb-depth-line{min-height:37px!important;height:37px!important;}
+.tb-roster-banner .tb-depth-title{display:none!important;}
+.tb-roster-banner .tb-depth-chart{width:100%!important;}
+.tb-roster-banner .tb-depth-card{height:31px!important;min-height:31px!important;}
+.tb-roster-banner .tb-depth-photo{width:27px!important;height:29px!important;}
 
-/* Forecast cards: make survival probability the visible takeaway. */
-.tb-side-right .tb-support-card{
-  position:relative;
-  border-color:rgba(58,146,255,.65) !important;
-}
-.tb-side-right .tb-support-card .tb-support-meta:last-child,
-.tb-side-right .tb-support-card small:last-child{
-  color:#84b9ff !important;
-  font-weight:800;
-}
+.tb-decision-grid{padding:6px 14px 7px!important;gap:10px!important;}
+.tb-center{grid-template-rows:minmax(0,1fr) 25px!important;gap:4px!important;}
+.tb-hero{padding:11px 15px!important;}.tb-hero-head{min-height:78px!important;}.tb-hero-photo{width:108px!important;height:108px!important;}
+.tb-goose-call{margin-top:5px!important;padding:9px 13px!important;}.tb-hero-stats,.tb-decision-compare,.tb-hero-actions{margin-top:6px!important;}.tb-draft-pulse{height:25px!important;min-height:25px!important;}
+.tb-side-right .tb-support-card{position:relative;border-color:rgba(58,146,255,.65)!important;}
 
-@media (max-width:1050px){
-  :root{--tb-cockpit-top:108px;}
-  .tb-command-surface{grid-template-rows:108px 76px minmax(0,1fr) 56px !important;}
-  .tb-live-rail{grid-template-columns:150px minmax(0,1fr) !important;padding:8px !important;}
-  .tb-live-franchise{grid-template-columns:44px minmax(0,1fr);gap:7px;}
-  .tb-live-franchise img{width:44px;height:44px;}
-  .tb-live-franchise-copy strong{font-size:16px;}
-  .tb-pick-tile{min-height:72px;}
-  .tb-roster-banner{padding:5px 10px !important;}
-  .tb-roster-banner .tb-banner-head{height:24px !important;min-height:24px !important;}
+@media(max-width:1050px){
+  :root{--tb-cockpit-top:106px}.tb-command-surface{grid-template-rows:106px 64px minmax(0,1fr) 56px!important}.tb-live-rail{grid-template-columns:145px minmax(0,1fr)!important;padding:7px!important}.tb-live-franchise{grid-template-columns:42px minmax(0,1fr);gap:7px}.tb-live-franchise img{width:42px;height:42px}.tb-live-franchise-copy strong{font-size:15px}.tb-pick-track{grid-template-columns:repeat(8,minmax(0,1fr))!important}.tb-pick-tile:nth-child(n+9){display:none!important}.tb-pick-tile{min-height:82px}.tb-live-pick-main{grid-template-columns:25px minmax(0,1fr)}.tb-live-pick-avatar{width:25px;height:29px}.tb-draft-next{display:none!important}.tb-roster-banner{padding:4px 8px!important}
 }
-
-@media (max-width:700px){
-  :root{--tb-cockpit-top:84px;}
-  .tb-command-surface{grid-template-rows:84px 68px minmax(0,1fr) 54px !important;}
-  .tb-live-rail{grid-template-columns:100px minmax(0,1fr) !important;padding:6px !important;gap:5px !important;}
-  .tb-live-franchise{grid-template-columns:32px minmax(0,1fr);gap:5px;}
-  .tb-live-franchise img{width:32px;height:32px;border-radius:8px;}
-  .tb-live-franchise-copy small{font-size:7px;}
-  .tb-live-franchise-copy strong{font-size:13px;}
-  .tb-live-franchise-copy span{font-size:8px;margin-top:2px;}
-  .tb-pick-tile{min-height:62px;padding:5px !important;}
-  .tb-pick-tile b{font-size:10px !important;margin-top:4px !important;}
-  .tb-roster-banner .tb-banner-head{display:none !important;}
-  .tb-roster-banner{padding:4px 6px !important;}
-  .tb-hero-photo{width:80px !important;height:80px !important;}
+@media(max-width:700px){
+  :root{--tb-cockpit-top:82px}.tb-command-surface{grid-template-rows:82px 58px minmax(0,1fr) 54px!important}.tb-live-rail{grid-template-columns:90px minmax(0,1fr)!important;padding:5px!important;gap:5px!important}.tb-live-franchise{grid-template-columns:29px minmax(0,1fr);gap:5px}.tb-live-franchise img{width:29px;height:29px;border-radius:7px}.tb-live-franchise-copy small{font-size:6px}.tb-live-franchise-copy strong{font-size:12px}.tb-live-franchise-copy span{font-size:7px;margin-top:2px}.tb-pick-track{grid-template-columns:repeat(5,minmax(0,1fr))!important}.tb-pick-tile:nth-child(n+6){display:none!important}.tb-pick-tile{min-height:70px;padding:4px!important}.tb-live-pick-main{grid-template-columns:21px minmax(0,1fr);gap:4px}.tb-live-pick-avatar{width:21px;height:25px;border-radius:5px}.tb-live-pick-copy b{font-size:8px!important}.tb-live-pick-copy em,.tb-live-pick-copy small{font-size:6px!important}.tb-live-pick-status{font-size:6px!important}.tb-roster-banner .tb-banner-head{display:none!important}.tb-roster-banner{padding:3px 5px!important}.tb-hero-photo{width:80px!important;height:80px!important}
 }
