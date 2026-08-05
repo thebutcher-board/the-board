@@ -1,6 +1,6 @@
 'use strict';
 (function(){
-  const VERSION='cockpit-1.0.0';
+  const VERSION='cockpit-1.1.0';
   const teamName=()=>window.state?.profile?.teamName||'The Butcher';
   const drafted=()=>window.state?.drafted||[];
   const ranked=()=>{try{return window.ranked?.()||[]}catch{return[]}};
@@ -9,11 +9,32 @@
   const currentPick=()=>drafted().length;
   const pickLabel=i=>{const teams=Math.max(1,Number(window.state?.profile?.teamCount||10));return `${Math.floor(i/teams)+1}.${String((i%teams)+1).padStart(2,'0')}`};
 
+  function ensureRefinementStyles(){
+    if(document.querySelector('link[data-cockpit-refinement]'))return;
+    const link=document.createElement('link');
+    link.rel='stylesheet';
+    link.href='cockpit-v1-1.css?v=1.1.0';
+    link.dataset.cockpitRefinement='true';
+    document.head.appendChild(link);
+  }
+
   function predictionFor(index){
     const pool=ranked();
     if(index<drafted().length){const d=drafted()[index];return d?.player?.name||d?.name||'Drafted';}
     const offset=index-drafted().length;
     return pool[offset]?.name||'Open';
+  }
+
+  function franchiseIdentity(){
+    const img=document.querySelector('#frontOfficeRoot .tb-franchise img');
+    const src=img?.getAttribute('src')||'';
+    const logo=src?`<img src="${esc(src)}" alt="${esc(teamName())} logo">`:'';
+    return `<div class="tb-live-franchise">${logo}<div class="tb-live-franchise-copy"><small>Your franchise</small><strong>${esc(teamName())}</strong><span>Live roster · Mission ${Math.max(1,currentPick()+1)}</span></div></div>`;
+  }
+
+  function picksUntilMine(start){
+    for(let i=0;i<30;i+=1){if(ownerAt(start+i)===teamName())return i;}
+    return 0;
   }
 
   function buildRail(){
@@ -23,14 +44,14 @@
       return `<div class="tb-pick-tile ${n===0?'is-current':''} ${mine?'is-yours':''}"><small>${esc(pickLabel(i))} · ${esc(owner)}</small><b>${esc(player)}</b><span>${n===0?'ON THE CLOCK':mine?'YOUR PICK':'PROJECTED'}</span></div>`;
     }).join('');
     return `<section class="tb-live-rail" aria-label="Live draft flow">
-      <div class="tb-live-status"><small>LIVE DRAFT</small><strong>${esc(ownerAt(start))}</strong><span>Pick ${esc(pickLabel(start))} · ${Math.max(0,Array.from({length:30},(_,i)=>i+1).find(i=>ownerAt(start+i)===teamName())||0)} picks until you</span></div>
+      ${franchiseIdentity()}
       <div class="tb-pick-track">${tiles}</div>
-      <div class="tb-draft-next"><small>GOOSE FORECAST</small><b>${esc(predictionFor(start))}</b><span>Current projected selection</span></div>
+      <div class="tb-draft-next"><small>GOOSE FORECAST</small><b>${esc(predictionFor(start))}</b><span>${picksUntilMine(start)} picks until your turn</span></div>
     </section>`;
   }
 
   function playerRows(players){
-    return players.slice(0,24).map((p,i)=>`<div class="tb-drawer-player"><div><small>${esc(p.pos||'—')} · ${esc(p.team||'—')}</small><b>${esc(p.name)}</b></div><span>${Math.round(Number(p.proj||0))} pts</span></div>`).join('');
+    return players.slice(0,24).map(p=>`<div class="tb-drawer-player"><div><small>${esc(p.pos||'—')} · ${esc(p.team||'—')}</small><b>${esc(p.name)}</b></div><span>${Math.round(Number(p.proj||0))} pts</span></div>`).join('');
   }
 
   function rosterRows(){
@@ -71,6 +92,7 @@
   }
 
   function apply(){
+    ensureRefinementStyles();
     const surface=document.querySelector('#frontOfficeRoot .tb-command-surface');
     if(!surface||surface.dataset.cockpitVersion===VERSION)return false;
     surface.dataset.cockpitVersion=VERSION;
