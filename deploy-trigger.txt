@@ -1,1 +1,1 @@
-Front Office v15.0.2 whole confidence ring alignment deployment trigger
+Front Office v15.0.7 centered Goose confidence ring deployment trigger
