@@ -2,9 +2,10 @@
 (function(){
   const VERIFIED={
     'jalen hurts':'6904','drake maye':'11560','jahmyr gibbs':'9221','ceedee lamb':'6786','trey mcbride':'8151',
-    'brock purdy':'7523','jared goff':'5857','matthew stafford':'421','patrick mahomes':'4046','c.j. stroud':'9758',
-    'jordan love':'6804','daniel jones':'5849','baker mayfield':'4892','garrett wilson':'8146','davante adams':'2133',
-    'brandon aubrey':'11628','jaylen waddle':'7561','courtland sutton':'5133'
+    'ashton jeanty':'12526','brock purdy':'7523','jared goff':'5857','matthew stafford':'421','patrick mahomes':'4046',
+    'c.j. stroud':'9758','cam ward':'12522','jaxson dart':'12507','jeremiyah love':'12531','jordan love':'6804',
+    'daniel jones':'5849','baker mayfield':'4892','garrett wilson':'8146','davante adams':'2133','brandon aubrey':'11628',
+    'jaylen waddle':'7561','courtland sutton':'5133'
   };
   const PHOTO_SELECTOR='.tb-photo,.tb-support-photo,.tb-depth-photo,.tb-hero-photo';
   const clean=n=>String(n||'').replace(/…/g,'').trim().toLowerCase();
@@ -42,21 +43,16 @@
     const verifiedId=VERIFIED[clean(name)];
     let img=node.querySelector('img');
 
-    /* Use the verified portrait whenever one is known. */
     if(verifiedId){
       if(!img){img=document.createElement('img');node.prepend(img)}
-      const verifiedSrc=`https://sleepercdn.com/content/nfl/players/thumb/${verifiedId}.jpg`;
-      if(img.src!==verifiedSrc)img.src=verifiedSrc;
+      const verifiedSrc=`https://sleepercdn.com/content/nfl/players/${verifiedId}.jpg`;
+      if(!img.src.includes(`/players/${verifiedId}.jpg`))img.src=verifiedSrc;
       wireFallback(node,img,name);
       return;
     }
 
-    /* For every other player, preserve the renderer's current image rather than
-       replacing a valid portrait with initials. A failed URL still gets a clean fallback. */
-    if(img&&img.getAttribute('src')){
-      wireFallback(node,img,name);
-      return;
-    }
+    /* Never display a questionable portrait. Unverified players use a deliberate,
+       readable initials avatar until a stable player-id mapping is added. */
     fallback(node,name);
   }
   function apply(root=document){root.querySelectorAll?.(`#frontOfficeRoot ${PHOTO_SELECTOR}`).forEach(secure)}
@@ -67,7 +63,7 @@
     const root=document.getElementById('frontOfficeRoot');
     if(!root)return;
     apply(root);
-    observer.observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:['src','alt']});
+    observer.observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:['src','alt','data-photo-name']});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
