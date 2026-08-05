@@ -6,30 +6,68 @@
     'jordan love':'6804','daniel jones':'5849','baker mayfield':'4892','garrett wilson':'8146','davante adams':'2133',
     'brandon aubrey':'11628','jaylen waddle':'7561','courtland sutton':'5133'
   };
+  const PHOTO_SELECTOR='.tb-photo,.tb-support-photo,.tb-depth-photo,.tb-hero-photo';
   const clean=n=>String(n||'').replace(/…/g,'').trim().toLowerCase();
   const initials=n=>String(n||'').trim().split(/\s+/).map(x=>x[0]||'').join('').slice(0,2).toUpperCase();
 
+  function cardName(node){
+    const explicit=node.dataset.photoName||node.querySelector('img')?.alt;
+    if(explicit)return String(explicit).trim();
+    const card=node.closest('.tb-support-card,.tb-depth-card,.tb-hero,.tb-hero-player');
+    const label=card?.querySelector('.tb-support-copy strong,.tb-support-copy b,.tb-player-name,h1,h2,h3');
+    return String(label?.textContent||'').trim();
+  }
   function fallback(node,name){
-    const img=node.querySelector('img');if(img)img.remove();
+    const img=node.querySelector('img');
+    if(img)img.remove();
     node.classList.add('is-fallback');
-    let b=node.querySelector('b');if(!b){b=document.createElement('b');node.appendChild(b)}
-    b.textContent=initials(name);b.style.display='grid';
+    let b=node.querySelector('b');
+    if(!b){b=document.createElement('b');node.appendChild(b)}
+    b.textContent=initials(name)||'—';
+    b.style.display='grid';
+  }
+  function wireFallback(node,img,name){
+    img.loading='eager';
+    img.decoding='async';
+    img.alt=name;
+    img.onerror=()=>fallback(node,name);
+    img.onload=()=>{
+      node.classList.remove('is-fallback');
+      const b=node.querySelector('b');
+      if(b)b.style.display='none';
+    };
   }
   function secure(node){
-    const name=node.dataset.photoName||node.querySelector('img')?.alt||'';
-    const id=VERIFIED[clean(name)];
-    if(!id){fallback(node,name);return}
-    node.classList.remove('is-fallback');
+    const name=cardName(node);
+    const verifiedId=VERIFIED[clean(name)];
     let img=node.querySelector('img');
-    if(!img){img=document.createElement('img');img.alt=name;node.prepend(img)}
-    img.loading='eager';img.decoding='async';img.src=`https://sleepercdn.com/content/nfl/players/thumb/${id}.jpg`;
-    img.onerror=()=>fallback(node,name);
-    const b=node.querySelector('b');if(b)b.style.display='none';
+
+    /* Use the verified portrait whenever one is known. */
+    if(verifiedId){
+      if(!img){img=document.createElement('img');node.prepend(img)}
+      const verifiedSrc=`https://sleepercdn.com/content/nfl/players/thumb/${verifiedId}.jpg`;
+      if(img.src!==verifiedSrc)img.src=verifiedSrc;
+      wireFallback(node,img,name);
+      return;
+    }
+
+    /* For every other player, preserve the renderer's current image rather than
+       replacing a valid portrait with initials. A failed URL still gets a clean fallback. */
+    if(img&&img.getAttribute('src')){
+      wireFallback(node,img,name);
+      return;
+    }
+    fallback(node,name);
   }
-  function apply(root=document){root.querySelectorAll?.('#frontOfficeRoot .tb-photo').forEach(secure)}
+  function apply(root=document){root.querySelectorAll?.(`#frontOfficeRoot ${PHOTO_SELECTOR}`).forEach(secure)}
   let queued=false;
   const queue=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;apply()})};
   const observer=new MutationObserver(queue);
-  function boot(){const root=document.getElementById('frontOfficeRoot');if(!root)return;apply(root);observer.observe(root,{childList:true,subtree:true})}
+  function boot(){
+    const root=document.getElementById('frontOfficeRoot');
+    if(!root)return;
+    apply(root);
+    observer.observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:['src','alt']});
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
