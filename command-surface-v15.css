@@ -53,7 +53,7 @@
 .tb-hero-grade {
   --goose-confidence: 87%;
   position: relative;
-  top: -14px;
+  top: -24px;
   width: 92px;
   height: 92px;
   display: grid;
@@ -132,13 +132,22 @@
   50% { transform: scale(1.12); opacity: 1; }
 }
 
-/* Desktop optical alignment: reclaim the unused left gutter and give the
-   right rail the same amount of breathing room without changing card geometry. */
+/* Desktop viewport alignment: break the Front Office out of the legacy 1180px
+   main wrapper, then give it equal 8px gutters on both sides. */
 @media (min-width: 981px) {
+  #warroom {
+    width: calc(100vw - 16px) !important;
+    max-width: none !important;
+    margin-left: calc(50% - 50vw + 8px) !important;
+    margin-right: 8px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  #frontOfficeRoot,
   #frontOfficeRoot > .tb-war-room {
-    width: calc(100% + 12px) !important;
-    max-width: 1500px !important;
-    margin-left: -12px !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
     margin-right: 0 !important;
   }
 }
@@ -159,7 +168,7 @@
 /* Keep the confidence treatment compact on phones */
 @media (max-width: 720px) {
   .tb-hero-grade {
-    top: -9px;
+    top: -14px;
     width: 72px;
     height: 72px;
     row-gap: 3px;
