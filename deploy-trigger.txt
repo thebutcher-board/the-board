@@ -1,1 +1,1 @@
-Stable rollback deployment trigger
+Command Surface v6 deployment trigger
