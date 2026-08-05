@@ -1,0 +1,248 @@
+/* THE BOARD — Command Surface v12
+   Position language, flowing side cards, franchise header cleanup, and safe portrait presentation. */
+
+#frontOfficeRoot{
+  --pos-qb:#f4c542;
+  --pos-rb:#35b66f;
+  --pos-wr:#2f8cff;
+  --pos-te:#ff4fb3;
+  --pos-flex:#35b66f;
+  --pos-k:#e24c4c;
+  --pos-def:#87919b;
+  --pos-any:#87919b;
+}
+
+/* Franchise identity: protect the team name and move supporting chips below it. */
+#frontOfficeRoot .tb-roster-banner .tb-banner-head{
+  grid-template-columns:minmax(390px,.95fr) minmax(0,2.05fr)!important;
+  align-items:start!important;
+  gap:18px!important;
+}
+#frontOfficeRoot .tb-franchise{
+  display:grid!important;
+  grid-template-columns:78px minmax(0,1fr)!important;
+  grid-template-rows:auto!important;
+  align-items:start!important;
+  column-gap:14px!important;
+  min-width:0!important;
+  overflow:visible!important;
+}
+#frontOfficeRoot .tb-franchise img{
+  grid-column:1!important;
+  grid-row:1 / span 2!important;
+  width:72px!important;
+  height:72px!important;
+  object-fit:contain!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+#frontOfficeRoot .tb-franchise>div{
+  grid-column:2!important;
+  min-width:0!important;
+  overflow:visible!important;
+}
+#frontOfficeRoot .tb-franchise h1{
+  margin:3px 0 5px!important;
+  max-width:none!important;
+  width:auto!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  font-size:clamp(27px,2.25vw,39px)!important;
+  line-height:.96!important;
+  letter-spacing:-.025em!important;
+}
+#frontOfficeRoot .tb-franchise p{margin:0!important;white-space:nowrap!important}
+#frontOfficeRoot [class*="dna"],
+#frontOfficeRoot [class*="DNA"]{
+  grid-column:2!important;
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:6px!important;
+  margin-top:8px!important;
+  position:static!important;
+  transform:none!important;
+  max-width:100%!important;
+}
+
+/* Side cards: names flow to the pinned grade instead of living in a narrow box. */
+#frontOfficeRoot .tb-support-card{
+  --position-color:var(--pos-any);
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:42px minmax(0,1fr) 34px!important;
+  grid-template-rows:1fr!important;
+  align-items:center!important;
+  column-gap:8px!important;
+  height:94px!important;
+  min-height:94px!important;
+  padding:8px 8px 8px 7px!important;
+  overflow:hidden!important;
+  border:1px solid color-mix(in srgb,var(--position-color) 48%,rgba(255,255,255,.12))!important;
+  border-left:3px solid var(--position-color)!important;
+  background:
+    linear-gradient(145deg,color-mix(in srgb,var(--position-color) 5%,rgba(43,50,61,.88)),rgba(20,24,31,.82))!important;
+  box-shadow:0 8px 20px rgba(0,0,0,.16)!important;
+}
+#frontOfficeRoot .tb-support-card[data-pos="QB"]{--position-color:var(--pos-qb)}
+#frontOfficeRoot .tb-support-card[data-pos="RB"]{--position-color:var(--pos-rb)}
+#frontOfficeRoot .tb-support-card[data-pos="WR"]{--position-color:var(--pos-wr)}
+#frontOfficeRoot .tb-support-card[data-pos="TE"]{--position-color:var(--pos-te)}
+#frontOfficeRoot .tb-support-card[data-pos="K"]{--position-color:var(--pos-k)}
+#frontOfficeRoot .tb-support-card[data-pos="DEF"]{--position-color:var(--pos-def)}
+#frontOfficeRoot .tb-support-photo{
+  grid-column:1!important;
+  width:42px!important;
+  height:54px!important;
+  align-self:end!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+#frontOfficeRoot .tb-support-photo img{object-fit:contain!important;object-position:center bottom!important}
+#frontOfficeRoot .tb-support-copy{
+  grid-column:2!important;
+  min-width:0!important;
+  width:100%!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-self:stretch!important;
+  overflow:visible!important;
+  padding:2px 0!important;
+}
+#frontOfficeRoot .tb-support-copy small{
+  margin:0 0 2px!important;
+  color:#d9a46a!important;
+  font-size:6.5px!important;
+  line-height:1!important;
+}
+#frontOfficeRoot .tb-support-copy strong{
+  display:block!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  color:#fff!important;
+  font-size:10px!important;
+  line-height:1.05!important;
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  overflow-wrap:anywhere!important;
+}
+#frontOfficeRoot .tb-support-copy>span{
+  position:static!important;
+  display:block!important;
+  margin-top:3px!important;
+  color:#aeb6c0!important;
+  font-size:6px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#frontOfficeRoot .tb-support-copy footer{
+  position:static!important;
+  display:flex!important;
+  justify-content:space-between!important;
+  gap:4px!important;
+  margin-top:auto!important;
+  padding-top:5px!important;
+  color:#aeb6c0!important;
+}
+#frontOfficeRoot .tb-support-copy footer i{font-size:5.8px!important;white-space:nowrap!important}
+#frontOfficeRoot .tb-grade{
+  grid-column:3!important;
+  position:static!important;
+  align-self:start!important;
+  justify-self:end!important;
+  margin-top:1px!important;
+  font-size:18px!important;
+  line-height:1!important;
+}
+#frontOfficeRoot .tb-support-pos{
+  position:absolute!important;
+  left:7px!important;
+  top:7px!important;
+  z-index:5!important;
+  min-width:16px!important;
+  height:11px!important;
+  padding:0 3px!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:3px!important;
+  font-size:5px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  color:#111!important;
+  background:var(--position-color)!important;
+}
+
+/* New position palette everywhere. */
+#frontOfficeRoot [data-pos="QB"]{--position-color:var(--pos-qb)}
+#frontOfficeRoot [data-pos="RB"]{--position-color:var(--pos-rb)}
+#frontOfficeRoot [data-pos="WR"]{--position-color:var(--pos-wr)}
+#frontOfficeRoot [data-pos="TE"]{--position-color:var(--pos-te)}
+#frontOfficeRoot [data-pos="FLEX"]{--position-color:var(--pos-flex)}
+#frontOfficeRoot [data-pos="K"]{--position-color:var(--pos-k)}
+#frontOfficeRoot [data-pos="DEF"]{--position-color:var(--pos-def)}
+#frontOfficeRoot .tb-mini-pos,
+#frontOfficeRoot .tb-position,
+#frontOfficeRoot .tb-support-pos{
+  background:var(--position-color,var(--pos-any))!important;
+}
+#frontOfficeRoot [data-pos="WR"] .tb-mini-pos,
+#frontOfficeRoot [data-pos="WR"] .tb-position,
+#frontOfficeRoot [data-pos="WR"] .tb-support-pos,
+#frontOfficeRoot [data-pos="K"] .tb-mini-pos,
+#frontOfficeRoot [data-pos="K"] .tb-position,
+#frontOfficeRoot [data-pos="K"] .tb-support-pos{
+  color:#fff!important;
+}
+#frontOfficeRoot .tb-depth-card[data-pos]{
+  border-left:2px solid var(--position-color)!important;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--position-color) 5%,rgba(15,20,25,.9)),rgba(15,20,25,.84))!important;
+}
+
+/* Portraits: keep faces clear and never let labels cover them. */
+#frontOfficeRoot .tb-photo{background:transparent!important}
+#frontOfficeRoot .tb-photo img{object-fit:contain!important;object-position:center bottom!important}
+#frontOfficeRoot .tb-photo.is-fallback{
+  display:grid!important;
+  place-items:center!important;
+  background:linear-gradient(145deg,#3b424d,#242a33)!important;
+  color:#fff!important;
+}
+#frontOfficeRoot .tb-photo.is-fallback b{display:grid!important}
+#frontOfficeRoot .tb-depth-card .tb-mini-pos{
+  left:auto!important;
+  right:4px!important;
+  top:3px!important;
+}
+#frontOfficeRoot .tb-depth-card>div{padding-top:0!important;padding-right:19px!important}
+
+@media (max-width:1320px){
+  #frontOfficeRoot .tb-roster-banner .tb-banner-head{grid-template-columns:minmax(330px,.9fr) minmax(0,2.1fr)!important}
+  #frontOfficeRoot .tb-franchise h1{font-size:30px!important}
+  #frontOfficeRoot .tb-support-card{grid-template-columns:38px minmax(0,1fr) 30px!important;height:92px!important;min-height:92px!important}
+  #frontOfficeRoot .tb-support-photo{width:38px!important;height:50px!important}
+  #frontOfficeRoot .tb-support-copy strong{font-size:9px!important}
+}
+
+@media (max-width:980px){
+  #frontOfficeRoot .tb-roster-banner .tb-banner-head{grid-template-columns:1fr!important}
+  #frontOfficeRoot .tb-franchise{grid-template-columns:64px minmax(0,1fr)!important}
+  #frontOfficeRoot .tb-franchise img{width:58px!important;height:58px!important}
+  #frontOfficeRoot .tb-franchise h1{font-size:29px!important;white-space:normal!important}
+}
+
+@media (max-width:680px){
+  #frontOfficeRoot .tb-support-card{flex-basis:178px!important}
+  #frontOfficeRoot .tb-support-copy strong{font-size:10px!important}
+}
