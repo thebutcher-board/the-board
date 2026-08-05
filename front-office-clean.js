@@ -6,11 +6,20 @@
     'c.j. stroud':'9758','cam ward':'12522','jordan love':'6804','daniel jones':'5849','baker mayfield':'4892','garrett wilson':'8146',
     'davante adams':'2133','brandon aubrey':'11628','jeremiyah love':'12531','jaylen waddle':'7561','courtland sutton':'5133'
   };
+  const BYE_BY_TEAM={
+    CAR:5,KC:5,CIN:6,DET:6,MIA:6,MIN:6,BUF:7,JAX:7,LAC:7,WAS:7,HOU:8,NO:8,NYG:8,SF:8,
+    PIT:9,TEN:9,CHI:10,DEN:10,PHI:10,TB:10,ATL:11,CLE:11,GB:11,LAR:11,NE:11,SEA:11,
+    BAL:13,IND:13,LV:13,NYJ:13,ARI:14,DAL:14
+  };
+  const TEAM_ALIASES={
+    JAC:'JAX',WSH:'WAS',LA:'LAR',RAM:'LAR',SD:'LAC',OAK:'LV',STL:'LAR'
+  };
   const SLOT_DEFS=[['QB1','QB'],['QB2','QB'],['RB1','RB'],['RB2','RB'],['WR1','WR'],['WR2','WR'],['TE','TE'],['FLEX','FLEX'],['K','K'],['DEF','DEF'],['BENCH 1','ANY'],['BENCH 2','ANY'],['BENCH 3','ANY'],['BENCH 4','ANY'],['BENCH 5','ANY'],['BENCH 6','ANY']];
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n));
   const clean=n=>String(n||'').replace(/…/g,'').trim().toLowerCase();
   const initials=n=>String(n||'').split(/\s+/).map(x=>x[0]||'').join('').slice(0,2).toUpperCase();
+  const normalizeTeam=t=>TEAM_ALIASES[String(t||'').trim().toUpperCase()]||String(t||'').trim().toUpperCase();
   const teamName=()=>window.state?.profile?.teamName||'The Butcher';
   const ranked=()=>{try{return window.ranked?.()||[]}catch{return[]}};
   const currentOwner=()=>{try{return window.draftOrderAt?.(window.state?.drafted?.length||0)||'League'}catch{return'League'}};
@@ -18,7 +27,7 @@
   const roster=()=>{try{return (window.rosterFor?.(teamName())||[]).map(p=>window.playerByName?.(p.name)||p)}catch{return[]}};
   const engine=()=>{try{return window.BoardDecisionEngine?.results?.()||[]}catch{return[]}};
   const selectedName=()=>window.__cleanFrontOfficeSelected||window.BoardCockpit?.selected?.()||null;
-  const byeOf=p=>p?.bye??p?.byeWeek??p?.weekOff??'—';
+  const byeOf=p=>p?.bye??p?.byeWeek??p?.weekOff??BYE_BY_TEAM[normalizeTeam(p?.team)]??'—';
 
   function playerPhoto(name,cls=''){
     const id=PHOTO_IDS[clean(name)],fallback=esc(initials(name));
@@ -48,27 +57,31 @@
     const filled=entries.filter(x=>x.player).length,points=entries.reduce((s,x)=>s+Number(x.player?.proj||0),0);
     return{points:Math.round(points),playoff:clamp(Math.round((projected?52:42)+filled*3.2+points/190),10,94),champ:clamp(Math.round((projected?8:5)+filled*1.05+points/520),3,45),score:clamp(Math.round(55+filled*1.8+points/120),55,99)};
   }
+  function positionFor(entry){return entry.player?.pos||entry.slot.replace(/\s*\d+$/,'').replace(/\d/g,'')}
   function depthCard(entry){
     const p=entry.player;
-    if(!p)return `<div class="tb-depth-card is-empty"><small>${entry.slot}</small><span>OPEN</span></div>`;
-    return `<div class="tb-depth-card">${playerPhoto(p.name,'tb-depth-photo')}<span class="tb-mini-pos">${esc(p.pos||entry.slot.replace(/\d/g,''))}</span><div><small>${entry.slot}</small><strong title="${esc(p.name)}">${esc(p.name)}</strong><span>${esc(p.team||'—')} · BYE ${esc(byeOf(p))}</span></div></div>`;
+    if(!p)return `<div class="tb-depth-card is-empty"><span class="tb-mini-pos">${esc(positionFor(entry))}</span><small>${entry.slot}</small><span>OPEN</span></div>`;
+    return `<div class="tb-depth-card">${playerPhoto(p.name,'tb-depth-photo')}<span class="tb-mini-pos">${esc(positionFor(entry))}</span><div><small>${entry.slot}</small><strong title="${esc(p.name)}">${esc(p.name)}</strong><span>${esc(p.team||'—')} · BYE ${esc(byeOf(p))}</span></div></div>`;
   }
   function depthChart(entries){
     const groups=[['QB',entries.slice(0,2)],['RB',entries.slice(2,4)],['WR',entries.slice(4,6)],['SKILL',entries.slice(6,8)],['SPECIAL',entries.slice(8,10)],['BENCH',entries.slice(10)]];
-    return groups.map(([label,cards])=>`<section class="tb-depth-group"><label>${label}</label><div>${cards.map(depthCard).join('')}</div></section>`).join('');
+    return groups.map(([label,cards])=>`<section class="tb-depth-group tb-depth-${label.toLowerCase()}"><label>${label}</label><div>${cards.map(depthCard).join('')}</div></section>`).join('');
+  }
+  function rosterBand(entries,title,subtitle){
+    return `<div class="tb-depth-line"><div class="tb-depth-title"><small>${esc(title)}</small><b>${esc(subtitle)}</b></div><div class="tb-depth-chart">${depthChart(entries)}</div></div>`;
   }
   function metricBar(o,projected=false){
     return `<div class="tb-banner-metrics">${projected?`<span><small>PERFECT DRAFT</small><b>${o.score}</b></span>`:''}<span><small>PROJECTED PTS</small><b>${o.points}</b></span><span><small>PLAYOFF</small><b>${o.playoff}%</b></span><span><small>CHAMPIONSHIP</small><b>${o.champ}%</b></span>${projected?'':`<span><small>PICKS UNTIL YOU</small><b>${picksAway()||'—'}</b></span><span><small>ON THE CLOCK</small><b>${esc(currentOwner())}</b></span>`}</div>`;
   }
   function supportCard(item,label){
     const p=item.player,m=metrics(item),availability=label==='Next pick'?`${m.survives}% available`:`${100-m.survives}% pass risk`;
-    return `<button class="tb-support-card" data-explore="${encodeURIComponent(p.name)}" title="${esc(p.name)}">${playerPhoto(p.name,'tb-support-photo')}<span class="tb-support-pos">${esc(p.pos)}</span><div class="tb-support-copy"><small>${esc(label)}</small><strong>${esc(p.name)}</strong><span>${esc(p.team||'—')} · BYE ${esc(byeOf(p))}</span><footer><i>${Math.round(p.proj||0)} pts</i><i>${availability}</i></footer></div><b class="tb-grade">${m.grade}</b></button>`;
+    return `<button class="tb-support-card" data-explore="${encodeURIComponent(p.name)}" title="${esc(p.name)}"><span class="tb-support-pos">${esc(p.pos)}</span>${playerPhoto(p.name,'tb-support-photo')}<div class="tb-support-copy"><small>${esc(label)}</small><strong>${esc(p.name)}</strong><span>${esc(p.team||'—')} · BYE ${esc(byeOf(p))}</span><footer><i>${Math.round(p.proj||0)} pts</i><i>${availability}</i></footer></div><b class="tb-grade">${m.grade}</b></button>`;
   }
   function hero(item){
     const p=item.player,m=metrics(item),gone=100-m.survives;
     return `<article class="tb-hero">
       <header class="tb-hero-head">
-        <div class="tb-hero-player">${playerPhoto(p.name,'tb-hero-photo')}<span class="tb-position">${esc(p.pos)}</span></div>
+        <div class="tb-hero-player"><span class="tb-position">${esc(p.pos)}</span>${playerPhoto(p.name,'tb-hero-photo')}</div>
         <div class="tb-hero-identity"><small>PLAYER UNDER CONSIDERATION</small><h2>${esc(p.name)}</h2><p>${esc(p.team||'—')} · ${esc(p.pos)}1 · BYE ${esc(byeOf(p))}</p></div>
         <div class="tb-hero-grade"><b>${m.grade}</b><small>GOOSE</small></div>
       </header>
@@ -97,9 +110,9 @@
     const priority=['QB','RB','WR','TE'].find(pos=>(counts[pos]||0)<targets[pos])||'WR';
     const pivots=others.slice(0,10).map(itemFor),future=[...others.filter(p=>p.pos===priority),...others.filter(p=>p.pos!==priority)].slice(0,10).map(itemFor);
     mount.innerHTML=`<div class="tb-war-room"><div class="tb-command-surface">
-      <header class="tb-roster-banner"><div class="tb-banner-head"><div class="tb-franchise"><img src="logo.png" alt="${esc(teamName())}"><div><small>YOUR FRANCHISE</small><h1>${esc(teamName())}</h1><p>Live roster · Mission ${(window.state?.drafted?.length||0)+1}</p></div></div>${metricBar(currentOdds)}</div><div class="tb-depth-line"><div class="tb-depth-title"><small>CURRENT TEAM</small><b>Built as you draft</b></div>${depthChart(currentEntries)}</div></header>
+      <header class="tb-roster-banner"><div class="tb-banner-head"><div class="tb-franchise"><img src="logo.png" alt="${esc(teamName())}"><div><small>YOUR FRANCHISE</small><h1>${esc(teamName())}</h1><p>Live roster · Mission ${(window.state?.drafted?.length||0)+1}</p></div></div>${metricBar(currentOdds)}</div>${rosterBand(currentEntries,'CURRENT TEAM','Built as you draft')}</header>
       <section class="tb-decision-grid"><aside class="tb-side tb-pivots"><small>WHAT IF YOU PIVOT</small><h3>Pivot Paths</h3><div class="tb-support-grid">${pivots.map(x=>supportCard(x,'Alternate')).join('')}</div></aside><main class="tb-center">${hero(main)}${draftPulse(main,priority)}</main><aside class="tb-side tb-future"><small>FUTURE BOARD</small><h3>Likely Available</h3><div class="tb-support-grid">${future.map(x=>supportCard(x,'Next pick')).join('')}</div></aside></section>
-      <footer class="tb-perfect-banner"><div class="tb-banner-head"><div class="tb-perfect-title"><small>PERFECT DRAFT</small><h2>Best Realistic Finished Roster</h2><p>Pre-draft prediction recalculates after every selection.</p></div>${metricBar(perfectOdds,true)}</div><div class="tb-depth-line"><div class="tb-depth-title"><small>PROJECTED TEAM</small><b>Best realistic path</b></div>${depthChart(perfectEntries)}</div></footer>
+      <footer class="tb-perfect-banner"><div class="tb-banner-head"><div class="tb-perfect-title"><small>PERFECT DRAFT</small><h2>Best Realistic Finished Roster</h2><p>Pre-draft prediction recalculates after every selection.</p></div>${metricBar(perfectOdds,true)}</div>${rosterBand(perfectEntries,'PROJECTED TEAM','Best realistic path')}</footer>
     </div></div>`;
     hydratePhotos(mount);bind(mount);return true;
   }
