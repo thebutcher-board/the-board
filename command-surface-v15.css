@@ -1,0 +1,150 @@
+/* Front Office v15 — final visual polish */
+
+/* Hero emphasis without changing the stable layout */
+.tb-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.tb-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(37, 99, 235, .13), transparent 30%),
+    radial-gradient(circle at 84% 12%, rgba(249, 115, 22, .08), transparent 28%);
+}
+.tb-hero-player {
+  position: relative;
+}
+.tb-hero-player::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 78%;
+  height: 34%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: rgba(37, 99, 235, .18);
+  filter: blur(18px);
+  pointer-events: none;
+  z-index: 0;
+}
+.tb-hero-photo {
+  position: relative;
+  z-index: 1;
+  transform: scale(1.08);
+  transform-origin: center bottom;
+  transition: transform .22s ease, filter .22s ease;
+}
+.tb-hero:hover .tb-hero-photo {
+  transform: scale(1.11) translateY(-2px);
+  filter: saturate(1.05) contrast(1.02);
+}
+.tb-hero-identity h2 {
+  font-size: clamp(2rem, 2.55vw, 3.25rem);
+  letter-spacing: -.035em;
+}
+
+/* Goose confidence ring */
+.tb-hero-grade {
+  --goose-confidence: 87%;
+  position: relative;
+  width: 92px;
+  height: 92px;
+  display: grid;
+  place-content: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, rgba(20, 26, 34, .98) 58%, transparent 60%),
+    conic-gradient(#ff8a00 var(--goose-confidence), rgba(255,255,255,.10) 0);
+  box-shadow: 0 0 0 1px rgba(255, 138, 0, .18), 0 0 24px rgba(255, 138, 0, .12);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.tb-hero-grade:hover {
+  transform: scale(1.035);
+  box-shadow: 0 0 0 1px rgba(255, 138, 0, .28), 0 0 30px rgba(255, 138, 0, .20);
+}
+.tb-hero-grade b {
+  line-height: .9;
+  text-shadow: 0 0 18px rgba(255,255,255,.12);
+}
+.tb-hero-grade small {
+  margin-top: 7px;
+  letter-spacing: .14em;
+}
+
+/* Alive, restrained interactions */
+.tb-support-card,
+.tb-depth-card,
+.tb-hero-actions button,
+.tb-decision-compare section {
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease;
+}
+@media (hover:hover) and (pointer:fine) {
+  .tb-support-card:hover {
+    transform: translateY(-2px);
+  }
+  .tb-depth-card:not(.is-empty):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(0,0,0,.16);
+  }
+  .tb-hero-actions button:hover {
+    transform: translateY(-1px);
+  }
+}
+.tb-hero-actions button:first-child {
+  box-shadow: 0 0 0 1px rgba(255,138,0,.10), 0 8px 22px rgba(255,110,0,.14);
+}
+.tb-hero-actions button:first-child:hover {
+  box-shadow: 0 0 0 1px rgba(255,138,0,.20), 0 10px 28px rgba(255,110,0,.22);
+}
+
+/* Clearer scan points in hero metrics */
+.tb-hero-stats span:nth-child(1) small::before { content: "↗ "; }
+.tb-hero-stats span:nth-child(2) small::before { content: "◎ "; }
+.tb-hero-stats span:nth-child(3) small::before { content: "◫ "; }
+.tb-hero-stats span:nth-child(5) small::before { content: "△ "; }
+.tb-hero-stats span:nth-child(7) small::before { content: "◆ "; }
+
+/* Smooth metric/progress updates */
+.tb-banner-metrics span::after {
+  transition: width .45s ease;
+}
+.tb-pulse-dot {
+  animation: tbPulse 1.8s ease-in-out infinite;
+}
+@keyframes tbPulse {
+  0%,100% { transform: scale(.88); opacity: .72; }
+  50% { transform: scale(1.12); opacity: 1; }
+}
+
+/* Respect accessibility and battery-saving preferences */
+@media (prefers-reduced-motion: reduce) {
+  .tb-hero-photo,
+  .tb-support-card,
+  .tb-depth-card,
+  .tb-hero-actions button,
+  .tb-hero-grade,
+  .tb-banner-metrics span::after {
+    transition: none !important;
+  }
+  .tb-pulse-dot { animation: none !important; }
+}
+
+/* Keep the confidence treatment compact on phones */
+@media (max-width: 720px) {
+  .tb-hero-grade {
+    width: 72px;
+    height: 72px;
+  }
+  .tb-hero-photo {
+    transform: scale(1.04);
+  }
+  .tb-hero:hover .tb-hero-photo {
+    transform: scale(1.04);
+  }
+}
