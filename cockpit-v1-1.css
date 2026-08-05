@@ -1,0 +1,143 @@
+/* THE BOARD — Cockpit refinement v1.1 */
+:root{
+  --tb-cockpit-top:132px;
+}
+
+/* Taller, more readable live draft rail */
+.tb-command-surface{
+  grid-template-rows:var(--tb-cockpit-top) 88px minmax(0,1fr) var(--tb-drawer-collapsed) !important;
+}
+.tb-live-rail{
+  grid-template-columns:190px minmax(0,1fr) 150px !important;
+  padding:12px 16px !important;
+  gap:10px !important;
+}
+.tb-live-franchise{
+  display:grid;
+  grid-template-columns:58px minmax(0,1fr);
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.tb-live-franchise img{
+  width:58px;
+  height:58px;
+  object-fit:contain;
+  border-radius:12px;
+}
+.tb-live-franchise-copy{min-width:0;}
+.tb-live-franchise-copy small{
+  display:block;
+  color:#d29b62;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.tb-live-franchise-copy strong{
+  display:block;
+  margin-top:3px;
+  font-size:20px;
+  line-height:1.05;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.tb-live-franchise-copy span{
+  display:block;
+  margin-top:5px;
+  color:#9ca7b7;
+  font-size:11px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.tb-pick-track{gap:6px !important;}
+.tb-pick-tile{
+  min-height:86px;
+  padding:9px 9px !important;
+  justify-content:flex-start !important;
+}
+.tb-pick-tile small{font-size:9px !important;}
+.tb-pick-tile b{
+  font-size:13px !important;
+  line-height:1.15;
+  margin-top:8px !important;
+}
+.tb-pick-tile span{margin-top:auto !important;padding-top:7px;}
+.tb-draft-next b{font-size:19px !important;line-height:1.05;}
+
+/* The franchise identity now lives in the draft rail. Keep only metrics + roster here. */
+.tb-roster-banner{
+  padding:7px 18px 6px !important;
+  min-height:0 !important;
+}
+.tb-roster-banner .tb-banner-head{
+  height:28px !important;
+  min-height:28px !important;
+  margin:0 0 4px !important;
+}
+.tb-roster-banner .tb-franchise{display:none !important;}
+.tb-roster-banner .tb-banner-metrics{
+  width:100% !important;
+  height:28px !important;
+  margin-left:0 !important;
+}
+.tb-roster-banner .tb-banner-metrics span{padding:4px 12px !important;}
+.tb-roster-banner .tb-depth-line{min-height:45px !important;}
+.tb-roster-banner .tb-depth-title{display:none !important;}
+.tb-roster-banner .tb-depth-chart{width:100% !important;}
+.tb-roster-banner .tb-depth-card{height:34px !important;min-height:34px !important;}
+.tb-roster-banner .tb-depth-photo{width:29px !important;height:31px !important;}
+
+/* Pull the decision stage upward and let the hero dominate. */
+.tb-decision-grid{
+  padding:8px 16px 8px !important;
+  gap:10px !important;
+}
+.tb-center{grid-template-rows:minmax(0,1fr) 26px !important;gap:4px !important;}
+.tb-hero{padding:12px 16px !important;}
+.tb-hero-head{min-height:80px !important;}
+.tb-hero-photo{width:112px !important;height:112px !important;}
+.tb-goose-call{margin-top:5px !important;padding:10px 14px !important;}
+.tb-hero-stats,.tb-decision-compare,.tb-hero-actions{margin-top:6px !important;}
+.tb-draft-pulse{height:26px !important;min-height:26px !important;}
+
+/* Forecast cards: make survival probability the visible takeaway. */
+.tb-side-right .tb-support-card{
+  position:relative;
+  border-color:rgba(58,146,255,.65) !important;
+}
+.tb-side-right .tb-support-card .tb-support-meta:last-child,
+.tb-side-right .tb-support-card small:last-child{
+  color:#84b9ff !important;
+  font-weight:800;
+}
+
+@media (max-width:1050px){
+  :root{--tb-cockpit-top:108px;}
+  .tb-command-surface{grid-template-rows:108px 76px minmax(0,1fr) 56px !important;}
+  .tb-live-rail{grid-template-columns:150px minmax(0,1fr) !important;padding:8px !important;}
+  .tb-live-franchise{grid-template-columns:44px minmax(0,1fr);gap:7px;}
+  .tb-live-franchise img{width:44px;height:44px;}
+  .tb-live-franchise-copy strong{font-size:16px;}
+  .tb-pick-tile{min-height:72px;}
+  .tb-roster-banner{padding:5px 10px !important;}
+  .tb-roster-banner .tb-banner-head{height:24px !important;min-height:24px !important;}
+}
+
+@media (max-width:700px){
+  :root{--tb-cockpit-top:84px;}
+  .tb-command-surface{grid-template-rows:84px 68px minmax(0,1fr) 54px !important;}
+  .tb-live-rail{grid-template-columns:100px minmax(0,1fr) !important;padding:6px !important;gap:5px !important;}
+  .tb-live-franchise{grid-template-columns:32px minmax(0,1fr);gap:5px;}
+  .tb-live-franchise img{width:32px;height:32px;border-radius:8px;}
+  .tb-live-franchise-copy small{font-size:7px;}
+  .tb-live-franchise-copy strong{font-size:13px;}
+  .tb-live-franchise-copy span{font-size:8px;margin-top:2px;}
+  .tb-pick-tile{min-height:62px;padding:5px !important;}
+  .tb-pick-tile b{font-size:10px !important;margin-top:4px !important;}
+  .tb-roster-banner .tb-banner-head{display:none !important;}
+  .tb-roster-banner{padding:4px 6px !important;}
+  .tb-hero-photo{width:80px !important;height:80px !important;}
+}
