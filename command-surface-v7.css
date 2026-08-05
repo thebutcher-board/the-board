@@ -1,0 +1,92 @@
+/* THE BOARD — Command Surface v7
+   Compact war-room pass: no divider ribbons, readable cards, bye weeks, and Draft Pulse. */
+#frontOfficeRoot .tb-command-surface{
+  padding:0!important;
+  border-radius:28px!important;
+  background:
+    radial-gradient(ellipse at 50% 43%,rgba(255,133,0,.10),transparent 31%),
+    radial-gradient(ellipse at 5% 10%,rgba(38,191,111,.16),transparent 32%),
+    radial-gradient(ellipse at 96% 46%,rgba(86,71,148,.065),transparent 27%),
+    linear-gradient(155deg,#172028 0%,#0f151c 49%,#0a0e14 100%)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.045),0 24px 70px rgba(0,0,0,.28)!important;
+}
+#frontOfficeRoot .tb-command-surface:after{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(180deg,rgba(47,184,106,.055),transparent 24%),linear-gradient(90deg,rgba(47,184,106,.04),transparent 18%,transparent 82%,rgba(255,133,0,.03));mix-blend-mode:screen;
+}
+#frontOfficeRoot .tb-roster-banner,#frontOfficeRoot .tb-perfect-banner,#frontOfficeRoot .tb-decision-grid{position:relative;z-index:2;margin:0!important;border:0!important;box-shadow:none!important;background:transparent!important}
+#frontOfficeRoot .tb-roster-banner{padding:20px 22px 8px!important}
+#frontOfficeRoot .tb-decision-grid{padding:10px 18px 8px!important}
+#frontOfficeRoot .tb-perfect-banner{padding:8px 22px 20px!important}
+#frontOfficeRoot .tb-roster-banner:after,#frontOfficeRoot .tb-perfect-banner:before,#frontOfficeRoot .tb-live-ribbon,#frontOfficeRoot .tb-league-row{display:none!important}
+
+/* Hero: denser, cleaner hierarchy. */
+#frontOfficeRoot .tb-hero{border-radius:18px!important;background:linear-gradient(145deg,rgba(55,65,78,.72),rgba(24,30,39,.74))!important;padding:16px!important}
+#frontOfficeRoot .tb-hero-head{gap:14px!important;align-items:center!important}
+#frontOfficeRoot .tb-hero-player{overflow:visible!important;background:linear-gradient(150deg,#414b59,#252c35)!important;flex:0 0 150px!important;height:124px!important}
+#frontOfficeRoot .tb-hero-photo{overflow:hidden;border-radius:14px!important;width:100%!important;height:100%!important}
+#frontOfficeRoot .tb-position{top:-5px!important;left:-5px!important;right:auto!important;z-index:5;box-shadow:0 7px 16px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.22)}
+#frontOfficeRoot .tb-hero-identity h2{letter-spacing:-.025em;margin:3px 0 2px!important}
+#frontOfficeRoot .tb-hero-identity p{margin:0!important}
+#frontOfficeRoot .tb-goose-call{min-height:0!important;margin:10px 0 8px!important;padding:10px 14px!important;background:linear-gradient(90deg,rgba(5,9,14,.66),rgba(8,12,18,.48))!important}
+#frontOfficeRoot .tb-goose-call p{max-width:none!important;margin:3px 0 0!important}
+#frontOfficeRoot .tb-hero-stats{margin-top:8px!important}
+#frontOfficeRoot .tb-decision-compare{margin-top:10px!important;gap:10px!important}
+#frontOfficeRoot .tb-decision-compare section{padding:10px 13px!important}
+#frontOfficeRoot .tb-hero-actions{margin-top:10px!important}
+
+/* Draft Pulse replaces the old league/live row and is intentionally animation-ready. */
+#frontOfficeRoot .tb-draft-pulse{
+  min-height:28px;margin:7px 4px 0;padding:5px 10px;display:flex;align-items:center;gap:12px;overflow:hidden;
+  color:#cbd2d9;background:linear-gradient(90deg,rgba(7,11,16,.18),rgba(14,20,27,.42),rgba(7,11,16,.14));
+  border:0;border-radius:5px;font-size:10px;white-space:nowrap;
+}
+#frontOfficeRoot .tb-draft-pulse .tb-pulse-dot{width:6px;height:6px;border-radius:50%;flex:0 0 6px;background:#5fd18d;box-shadow:0 0 10px rgba(95,209,141,.75)}
+#frontOfficeRoot .tb-draft-pulse.is-hot .tb-pulse-dot{background:#ff8a00;box-shadow:0 0 12px rgba(255,138,0,.95)}
+#frontOfficeRoot .tb-draft-pulse b{color:#f1a15c;font-size:9px;letter-spacing:.11em}
+#frontOfficeRoot .tb-draft-pulse span+span:before{content:"•";margin-right:12px;color:rgba(255,255,255,.22)}
+
+/* Roster slots: thumbnail first, then slot/name/bye. */
+#frontOfficeRoot .tb-depth-card{position:relative!important;min-height:52px!important;padding:5px 8px 5px 5px!important;gap:7px!important}
+#frontOfficeRoot .tb-depth-photo{width:38px!important;height:42px!important;flex:0 0 38px!important;border-radius:8px!important}
+#frontOfficeRoot .tb-depth-card>div{min-width:0!important}
+#frontOfficeRoot .tb-depth-card strong{font-size:10px!important;line-height:1.05!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;display:block!important}
+#frontOfficeRoot .tb-depth-card small{font-size:7px!important;line-height:1!important}
+#frontOfficeRoot .tb-depth-card span{font-size:7px!important;line-height:1.15!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#frontOfficeRoot .tb-mini-pos{position:absolute!important;left:31px!important;top:4px!important;z-index:4!important;display:grid!important;place-items:center!important;min-width:18px!important;height:14px!important;padding:0 4px!important;border-radius:5px!important;background:#ff8500!important;color:#fff!important;font-size:6px!important;font-weight:800!important;line-height:1!important;box-shadow:0 2px 7px rgba(0,0,0,.3)}
+#frontOfficeRoot .tb-depth-card.is-empty{min-height:52px!important}
+
+/* Side cards: compact scan cards, not mini dashboards. */
+#frontOfficeRoot .tb-support-card{position:relative!important;height:88px!important;padding:7px!important;gap:6px!important}
+#frontOfficeRoot .tb-support-photo{flex:0 0 46px!important;width:46px!important;height:55px!important;border-radius:9px!important}
+#frontOfficeRoot .tb-support-pos{position:absolute;left:42px;top:5px;z-index:5;min-width:18px;height:14px;padding:0 4px;display:grid;place-items:center;border-radius:5px;background:#ff8500;color:#fff;font-size:6px;font-weight:800;line-height:1}
+#frontOfficeRoot .tb-support-copy{min-width:0!important}
+#frontOfficeRoot .tb-support-copy small{font-size:6px!important;line-height:1!important}
+#frontOfficeRoot .tb-support-copy strong{font-size:10px!important;line-height:1.08!important;display:block!important;white-space:normal!important;overflow:hidden!important;max-height:22px!important}
+#frontOfficeRoot .tb-support-copy span{font-size:7px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#frontOfficeRoot .tb-support-copy footer{display:flex!important;gap:4px!important;justify-content:space-between!important}
+#frontOfficeRoot .tb-support-copy footer i{font-size:6px!important;white-space:nowrap!important}
+#frontOfficeRoot .tb-grade{align-self:flex-start!important;font-size:18px!important;line-height:1!important}
+
+/* Perfect Draft remains part of the same surface. */
+#frontOfficeRoot .tb-perfect-banner{background:linear-gradient(180deg,rgba(20,27,36,.02),rgba(25,32,42,.20))!important}
+#frontOfficeRoot .tb-perfect-banner .tb-banner-head{padding-top:0!important}
+#frontOfficeRoot .tb-perfect-banner .tb-banner-metrics{background:rgba(7,11,16,.20)!important}
+
+@media (max-width:980px){
+  #frontOfficeRoot .tb-roster-banner{padding:14px 12px 7px!important}
+  #frontOfficeRoot .tb-decision-grid{padding:8px 12px!important}
+  #frontOfficeRoot .tb-perfect-banner{padding:7px 12px 14px!important}
+  #frontOfficeRoot .tb-draft-pulse{overflow-x:auto;scrollbar-width:none}
+  #frontOfficeRoot .tb-draft-pulse::-webkit-scrollbar{display:none}
+  #frontOfficeRoot .tb-hero-player{flex-basis:132px!important;height:112px!important}
+}
+@media (max-width:680px){
+  #frontOfficeRoot .tb-command-surface{border-radius:16px!important}
+  #frontOfficeRoot .tb-hero{padding:12px!important}
+  #frontOfficeRoot .tb-hero-player{flex:0 0 100%!important;height:190px!important}
+  #frontOfficeRoot .tb-position{top:-4px!important;left:-4px!important}
+  #frontOfficeRoot .tb-support-card{height:84px!important}
+  #frontOfficeRoot .tb-draft-pulse{margin-top:5px;padding:4px 7px;font-size:8px;gap:8px}
+  #frontOfficeRoot .tb-draft-pulse span+span:before{margin-right:8px}
+}
