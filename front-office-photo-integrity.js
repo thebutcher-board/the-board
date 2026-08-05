@@ -4,11 +4,11 @@
     'jalen hurts':'6904','drake maye':'11560','jahmyr gibbs':'9221','ceedee lamb':'6786','trey mcbride':'8151',
     'ashton jeanty':'12526','brock purdy':'7523','jared goff':'5857','matthew stafford':'421','patrick mahomes':'4046',
     'c.j. stroud':'9758','cam ward':'12522','jaxson dart':'12507','jeremiyah love':'12531','jordan love':'6804',
-    'daniel jones':'5849','baker mayfield':'4892','garrett wilson':'8146','davante adams':'2133','brandon aubrey':'11628',
-    'jaylen waddle':'7561','courtland sutton':'5133'
+    'daniel jones':'5849','baker mayfield':'4892','garrett wilson':'8146','davante adams':'2133','brandon aubrey':'11533',
+    'marvin harrison':'11628','marvin harrison jr':'11628','jaylen waddle':'7561','courtland sutton':'5133'
   };
   const PHOTO_SELECTOR='.tb-photo,.tb-support-photo,.tb-depth-photo,.tb-hero-photo';
-  const PLAYER_CACHE_KEY='tb-sleeper-player-photo-map-v1';
+  const PLAYER_CACHE_KEY='tb-sleeper-player-photo-map-v2';
   const PLAYER_CACHE_TTL=24*60*60*1000;
   const clean=n=>String(n||'')
     .replace(/…/g,'')
