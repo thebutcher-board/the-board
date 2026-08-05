@@ -1,1 +1,1 @@
-Front Office v15.0.7 centered Goose confidence ring deployment trigger
+Draft Cockpit v16.0.0 one-screen architecture deployment trigger
