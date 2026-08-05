@@ -1,79 +1,74 @@
-/* THE BOARD — Goose Decision Intelligence v3 */
-#frontOfficeRoot .tb-support-card.is-selected{border-color:#ff8a00!important;box-shadow:0 0 0 2px rgba(255,138,0,.18),0 12px 30px rgba(0,0,0,.28)!important}
-#frontOfficeRoot .tb-support-card.is-selected::after{content:'IN HERO';position:absolute;top:6px;left:6px;z-index:3;padding:3px 6px;border-radius:999px;background:#ff8500;color:#fff;font-size:6px;font-weight:900;letter-spacing:.08em}
-#frontOfficeRoot .tb-card-signal{position:absolute;right:7px;top:33px;color:#f6b56f;font-size:6px;letter-spacing:.04em;text-transform:uppercase;opacity:.86}
+/* THE BOARD — stabilized liquid command center */
+#frontOfficeRoot{--tb-orange:#ff8500;--tb-line:rgba(255,255,255,.075);--tb-panel:rgba(23,28,37,.72);--tb-deep:#0d1118}
 
-/* Three bench columns, two cards stacked in each. */
-#frontOfficeRoot .tb-depth-group.tb-bench-compact{grid-column:auto;min-width:0}
-#frontOfficeRoot .tb-depth-group.tb-bench-compact>div{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
-#frontOfficeRoot .tb-bench-pair{display:grid!important;grid-template-columns:1fr!important;gap:6px!important;min-width:0}
-#frontOfficeRoot .tb-bench-pair .tb-depth-card{min-width:0}
+/* One continuous command surface. */
+#frontOfficeRoot .tb-stage,
+#frontOfficeRoot .tb-command-center,
+#frontOfficeRoot .tb-war-room{background:radial-gradient(circle at 50% 38%,rgba(255,133,0,.065),transparent 35%),linear-gradient(180deg,#151b24 0%,#0d1118 72%)!important}
+#frontOfficeRoot .tb-roster-banner,
+#frontOfficeRoot .tb-perfect-draft{border-color:rgba(255,255,255,.06)!important;box-shadow:none!important}
+#frontOfficeRoot .tb-hero{border-color:rgba(255,133,0,.45)!important;box-shadow:0 24px 70px rgba(0,0,0,.25),0 0 50px rgba(255,133,0,.045)!important}
+#frontOfficeRoot .tb-support-card{box-shadow:none!important}
 
-/* Readable collectible-card names. */
-#frontOfficeRoot .tb-support-copy strong{font-size:11px!important;line-height:1.02!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;margin-top:3px!important}
-#frontOfficeRoot .tb-support-copy strong span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#frontOfficeRoot .tb-support-copy strong span:last-child{font-size:12px;color:#fff}
-#frontOfficeRoot .tb-photo.is-fallback{background:radial-gradient(circle at 40% 25%,rgba(255,255,255,.12),transparent 38%),linear-gradient(145deg,#3d4552,#222831)}
-#frontOfficeRoot .tb-photo.is-fallback>b{color:#eef2f6;font-weight:900;letter-spacing:.03em}
+/* Remove the temporary intelligence blocks that crowded the hero. */
+#frontOfficeRoot .tb-confidence,
+#frontOfficeRoot .tb-why-grid,
+#frontOfficeRoot .tb-fallout{display:none!important}
 
-/* Confidence meter. */
-#frontOfficeRoot .tb-confidence{display:grid;grid-template-columns:auto minmax(120px,1fr) auto;align-items:center;gap:10px;margin:10px 0 12px 184px;padding:9px 11px;border:1px solid rgba(255,255,255,.1);border-radius:11px;background:rgba(8,11,16,.45)}
-#frontOfficeRoot .tb-confidence small,#frontOfficeRoot .tb-confidence strong{display:block}
-#frontOfficeRoot .tb-confidence small{font-size:6px;color:#9ca5af;letter-spacing:.08em}
-#frontOfficeRoot .tb-confidence strong{font-size:11px;color:#f5a154;margin-top:2px}
-#frontOfficeRoot .tb-confidence>b{font-size:14px}
-#frontOfficeRoot .tb-confidence-track{height:7px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden}
-#frontOfficeRoot .tb-confidence-track i{display:block;width:var(--confidence);height:100%;border-radius:inherit;background:linear-gradient(90deg,#f5a154,#ff8500);box-shadow:0 0 12px rgba(255,133,0,.35)}
+/* Hero is the fixed visual anchor. */
+#frontOfficeRoot .tb-hero-content>header{position:relative;z-index:2;min-width:0}
+#frontOfficeRoot .tb-hero-content h2{margin:0!important;max-width:100%;font-size:clamp(28px,2.35vw,42px)!important;line-height:1!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#frontOfficeRoot .tb-hero-grade{top:20px!important;right:22px!important}
+#frontOfficeRoot .tb-goose-note{margin-top:14px!important;min-height:88px!important;padding:18px 20px!important}
+#frontOfficeRoot .tb-hero-stats{margin-top:12px!important}
+#frontOfficeRoot .tb-hero-actions{margin-top:12px!important}
 
-/* Why Goose and Opportunity Window. */
-#frontOfficeRoot .tb-why-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}
-#frontOfficeRoot .tb-why,#frontOfficeRoot .tb-window{padding:11px 12px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(8,11,16,.42);min-width:0}
-#frontOfficeRoot .tb-why>small,#frontOfficeRoot .tb-window>small{display:block;color:#f5a154;font-size:7px;letter-spacing:.1em;margin-bottom:7px}
-#frontOfficeRoot .tb-why ul{margin:0;padding-left:15px;color:#c7cdd5;font-size:9px;line-height:1.45}
-#frontOfficeRoot .tb-window label{display:flex;justify-content:space-between;gap:8px;color:#aeb6c0;font-size:7px;margin:5px 0 3px}
-#frontOfficeRoot .tb-window label b{color:#fff;font-size:8px}
-#frontOfficeRoot .tb-window>span{display:block;height:6px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
-#frontOfficeRoot .tb-window>span i{display:block;width:var(--window);height:100%;border-radius:inherit;background:linear-gradient(90deg,#7f58c9,#ff8500)}
+/* Three columns with two bench cards stacked in each. */
+#frontOfficeRoot .tb-depth-group.tb-bench-compact{min-width:0!important}
+#frontOfficeRoot .tb-depth-group.tb-bench-compact>div{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;overflow:visible!important}
+#frontOfficeRoot .tb-bench-pair{display:grid!important;grid-template-columns:1fr!important;gap:7px!important;min-width:0}
+#frontOfficeRoot .tb-bench-pair .tb-depth-card{min-width:0!important;width:100%!important}
 
-/* Team DNA lives in the franchise wall, not another card. */
-#frontOfficeRoot .tb-team-dna{grid-column:1/-1;display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:-5px}
+/* Clean, readable support cards. */
+#frontOfficeRoot .tb-support-copy{min-width:0!important}
+#frontOfficeRoot .tb-support-copy strong{display:block!important;font-size:10px!important;line-height:1.08!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin-top:2px!important}
+#frontOfficeRoot .tb-support-copy header{min-width:0!important}
+#frontOfficeRoot .tb-support-copy footer{white-space:nowrap!important}
+#frontOfficeRoot .tb-photo.is-fallback{display:grid;place-items:center;background:radial-gradient(circle at 40% 25%,rgba(255,255,255,.12),transparent 42%),linear-gradient(145deg,#3d4552,#222831)!important}
+#frontOfficeRoot .tb-photo.is-fallback>b{display:block!important;color:#eef2f6;font-weight:900;font-size:20px;letter-spacing:.02em}
+#frontOfficeRoot .tb-card-signal{display:none!important}
+#frontOfficeRoot .tb-support-card.is-selected::after{display:none!important}
+
+/* Team DNA stays subtle inside the franchise wall. */
+#frontOfficeRoot .tb-team-dna{grid-column:1/-1;display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:2px}
 #frontOfficeRoot .tb-team-dna small{color:#f5a154;font-size:7px;letter-spacing:.1em;margin-right:3px}
-#frontOfficeRoot .tb-team-dna span{padding:4px 8px;border:1px solid rgba(154,240,183,.2);border-radius:999px;background:rgba(13,48,31,.45);color:#bfeccc;font-size:8px}
+#frontOfficeRoot .tb-team-dna span{padding:4px 8px;border:1px solid rgba(154,240,183,.18);border-radius:999px;background:rgba(13,48,31,.28);color:#bfeccc;font-size:8px}
 
 /* Live probability underline. */
 #frontOfficeRoot .tb-live-odds{position:relative}
-#frontOfficeRoot .tb-live-odds::after{content:'';position:absolute;left:10px;right:10px;bottom:4px;height:2px;border-radius:99px;background:linear-gradient(90deg,#57d58c var(--odds),rgba(255,255,255,.07) var(--odds));opacity:.75}
+#frontOfficeRoot .tb-live-odds::after{content:'';position:absolute;left:10px;right:10px;bottom:4px;height:2px;border-radius:99px;background:linear-gradient(90deg,#57d58c var(--odds),rgba(255,255,255,.07) var(--odds));opacity:.72}
 
-#frontOfficeRoot .tb-fallout{display:grid;grid-template-columns:1.05fr repeat(4,minmax(0,1fr));margin-top:12px;border:1px solid rgba(255,255,255,.1);border-radius:13px;overflow:hidden;background:linear-gradient(90deg,rgba(255,133,0,.08),rgba(9,12,17,.42))}
-#frontOfficeRoot .tb-fallout>div{min-width:0;padding:10px 11px;border-right:1px solid rgba(255,255,255,.08)}
-#frontOfficeRoot .tb-fallout>div:last-child{border-right:0}
-#frontOfficeRoot .tb-fallout small,#frontOfficeRoot .tb-fallout b,#frontOfficeRoot .tb-fallout strong{display:block}
-#frontOfficeRoot .tb-fallout small{color:#9ca5af;font-size:6px;line-height:1.2;letter-spacing:.05em}
-#frontOfficeRoot .tb-fallout b,#frontOfficeRoot .tb-fallout strong{margin-top:4px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#frontOfficeRoot .tb-fallout-title small{color:#f5a154}#frontOfficeRoot .tb-fallout-title strong{font-size:13px}
+/* Subtle connective lighting: one board, not five widgets. */
+#frontOfficeRoot .tb-live-ribbon{border-color:rgba(255,255,255,.055)!important;background:rgba(8,11,16,.55)!important}
+#frontOfficeRoot .tb-main-grid{position:relative}
+#frontOfficeRoot .tb-main-grid::before{content:'';position:absolute;inset:-18px -12px;pointer-events:none;background:radial-gradient(ellipse at center,rgba(255,133,0,.055),transparent 58%);z-index:0}
+#frontOfficeRoot .tb-main-grid>*{position:relative;z-index:1}
 
 .tb-run-alert{position:fixed;top:88px;left:50%;z-index:99999;width:min(430px,calc(100vw - 28px));transform:translate(-50%,-24px) scale(.96);opacity:0;padding:14px 18px;border:1px solid rgba(255,138,0,.65);border-radius:14px;background:rgba(12,15,21,.96);box-shadow:0 22px 60px rgba(0,0,0,.5),0 0 32px rgba(255,133,0,.16);color:#fff;pointer-events:none;transition:opacity .24s ease,transform .24s ease}
-.tb-run-alert.is-live{opacity:1;transform:translate(-50%,0) scale(1)}.tb-run-alert small{display:block;color:#ff9a31;font-size:9px;letter-spacing:.13em}.tb-run-alert strong{display:block;font-size:18px;margin:3px 0}.tb-run-alert span{display:block;color:#b9c1cb;font-size:12px;line-height:1.35}
+.tb-run-alert.is-live{opacity:1;transform:translate(-50%,0) scale(1)}
+.tb-run-alert small{display:block;color:#ff9a31;font-size:9px;letter-spacing:.13em}
+.tb-run-alert strong{display:block;font-size:18px;margin:3px 0}
+.tb-run-alert span{display:block;color:#b9c1cb;font-size:12px;line-height:1.35}
 
-@media (min-width:981px) and (max-width:1320px){
-  #frontOfficeRoot .tb-confidence{margin-left:184px}
-  #frontOfficeRoot .tb-fallout>div{padding:8px 7px}
-  #frontOfficeRoot .tb-fallout b,#frontOfficeRoot .tb-fallout strong{font-size:11px}
+@media (max-width:1100px){
+  #frontOfficeRoot .tb-support-copy strong{font-size:9px!important}
   #frontOfficeRoot .tb-depth-group.tb-bench-compact>div{gap:5px!important}
-}
-@media (max-width:980px){
-  #frontOfficeRoot .tb-confidence{margin-left:184px}
-  #frontOfficeRoot .tb-depth-group.tb-bench-compact{width:100%!important}
+  #frontOfficeRoot .tb-bench-pair{gap:5px!important}
 }
 @media (max-width:680px){
-  #frontOfficeRoot .tb-confidence{margin:10px 0!important;grid-template-columns:auto 1fr auto}
-  #frontOfficeRoot .tb-why-grid{grid-template-columns:1fr}
-  #frontOfficeRoot .tb-fallout{grid-template-columns:repeat(2,minmax(0,1fr))}
-  #frontOfficeRoot .tb-fallout-title{grid-column:1/-1}
-  #frontOfficeRoot .tb-fallout>div{border-bottom:1px solid rgba(255,255,255,.08)}
-  #frontOfficeRoot .tb-fallout>div:nth-child(odd){border-right:0}
-  #frontOfficeRoot .tb-fallout>div:last-child{border-bottom:0}
-  #frontOfficeRoot .tb-card-signal{display:none}
-  #frontOfficeRoot .tb-depth-group.tb-bench-compact>div{grid-template-columns:repeat(3,132px)!important;overflow-x:auto;padding-bottom:4px}
+  #frontOfficeRoot .tb-hero-content h2{font-size:32px!important;white-space:normal}
+  #frontOfficeRoot .tb-depth-group.tb-bench-compact{width:100%!important}
+  #frontOfficeRoot .tb-depth-group.tb-bench-compact>div{grid-template-columns:repeat(3,132px)!important;overflow-x:auto!important;padding-bottom:4px}
+  #frontOfficeRoot .tb-team-dna{overflow-x:auto;flex-wrap:nowrap;padding-bottom:3px}
   .tb-run-alert{top:70px}
 }
