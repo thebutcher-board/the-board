@@ -1,0 +1,217 @@
+/* THE BOARD — Command Surface v10
+   Sketch-driven polish: mirrored roster bands, uniform mini cards,
+   position-first player tiles, and readable side-card hierarchy. */
+
+/* TOP + BOTTOM: same labels, same cards, same proportions. */
+#frontOfficeRoot .tb-depth-chart{
+  grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  gap:7px!important;
+}
+#frontOfficeRoot .tb-depth-group>label{
+  display:block!important;
+  margin:0 0 4px!important;
+  font-size:7px!important;
+  letter-spacing:.12em!important;
+  color:#9ba5ae!important;
+}
+#frontOfficeRoot .tb-depth-group>div{gap:4px!important}
+#frontOfficeRoot .tb-depth-bench>div{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:4px!important;
+}
+
+/* One compact card grammar everywhere. Slot labels QB1/RB2/etc. are removed;
+   the group label above the cards already explains roster position. */
+#frontOfficeRoot .tb-depth-card{
+  height:36px!important;
+  min-height:36px!important;
+  padding:3px 6px 3px 3px!important;
+  gap:5px!important;
+  border-radius:8px!important;
+}
+#frontOfficeRoot .tb-depth-photo{
+  width:27px!important;
+  height:30px!important;
+  flex:0 0 27px!important;
+  border-radius:6px!important;
+}
+#frontOfficeRoot .tb-depth-card>div{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:flex-start!important;
+  gap:1px!important;
+  min-width:0!important;
+  padding:0!important;
+}
+#frontOfficeRoot .tb-depth-card small{display:none!important}
+#frontOfficeRoot .tb-depth-card strong{
+  display:block!important;
+  width:100%!important;
+  font-size:8px!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#frontOfficeRoot .tb-depth-card>div>span{
+  display:block!important;
+  width:100%!important;
+  max-width:none!important;
+  font-size:5.5px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  color:#9ea8b2!important;
+}
+#frontOfficeRoot .tb-mini-pos{
+  left:3px!important;
+  top:3px!important;
+  min-width:16px!important;
+  height:12px!important;
+  padding:0 3px!important;
+  font-size:5px!important;
+  border-radius:4px!important;
+}
+#frontOfficeRoot .tb-depth-card.is-empty{
+  height:36px!important;
+  min-height:36px!important;
+  padding:13px 4px 3px!important;
+}
+#frontOfficeRoot .tb-depth-card.is-empty small{display:none!important}
+#frontOfficeRoot .tb-depth-card.is-empty>span:last-child{font-size:6px!important}
+
+/* SIDE CARDS: identity first, rank top-right, photo/position below, data beside it. */
+#frontOfficeRoot .tb-support-card{
+  position:relative!important;
+  height:94px!important;
+  min-height:94px!important;
+  padding:8px!important;
+  display:grid!important;
+  grid-template-columns:42px minmax(0,1fr) 28px!important;
+  grid-template-rows:auto auto 1fr!important;
+  column-gap:8px!important;
+  row-gap:2px!important;
+  align-items:start!important;
+  overflow:hidden!important;
+}
+#frontOfficeRoot .tb-support-copy{
+  display:contents!important;
+}
+#frontOfficeRoot .tb-support-copy small{
+  grid-column:1/3!important;
+  grid-row:1!important;
+  margin:0 32px 0 0!important;
+  font-size:6px!important;
+  line-height:1!important;
+  color:#c58a48!important;
+}
+#frontOfficeRoot .tb-support-copy strong{
+  grid-column:1/3!important;
+  grid-row:2!important;
+  margin:0 32px 0 0!important;
+  max-height:24px!important;
+  font-size:10px!important;
+  line-height:1.05!important;
+  display:-webkit-box!important;
+  -webkit-line-clamp:2!important;
+  -webkit-box-orient:vertical!important;
+  overflow:hidden!important;
+}
+#frontOfficeRoot .tb-support-copy>span{
+  position:absolute!important;
+  left:58px!important;
+  right:8px!important;
+  top:48px!important;
+  font-size:6.5px!important;
+  line-height:1.1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#frontOfficeRoot .tb-support-photo{
+  grid-column:1!important;
+  grid-row:3!important;
+  width:42px!important;
+  height:43px!important;
+  margin:5px 0 0!important;
+  border-radius:7px!important;
+  object-fit:cover!important;
+  object-position:center top!important;
+}
+#frontOfficeRoot .tb-support-pos{
+  left:6px!important;
+  top:49px!important;
+  min-width:18px!important;
+  height:13px!important;
+  padding:0 4px!important;
+  font-size:5.5px!important;
+  border-radius:4px!important;
+  z-index:4!important;
+}
+#frontOfficeRoot .tb-grade{
+  position:absolute!important;
+  right:8px!important;
+  top:7px!important;
+  font-size:18px!important;
+  line-height:1!important;
+}
+#frontOfficeRoot .tb-support-copy footer{
+  position:absolute!important;
+  left:58px!important;
+  right:8px!important;
+  bottom:8px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  gap:2px!important;
+}
+#frontOfficeRoot .tb-support-copy footer i{
+  max-width:100%!important;
+  font-size:6px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+/* Use the extra reclaimed space to keep both banners shallow and balanced. */
+#frontOfficeRoot .tb-depth-title{
+  display:flex!important;
+  align-items:baseline!important;
+  gap:10px!important;
+  padding:0 0 5px!important;
+}
+#frontOfficeRoot .tb-depth-title small{font-size:7px!important}
+#frontOfficeRoot .tb-depth-title b{font-size:10px!important}
+#frontOfficeRoot .tb-roster-banner{padding-bottom:8px!important}
+#frontOfficeRoot .tb-perfect-banner{padding-top:8px!important}
+
+@media (min-width:981px) and (max-width:1320px){
+  #frontOfficeRoot .tb-depth-chart{gap:5px!important}
+  #frontOfficeRoot .tb-depth-card{height:34px!important;min-height:34px!important}
+  #frontOfficeRoot .tb-depth-photo{width:25px!important;height:28px!important;flex-basis:25px!important}
+  #frontOfficeRoot .tb-depth-card strong{font-size:7.5px!important}
+  #frontOfficeRoot .tb-support-card{height:90px!important;min-height:90px!important;grid-template-columns:39px minmax(0,1fr) 25px!important}
+  #frontOfficeRoot .tb-support-photo{width:39px!important;height:40px!important}
+  #frontOfficeRoot .tb-support-copy>span,
+  #frontOfficeRoot .tb-support-copy footer{left:54px!important}
+}
+
+@media (max-width:980px){
+  #frontOfficeRoot .tb-depth-chart{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #frontOfficeRoot .tb-depth-bench{grid-column:1/-1!important}
+  #frontOfficeRoot .tb-depth-bench>div{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #frontOfficeRoot .tb-depth-card{height:42px!important;min-height:42px!important}
+  #frontOfficeRoot .tb-depth-photo{width:30px!important;height:35px!important;flex-basis:30px!important}
+}
+
+@media (max-width:680px){
+  #frontOfficeRoot .tb-depth-chart{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #frontOfficeRoot .tb-depth-bench>div{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #frontOfficeRoot .tb-depth-card{height:46px!important;min-height:46px!important}
+  #frontOfficeRoot .tb-depth-photo{width:34px!important;height:39px!important;flex-basis:34px!important}
+  #frontOfficeRoot .tb-depth-card strong{font-size:8.5px!important}
+  #frontOfficeRoot .tb-support-card{height:96px!important;min-height:96px!important;flex-basis:176px!important}
+}
