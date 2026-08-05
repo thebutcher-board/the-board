@@ -1,0 +1,253 @@
+/* THE BOARD — Command Surface v11
+   Universal microcards, equal-width roster architecture, flowing side cards,
+   franchise header cleanup, and shared fantasy-position color language. */
+
+#frontOfficeRoot{
+  --pos-qb:#ff8a00;
+  --pos-rb:#35b66f;
+  --pos-wr:#2f8cff;
+  --pos-te:#8b63d9;
+  --pos-flex:#d7a52c;
+  --pos-k:#e6bd2f;
+  --pos-def:#d55353;
+  --pos-any:#77838f;
+}
+
+/* 1–3. Universal microcard architecture. Five starting groups use one column
+   each; the bench owns three columns, allowing three equal stacks of two. */
+#frontOfficeRoot .tb-depth-chart{
+  display:grid!important;
+  grid-template-columns:repeat(8,minmax(0,1fr))!important;
+  gap:6px!important;
+  width:100%!important;
+  align-items:start!important;
+}
+#frontOfficeRoot .tb-depth-group{min-width:0!important}
+#frontOfficeRoot .tb-depth-group>div{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:4px!important;
+}
+#frontOfficeRoot .tb-depth-bench{grid-column:span 3!important}
+#frontOfficeRoot .tb-depth-bench>div{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:4px!important;
+}
+#frontOfficeRoot .tb-depth-card,
+#frontOfficeRoot .tb-depth-card.is-empty{
+  position:relative!important;
+  width:100%!important;
+  height:34px!important;
+  min-height:34px!important;
+  padding:3px 5px 3px 3px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:5px!important;
+  border-radius:7px!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+#frontOfficeRoot .tb-depth-photo{
+  width:25px!important;
+  height:29px!important;
+  flex:0 0 25px!important;
+  border-radius:5px!important;
+  overflow:hidden!important;
+  background:transparent!important;
+  border:0!important;
+}
+#frontOfficeRoot .tb-depth-photo img{object-position:center top!important}
+#frontOfficeRoot .tb-depth-card>div{
+  min-width:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  gap:1px!important;
+  padding-top:8px!important;
+}
+#frontOfficeRoot .tb-depth-card strong{
+  width:100%!important;
+  font-size:7.5px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#frontOfficeRoot .tb-depth-card>div>span{
+  width:100%!important;
+  color:#9aa5ae!important;
+  font-size:5.3px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#frontOfficeRoot .tb-depth-card small{display:none!important}
+#frontOfficeRoot .tb-mini-pos{
+  position:absolute!important;
+  left:31px!important;
+  top:3px!important;
+  z-index:4!important;
+  min-width:13px!important;
+  height:8px!important;
+  padding:0 2px!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:3px!important;
+  font-size:4.2px!important;
+  font-weight:800!important;
+  line-height:1!important;
+  color:#fff!important;
+  box-shadow:none!important;
+}
+#frontOfficeRoot .tb-depth-card.is-empty{
+  justify-content:center!important;
+  padding-top:10px!important;
+}
+#frontOfficeRoot .tb-depth-card.is-empty .tb-mini-pos{left:4px!important}
+#frontOfficeRoot .tb-depth-card.is-empty>span:last-child{font-size:5.5px!important}
+
+/* 4. Franchise identity flows into the banner instead of living in a cramped box. */
+#frontOfficeRoot .tb-roster-banner .tb-banner-head{
+  grid-template-columns:minmax(330px,.85fr) minmax(0,2.15fr)!important;
+  align-items:center!important;
+  column-gap:20px!important;
+}
+#frontOfficeRoot .tb-franchise{
+  min-width:0!important;
+  overflow:visible!important;
+  align-items:center!important;
+}
+#frontOfficeRoot .tb-franchise img{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  mix-blend-mode:normal!important;
+  object-fit:contain!important;
+}
+#frontOfficeRoot .tb-franchise>div{min-width:0!important;overflow:visible!important}
+#frontOfficeRoot .tb-franchise h1{
+  width:auto!important;
+  max-width:none!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  font-size:clamp(22px,2vw,34px)!important;
+  line-height:1!important;
+}
+#frontOfficeRoot .tb-franchise p{white-space:nowrap!important}
+
+/* 5. Side cards: one flowing composition, no boxed identity treatment. */
+#frontOfficeRoot .tb-support-card{
+  height:90px!important;
+  min-height:90px!important;
+  padding:8px!important;
+  grid-template-columns:38px minmax(0,1fr) 27px!important;
+  background:linear-gradient(145deg,rgba(42,49,61,.82),rgba(21,25,32,.68))!important;
+}
+#frontOfficeRoot .tb-support-copy strong{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  padding:0!important;
+  margin-right:28px!important;
+  font-size:9.5px!important;
+  line-height:1.05!important;
+}
+#frontOfficeRoot .tb-support-photo{
+  width:38px!important;
+  height:40px!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+#frontOfficeRoot .tb-support-copy>span,
+#frontOfficeRoot .tb-support-copy footer{left:52px!important}
+#frontOfficeRoot .tb-support-pos{
+  left:7px!important;
+  top:48px!important;
+  min-width:15px!important;
+  height:10px!important;
+  padding:0 3px!important;
+  font-size:4.5px!important;
+  border-radius:3px!important;
+}
+#frontOfficeRoot .tb-grade{font-size:17px!important}
+
+/* 6. Universal position colors. JS annotates each card with data-pos. */
+#frontOfficeRoot [data-pos="QB"] .tb-mini-pos,
+#frontOfficeRoot .tb-mini-pos[data-pos="QB"],
+#frontOfficeRoot [data-pos="QB"] .tb-support-pos,
+#frontOfficeRoot .tb-support-pos[data-pos="QB"],
+#frontOfficeRoot .tb-position[data-pos="QB"]{background:var(--pos-qb)!important}
+#frontOfficeRoot [data-pos="RB"] .tb-mini-pos,
+#frontOfficeRoot .tb-mini-pos[data-pos="RB"],
+#frontOfficeRoot [data-pos="RB"] .tb-support-pos,
+#frontOfficeRoot .tb-support-pos[data-pos="RB"],
+#frontOfficeRoot .tb-position[data-pos="RB"]{background:var(--pos-rb)!important}
+#frontOfficeRoot [data-pos="WR"] .tb-mini-pos,
+#frontOfficeRoot .tb-mini-pos[data-pos="WR"],
+#frontOfficeRoot [data-pos="WR"] .tb-support-pos,
+#frontOfficeRoot .tb-support-pos[data-pos="WR"],
+#frontOfficeRoot .tb-position[data-pos="WR"]{background:var(--pos-wr)!important}
+#frontOfficeRoot [data-pos="TE"] .tb-mini-pos,
+#frontOfficeRoot .tb-mini-pos[data-pos="TE"],
+#frontOfficeRoot [data-pos="TE"] .tb-support-pos,
+#frontOfficeRoot .tb-support-pos[data-pos="TE"],
+#frontOfficeRoot .tb-position[data-pos="TE"]{background:var(--pos-te)!important}
+#frontOfficeRoot [data-pos="FLEX"] .tb-mini-pos,
+#frontOfficeRoot .tb-mini-pos[data-pos="FLEX"],
+#frontOfficeRoot [data-pos="FLEX"] .tb-support-pos,
+#frontOfficeRoot .tb-support-pos[data-pos="FLEX"],
+#frontOfficeRoot .tb-position[data-pos="FLEX"]{background:var(--pos-flex)!important}
+#frontOfficeRoot [data-pos="K"] .tb-mini-pos,
+#frontOfficeRoot .tb-mini-pos[data-pos="K"],
+#frontOfficeRoot [data-pos="K"] .tb-support-pos,
+#frontOfficeRoot .tb-support-pos[data-pos="K"],
+#frontOfficeRoot .tb-position[data-pos="K"]{background:var(--pos-k)!important;color:#1a1a1a!important}
+#frontOfficeRoot [data-pos="DEF"] .tb-mini-pos,
+#frontOfficeRoot .tb-mini-pos[data-pos="DEF"],
+#frontOfficeRoot [data-pos="DEF"] .tb-support-pos,
+#frontOfficeRoot .tb-support-pos[data-pos="DEF"],
+#frontOfficeRoot .tb-position[data-pos="DEF"]{background:var(--pos-def)!important}
+#frontOfficeRoot [data-pos="ANY"] .tb-mini-pos,
+#frontOfficeRoot .tb-mini-pos[data-pos="ANY"]{background:var(--pos-any)!important}
+
+#frontOfficeRoot .tb-depth-card[data-pos]{border-left:2px solid color-mix(in srgb,var(--position-color,#77838f) 72%,transparent)!important}
+#frontOfficeRoot .tb-depth-card[data-pos="QB"]{--position-color:var(--pos-qb)}
+#frontOfficeRoot .tb-depth-card[data-pos="RB"]{--position-color:var(--pos-rb)}
+#frontOfficeRoot .tb-depth-card[data-pos="WR"]{--position-color:var(--pos-wr)}
+#frontOfficeRoot .tb-depth-card[data-pos="TE"]{--position-color:var(--pos-te)}
+#frontOfficeRoot .tb-depth-card[data-pos="FLEX"]{--position-color:var(--pos-flex)}
+#frontOfficeRoot .tb-depth-card[data-pos="K"]{--position-color:var(--pos-k)}
+#frontOfficeRoot .tb-depth-card[data-pos="DEF"]{--position-color:var(--pos-def)}
+
+@media (min-width:981px) and (max-width:1320px){
+  #frontOfficeRoot .tb-roster-banner .tb-banner-head{grid-template-columns:minmax(280px,.8fr) minmax(0,2.2fr)!important}
+  #frontOfficeRoot .tb-depth-chart{gap:4px!important}
+  #frontOfficeRoot .tb-depth-card,#frontOfficeRoot .tb-depth-card.is-empty{height:32px!important;min-height:32px!important}
+  #frontOfficeRoot .tb-depth-photo{width:23px!important;height:27px!important;flex-basis:23px!important}
+  #frontOfficeRoot .tb-mini-pos{left:28px!important}
+  #frontOfficeRoot .tb-depth-card strong{font-size:7px!important}
+}
+
+@media (max-width:980px){
+  #frontOfficeRoot .tb-roster-banner .tb-banner-head{grid-template-columns:1fr!important}
+  #frontOfficeRoot .tb-depth-chart{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #frontOfficeRoot .tb-depth-bench{grid-column:1/-1!important}
+  #frontOfficeRoot .tb-depth-bench>div{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #frontOfficeRoot .tb-depth-card,#frontOfficeRoot .tb-depth-card.is-empty{height:42px!important;min-height:42px!important}
+  #frontOfficeRoot .tb-depth-photo{width:31px!important;height:36px!important;flex-basis:31px!important}
+  #frontOfficeRoot .tb-mini-pos{left:37px!important;top:4px!important}
+}
+
+@media (max-width:680px){
+  #frontOfficeRoot .tb-depth-chart{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #frontOfficeRoot .tb-depth-bench>div{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #frontOfficeRoot .tb-franchise h1{white-space:normal!important;font-size:26px!important}
+  #frontOfficeRoot .tb-depth-card,#frontOfficeRoot .tb-depth-card.is-empty{height:46px!important;min-height:46px!important}
+  #frontOfficeRoot .tb-depth-photo{width:34px!important;height:40px!important;flex-basis:34px!important}
+  #frontOfficeRoot .tb-mini-pos{left:40px!important}
+  #frontOfficeRoot .tb-depth-card strong{font-size:8.5px!important}
+  #frontOfficeRoot .tb-support-card{height:94px!important;min-height:94px!important;flex-basis:172px!important}
+}
