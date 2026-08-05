@@ -8,10 +8,11 @@
     style.textContent=`
       #warroom{width:100%!important;max-width:none!important;padding:18px 24px 30px!important;overflow-x:hidden!important;box-sizing:border-box!important}
       #phaseOneMount{width:100%!important;max-width:none!important;margin:0!important;box-sizing:border-box!important}
-      .war-shell{width:100%!important;max-width:none!important;margin:0!important;box-sizing:border-box!important}
+      .war-shell{display:block!important;width:100%!important;max-width:none!important;margin:0!important;box-sizing:border-box!important}
 
-      .roster-banner,.perfect-banner{width:100%!important;max-width:none!important;box-sizing:border-box!important;padding:16px 18px!important;overflow:hidden!important}
-      .banner-top{display:grid!important;grid-template-columns:minmax(260px,360px) minmax(0,1fr)!important;align-items:center!important;gap:18px!important}
+      /* Both roster banners own the entire War Room canvas. */
+      .roster-banner,.perfect-banner{display:block!important;width:calc(100vw - 48px)!important;max-width:calc(100vw - 48px)!important;margin-left:calc(50% - 50vw + 24px)!important;margin-right:0!important;box-sizing:border-box!important;padding:16px 18px!important;overflow:hidden!important;clear:both!important}
+      .banner-top{display:grid!important;grid-template-columns:minmax(260px,360px) minmax(0,1fr)!important;align-items:center!important;gap:18px!important;width:100%!important}
       .franchise-id{min-width:0!important}
       .franchise-id img{width:76px!important;height:76px!important}
       .franchise-id h1{font-size:31px!important;line-height:1!important}
@@ -71,6 +72,7 @@
         .decision-grid{grid-template-columns:260px minmax(480px,1fr) 260px!important;gap:14px!important}
       }
       @media(max-width:900px){
+        .roster-banner,.perfect-banner{width:calc(100vw - 24px)!important;max-width:calc(100vw - 24px)!important;margin-left:calc(50% - 50vw + 12px)!important}
         .decision-grid{grid-template-columns:1fr!important}
         .hero-card{grid-template-columns:1fr!important}
         .hero-photo{min-height:380px!important}
