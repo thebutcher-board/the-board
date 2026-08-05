@@ -1,1 +1,1 @@
-Draft Cockpit v18.0.0 full release: projected rail, clean decision stage, My Team metrics, draft order settings
+Draft Cockpit v18.1.0 full release: settings fix, shared cards, one-screen fit, keepers on Board
