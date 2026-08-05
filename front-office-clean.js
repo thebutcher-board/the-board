@@ -18,6 +18,7 @@
   const roster=()=>{try{return (window.rosterFor?.(teamName())||[]).map(p=>window.playerByName?.(p.name)||p)}catch{return[]}};
   const engine=()=>{try{return window.BoardDecisionEngine?.results?.()||[]}catch{return[]}};
   const selectedName=()=>window.__cleanFrontOfficeSelected||window.BoardCockpit?.selected?.()||null;
+  const byeOf=p=>p?.bye??p?.byeWeek??p?.weekOff??'—';
 
   function playerPhoto(name,cls=''){
     const id=PHOTO_IDS[clean(name)],fallback=esc(initials(name));
@@ -50,7 +51,7 @@
   function depthCard(entry){
     const p=entry.player;
     if(!p)return `<div class="tb-depth-card is-empty"><small>${entry.slot}</small><span>OPEN</span></div>`;
-    return `<div class="tb-depth-card">${playerPhoto(p.name,'tb-depth-photo')}<div><small>${entry.slot}</small><strong title="${esc(p.name)}">${esc(p.name)}</strong><span>${esc(p.team||'—')} · ${esc(p.pos||'—')}</span></div></div>`;
+    return `<div class="tb-depth-card">${playerPhoto(p.name,'tb-depth-photo')}<span class="tb-mini-pos">${esc(p.pos||entry.slot.replace(/\d/g,''))}</span><div><small>${entry.slot}</small><strong title="${esc(p.name)}">${esc(p.name)}</strong><span>${esc(p.team||'—')} · BYE ${esc(byeOf(p))}</span></div></div>`;
   }
   function depthChart(entries){
     const groups=[['QB',entries.slice(0,2)],['RB',entries.slice(2,4)],['WR',entries.slice(4,6)],['SKILL',entries.slice(6,8)],['SPECIAL',entries.slice(8,10)],['BENCH',entries.slice(10)]];
@@ -61,14 +62,14 @@
   }
   function supportCard(item,label){
     const p=item.player,m=metrics(item),availability=label==='Next pick'?`${m.survives}% available`:`${100-m.survives}% pass risk`;
-    return `<button class="tb-support-card" data-explore="${encodeURIComponent(p.name)}" title="${esc(p.name)}">${playerPhoto(p.name,'tb-support-photo')}<div class="tb-support-copy"><small>${esc(label)}</small><strong>${esc(p.name)}</strong><span>${esc(p.team||'—')} · ${esc(p.pos)}</span><footer><i>${Math.round(p.proj||0)} pts</i><i>${availability}</i></footer></div><b class="tb-grade">${m.grade}</b></button>`;
+    return `<button class="tb-support-card" data-explore="${encodeURIComponent(p.name)}" title="${esc(p.name)}">${playerPhoto(p.name,'tb-support-photo')}<span class="tb-support-pos">${esc(p.pos)}</span><div class="tb-support-copy"><small>${esc(label)}</small><strong>${esc(p.name)}</strong><span>${esc(p.team||'—')} · BYE ${esc(byeOf(p))}</span><footer><i>${Math.round(p.proj||0)} pts</i><i>${availability}</i></footer></div><b class="tb-grade">${m.grade}</b></button>`;
   }
   function hero(item){
     const p=item.player,m=metrics(item),gone=100-m.survives;
     return `<article class="tb-hero">
       <header class="tb-hero-head">
         <div class="tb-hero-player">${playerPhoto(p.name,'tb-hero-photo')}<span class="tb-position">${esc(p.pos)}</span></div>
-        <div class="tb-hero-identity"><small>PLAYER UNDER CONSIDERATION</small><h2>${esc(p.name)}</h2><p>${esc(p.team||'—')} · ${esc(p.pos)}1</p></div>
+        <div class="tb-hero-identity"><small>PLAYER UNDER CONSIDERATION</small><h2>${esc(p.name)}</h2><p>${esc(p.team||'—')} · ${esc(p.pos)}1 · BYE ${esc(byeOf(p))}</p></div>
         <div class="tb-hero-grade"><b>${m.grade}</b><small>GOOSE</small></div>
       </header>
       <div class="tb-goose-call"><small>GOOSE CALL</small><p>Take ${esc(p.name)} now. Waiting risks the ${esc(p.pos)} tier and shifts your next mission.</p></div>
@@ -83,6 +84,11 @@
       <div class="tb-hero-actions"><button data-take="${encodeURIComponent(p.name)}">Take Player</button><button class="secondary" data-report="${encodeURIComponent(p.name)}">Open Report</button></div>
     </article>`;
   }
+  function draftPulse(main,priority){
+    const p=main.player,m=metrics(main),gone=100-m.survives;
+    const danger=gone>=65||m.scarcity>=75;
+    return `<div class="tb-draft-pulse ${danger?'is-hot':'is-calm'}" role="status" aria-live="polite"><span class="tb-pulse-dot"></span><b>${danger?`${esc(p.pos)} RUN PRESSURE`:'VALUE WINDOW'}</b><span>${gone}% chance ${esc(p.name)} is gone</span><span>${m.tier} tier</span><span>Next mission: ${priority}</span></div>`;
+  }
   function render(){
     const mount=document.getElementById('frontOfficeRoot'),all=ranked();if(!mount||!all.length)return false;
     const top=all.find(p=>p.name===selectedName())||all[0],main=itemFor(top),others=all.filter(p=>p.name!==top.name);
@@ -92,8 +98,7 @@
     const pivots=others.slice(0,10).map(itemFor),future=[...others.filter(p=>p.pos===priority),...others.filter(p=>p.pos!==priority)].slice(0,10).map(itemFor);
     mount.innerHTML=`<div class="tb-war-room"><div class="tb-command-surface">
       <header class="tb-roster-banner"><div class="tb-banner-head"><div class="tb-franchise"><img src="logo.png" alt="${esc(teamName())}"><div><small>YOUR FRANCHISE</small><h1>${esc(teamName())}</h1><p>Live roster · Mission ${(window.state?.drafted?.length||0)+1}</p></div></div>${metricBar(currentOdds)}</div><div class="tb-depth-line"><div class="tb-depth-title"><small>CURRENT TEAM</small><b>Built as you draft</b></div>${depthChart(currentEntries)}</div></header>
-      <div class="tb-live-ribbon"><b>GOOSE LIVE</b><span>${esc(currentOwner())} is selecting</span><span>${100-metrics(main).survives}% chance ${esc(top.name)} is gone by your next pick</span><span>${priority} is the next roster mission</span></div>
-      <section class="tb-decision-grid"><aside class="tb-side tb-pivots"><small>WHAT IF YOU PIVOT</small><h3>Pivot Paths</h3><div class="tb-support-grid">${pivots.map(x=>supportCard(x,'Alternate')).join('')}</div></aside><main class="tb-center">${hero(main)}<div class="tb-league-row"><span><small>LEAGUE LIVE</small><b>${esc(currentOwner())}</b></span><span><small>LIKELY POSITION</small><b>${priority}</b></span><button>Inspect Team</button></div></main><aside class="tb-side tb-future"><small>FUTURE BOARD</small><h3>Likely Available</h3><div class="tb-support-grid">${future.map(x=>supportCard(x,'Next pick')).join('')}</div></aside></section>
+      <section class="tb-decision-grid"><aside class="tb-side tb-pivots"><small>WHAT IF YOU PIVOT</small><h3>Pivot Paths</h3><div class="tb-support-grid">${pivots.map(x=>supportCard(x,'Alternate')).join('')}</div></aside><main class="tb-center">${hero(main)}${draftPulse(main,priority)}</main><aside class="tb-side tb-future"><small>FUTURE BOARD</small><h3>Likely Available</h3><div class="tb-support-grid">${future.map(x=>supportCard(x,'Next pick')).join('')}</div></aside></section>
       <footer class="tb-perfect-banner"><div class="tb-banner-head"><div class="tb-perfect-title"><small>PERFECT DRAFT</small><h2>Best Realistic Finished Roster</h2><p>Pre-draft prediction recalculates after every selection.</p></div>${metricBar(perfectOdds,true)}</div><div class="tb-depth-line"><div class="tb-depth-title"><small>PROJECTED TEAM</small><b>Best realistic path</b></div>${depthChart(perfectEntries)}</div></footer>
     </div></div>`;
     hydratePhotos(mount);bind(mount);return true;
