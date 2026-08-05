@@ -1,1 +1,1 @@
-Draft Cockpit v17.0.0 unified cockpit architecture deployment trigger
+Draft Cockpit v17.1.0 projected picks, live board, team metrics deployment
