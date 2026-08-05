@@ -53,7 +53,7 @@
 .tb-hero-grade {
   --goose-confidence: 87%;
   position: relative;
-  top: -24px;
+  top: -34px;
   width: 92px;
   height: 92px;
   display: grid;
@@ -168,7 +168,7 @@
 /* Keep the confidence treatment compact on phones */
 @media (max-width: 720px) {
   .tb-hero-grade {
-    top: -14px;
+    top: -20px;
     width: 72px;
     height: 72px;
     row-gap: 3px;
