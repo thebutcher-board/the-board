@@ -1,6 +1,6 @@
 'use strict';
 (function(){
-  const BOOT_VERSION='clean-front-office-1.3.0';
+  const BOOT_VERSION='clean-front-office-1.4.0';
   function addStyle(href,key){
     document.querySelectorAll(`link[data-front-office-style="${key}"]`).forEach(n=>n.remove());
     const link=document.createElement('link');
@@ -35,9 +35,9 @@
     window.__THE_BOARD_FRONT_OFFICE_BOOT__=BOOT_VERSION;
     document.querySelectorAll('script[src*="front-office-phase1"],script[src*="front-office-polish"],script[src*="front-office-photo-fix"],style#phaseOneStyles,link[data-front-office-clean],link[data-front-office-style],script[data-front-office-clean]').forEach(n=>n.remove());
     mount();
-    addStyle('front-office-clean.css?v=1.3.0','base');
-    addStyle('front-office-layout-v2.css?v=1.3.0','layout');
-    await addScript('front-office-clean.js?v=1.3.0');
+    addStyle('front-office-clean.css?v=1.4.0','base');
+    addStyle('front-office-layout-v2.css?v=1.4.0','layout');
+    await addScript('front-office-clean.js?v=1.4.0');
     window.renderWarroom=()=>window.CleanFrontOffice?.render?.();
     window.renderWarroom();
   }
