@@ -1,6 +1,6 @@
 'use strict';
 (function(){
-  const BOOT_VERSION='liquid-front-office-15.0.2';
+  const BOOT_VERSION='liquid-front-office-15.0.3';
   function addStyle(href,key){
     document.querySelectorAll(`link[data-front-office-style="${key}"]`).forEach(n=>n.remove());
     const link=document.createElement('link');link.rel='stylesheet';link.href=href;link.dataset.frontOfficeStyle=key;document.head.appendChild(link);
@@ -16,24 +16,24 @@
     window.__THE_BOARD_FRONT_OFFICE_BOOT__=BOOT_VERSION;
     document.querySelectorAll('script[src*="front-office-phase1"],script[src*="front-office-polish"],script[src*="front-office-photo-fix"],script[src*="front-office-photo-integrity"],script[src*="command-surface"],style#phaseOneStyles,link[data-front-office-clean],link[data-front-office-style],script[data-front-office-clean],script[data-front-office-script]').forEach(n=>n.remove());
     mount();
-    addStyle('front-office-clean.css?v=15.0.2','base');
-    addStyle('front-office-layout-v2.css?v=15.0.2','layout');
-    addStyle('front-office-intelligence-v2.css?v=15.0.2','intelligence');
-    addStyle('front-office-liquid.css?v=15.0.2','liquid');
-    addStyle('command-surface-v7.css?v=15.0.2','command-surface');
-    addStyle('command-surface-v8.css?v=15.0.2','command-surface-polish');
-    addStyle('command-surface-v9.css?v=15.0.2','command-surface-final-polish');
-    addStyle('command-surface-v10.css?v=15.0.2','command-surface-sketch-polish');
-    addStyle('command-surface-v11.css?v=15.0.2','command-surface-microcards');
-    addStyle('command-surface-v12.css?v=15.0.2','command-surface-integrity');
-    addStyle('command-surface-v13.css?v=15.0.2','command-surface-final');
-    addStyle('command-surface-v14.css?v=15.0.2','command-surface-sidecard-rebuild');
-    addStyle('command-surface-v15.css?v=15.0.2','command-surface-final-touches');
-    await addScript('front-office-clean.js?v=15.0.2','renderer');
+    addStyle('front-office-clean.css?v=15.0.3','base');
+    addStyle('front-office-layout-v2.css?v=15.0.3','layout');
+    addStyle('front-office-intelligence-v2.css?v=15.0.3','intelligence');
+    addStyle('front-office-liquid.css?v=15.0.3','liquid');
+    addStyle('command-surface-v7.css?v=15.0.3','command-surface');
+    addStyle('command-surface-v8.css?v=15.0.3','command-surface-polish');
+    addStyle('command-surface-v9.css?v=15.0.3','command-surface-final-polish');
+    addStyle('command-surface-v10.css?v=15.0.3','command-surface-sketch-polish');
+    addStyle('command-surface-v11.css?v=15.0.3','command-surface-microcards');
+    addStyle('command-surface-v12.css?v=15.0.3','command-surface-integrity');
+    addStyle('command-surface-v13.css?v=15.0.3','command-surface-final');
+    addStyle('command-surface-v14.css?v=15.0.3','command-surface-sidecard-rebuild');
+    addStyle('command-surface-v15.css?v=15.0.3','command-surface-final-touches');
+    await addScript('front-office-clean.js?v=15.0.3','renderer');
     window.renderWarroom=()=>window.CleanFrontOffice?.render?.();window.renderWarroom();
-    await addScript('front-office-position-colors.js?v=15.0.2','position-colors');
-    await addScript('front-office-photo-integrity.js?v=15.0.2','photo-integrity');
-    await addScript('front-office-intelligence-v2.js?v=15.0.2','intelligence');
+    await addScript('front-office-position-colors.js?v=15.0.3','position-colors');
+    await addScript('front-office-photo-integrity.js?v=15.0.3','photo-integrity');
+    await addScript('front-office-intelligence-v2.js?v=15.0.3','intelligence');
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
