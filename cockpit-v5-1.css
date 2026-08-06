@@ -1,0 +1,45 @@
+/* Cockpit V5.1 corrective release */
+body.tbv5-active>.topbar,
+body.tbv5-active>.tabs{display:none!important}
+body.tbv5-active>main{margin:0!important;padding:0!important;max-width:none!important;width:100%!important;height:100dvh!important}
+body.tbv5-active #warroom{margin:0!important;padding:0!important;width:100%!important;height:100dvh!important;max-width:none!important}
+body.tbv5-active #frontOfficeRoot{width:100%!important;height:100dvh!important;margin:0!important;padding:0!important}
+body.tbv5-active .tb-command-surface{border-radius:0!important;margin:0!important;width:100%!important;max-width:none!important}
+
+/* Approved projected-pick card architecture */
+.tbv5-projected{height:86px!important;grid-template-columns:170px minmax(0,1fr)!important;gap:7px!important;padding:7px 14px!important}
+.tbv5-projected-label{padding:9px 12px!important}
+.tbv5-projected-label small{font-size:7px!important}
+.tbv5-projected-label b{font-size:12px!important;line-height:1.05!important}
+.tbv5-projected-track{grid-template-columns:repeat(10,minmax(92px,1fr))!important;gap:6px!important;overflow:hidden!important}
+.tbv5-card{height:72px!important;padding:5px 6px!important;border-radius:10px!important;grid-template-rows:15px minmax(0,1fr) 10px!important}
+.tbv5-card>header span{min-width:22px!important;height:15px!important;font-size:7px!important}
+.tbv5-card>header small{font-size:7px!important}
+.tbv5-card>main{grid-template-columns:27px minmax(0,1fr)!important;gap:6px!important}
+.tbv5-card-photo{width:27px!important;height:34px!important;border-radius:6px!important}
+.tbv5-card-photo b{font-size:11px!important}
+.tbv5-card>main small{font-size:6px!important;line-height:1!important}
+.tbv5-name{font-size:8.5px!important;line-height:.98!important;letter-spacing:-.01em!important}
+.tbv5-card em{font-size:5.8px!important;line-height:1!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.tbv5-card footer{font-size:5.8px!important;line-height:1!important}
+
+body.tbv5-active .tb-command-surface{grid-template-rows:42px 86px minmax(0,1fr)!important}
+body.tbv5-active .tb-decision-grid{padding-top:7px!important}
+body.tbv5-active .tb-hero{max-height:calc(100dvh - 176px)!important}
+
+@media(max-width:1280px){
+  .tbv5-projected{height:82px!important;grid-template-columns:150px minmax(0,1fr)!important;padding:6px 9px!important}
+  .tbv5-projected-track{grid-template-columns:repeat(10,minmax(86px,1fr))!important;gap:5px!important}
+  .tbv5-card{height:68px!important;padding:4px 5px!important}
+  .tbv5-card>main{grid-template-columns:24px minmax(0,1fr)!important;gap:5px!important}
+  .tbv5-card-photo{width:24px!important;height:30px!important}
+  .tbv5-name{font-size:8px!important}
+  body.tbv5-active .tb-command-surface{grid-template-rows:42px 82px minmax(0,1fr)!important}
+  body.tbv5-active .tb-hero{max-height:calc(100dvh - 166px)!important}
+}
+
+@media(max-width:1050px){
+  .tbv5-projected{grid-template-columns:132px minmax(0,1fr)!important}
+  .tbv5-projected-track{overflow-x:auto!important;scrollbar-width:none}
+  .tbv5-projected-track::-webkit-scrollbar{display:none}
+}
