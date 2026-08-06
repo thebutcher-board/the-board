@@ -1,0 +1,119 @@
+'use strict';
+(function(){
+  const VERSION='cockpit-v5.0.0';
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const teamName=()=>window.state?.profile?.teamName||'The Butcher';
+  const teamCount=()=>Math.max(1,Number(window.state?.profile?.teamCount||10));
+  const drafted=()=>window.state?.drafted||[];
+  const keepers=()=>window.state?.keepers||window.state?.profile?.keepers||[];
+  const ranked=()=>{try{return window.ranked?.()||[]}catch{return[]}};
+  const ownerAt=i=>{try{return window.draftOrderAt?.(i)||'League'}catch{return'League'}};
+  const roster=()=>{try{return (window.rosterFor?.(teamName())||[]).map(p=>window.playerByName?.(p.name)||p)}catch{return[]}};
+  const nameOf=p=>p?.name||p?.fullName||p?.player_name||'Open';
+  const posOf=p=>String(p?.pos||p?.position||'').toUpperCase()||'—';
+  const teamOf=p=>p?.team||p?.nflTeam||p?.pro_team||'—';
+  const byeOf=p=>p?.bye??p?.byeWeek??p?.bye_week??'—';
+  const photoOf=p=>p?.photo||p?.image||p?.headshot||p?.avatar||p?.img||p?.photoUrl||p?.imageUrl||p?.headshot_url||'';
+  const initials=n=>String(n||'').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'—';
+  const pickLabel=i=>`${Math.floor(i/teamCount())+1}.${String((i%teamCount())+1).padStart(2,'0')}`;
+  const splitName=n=>{const a=String(n||'Open').trim().split(/\s+/);return[a.shift()||'Open',a.join(' ')]};
+  const playerAt=i=>i<drafted().length?(drafted()[i]?.player||drafted()[i]||null):ranked()[i-drafted().length]||null;
+  const metric=(selector,fallback='—')=>document.querySelector(selector)?.textContent?.trim()||fallback;
+  const picksUntilMine=start=>{for(let i=0;i<40;i++)if(ownerAt(start+i)===teamName())return i;return 0};
+
+  function photo(p,cls=''){
+    const n=nameOf(p),src=photoOf(p);
+    return `<span class="tbv5-photo ${cls}">${src?`<img src="${esc(src)}" alt="${esc(n)}" loading="eager" decoding="async" onerror="this.remove();this.nextElementSibling.hidden=false"><b hidden>${esc(initials(n))}</b>`:`<b>${esc(initials(n))}</b>`}</span>`;
+  }
+  function stacked(p){const[f,l]=splitName(nameOf(p));return `<b class="tbv5-name"><span>${esc(f)}</span>${l?`<span>${esc(l)}</span>`:''}</b>`}
+  function card(p,{pick='',owner='',status='',state=''}={}){
+    const pos=posOf(p).toLowerCase();
+    return `<article class="tbv5-card pos-${esc(pos)} ${esc(state)}" data-player="${encodeURIComponent(nameOf(p))}"><header><span>${esc(posOf(p))}</span>${pick?`<small>${esc(pick)}</small>`:''}</header><main>${photo(p,'tbv5-card-photo')}<div>${owner?`<small>${esc(owner)}</small>`:''}${stacked(p)}<em>${esc(teamOf(p))} · BYE ${esc(byeOf(p))}</em></div></main>${status?`<footer>${esc(status)}</footer>`:''}</article>`;
+  }
+  function header(){
+    return `<header class="tbv5-header"><div class="tbv5-brand"><img src="board-logo.svg" alt="THE BOARD"><div><b>THE BOARD</b><small>WIN BEFORE THE CLOCK STARTS</small></div></div><nav class="tbv5-nav"><button class="is-active" data-v5-view="warroom">Draft</button><button data-v5-view="board">Board</button><button data-v5-view="database">Players</button><button data-v5-view="league">League</button><button data-v5-view="history">History</button></nav><div class="tbv5-team"><img src="logo.png" alt="${esc(teamName())}"><div><small>YOUR FRANCHISE</small><b>${esc(teamName())}</b></div></div><button type="button" class="tbv5-settings" aria-label="Open draft settings">⚙</button></header>`;
+  }
+  function projectedRail(){
+    const start=drafted().length;
+    return `<section class="tbv5-projected"><div class="tbv5-projected-label"><small>LIVE FORECAST</small><b>NEXT TEN PROJECTED PICKS</b></div><div class="tbv5-projected-track">${Array.from({length:10},(_,n)=>{const idx=start+n,p=playerAt(idx),owner=ownerAt(idx),mine=owner===teamName();return card(p,{pick:pickLabel(idx),owner,status:n===0?'ON THE CLOCK':mine?'YOUR PICK':'PROJECTED',state:n===0?'is-current':mine?'is-yours':''})}).join('')}</div></section>`;
+  }
+  function drawerRows(players){return players.slice(0,40).map(p=>`<button class="tbv5-row" data-player="${encodeURIComponent(nameOf(p))}">${photo(p,'tbv5-row-photo')}<span><b>${esc(nameOf(p))}</b><small>${esc(posOf(p))} · ${esc(teamOf(p))} · BYE ${esc(byeOf(p))}</small></span><em>${Math.round(Number(p?.proj||0))}</em></button>`).join('')}
+  function teamPanel(){
+    const summary=`<section class="tbv5-team-summary"><div><small>MY TEAM</small><b>${esc(teamName())}</b></div><span><small>PROJECTED PTS</small><b>${esc(metric('#frontOfficeRoot .tb-banner-metrics span:nth-child(1) b'))}</b></span><span><small>PLAYOFF</small><b>${esc(metric('#frontOfficeRoot .tb-banner-metrics span:nth-child(2) b'))}</b></span><span><small>CHAMPIONSHIP</small><b>${esc(metric('#frontOfficeRoot .tb-banner-metrics span:nth-child(3) b'))}</b></span><span><small>NEXT PICK</small><b>${picksUntilMine(drafted().length)}</b></span></section>`;
+    return summary+`<div class="tbv5-team-grid">${drawerRows(roster())||'<div class="tbv5-message">Your roster populates as picks are made.</div>'}</div>`;
+  }
+  function panel(id){const pool=ranked();if(id==='players')return drawerRows(pool);if(id==='team')return teamPanel();if(id==='queue'||id==='targets')return drawerRows(pool.slice(0,20));return '<div class="tbv5-message">Survival odds, scarcity, roster fit and scenario comparisons will live here.</div>'}
+  function drawer(){
+    const tabs=[['players','Players'],['queue','Queue'],['team','My Team'],['targets','Targets'],['analytics','Analytics']];
+    return `<section class="tbv5-drawer"><button class="tbv5-handle" aria-expanded="false" aria-label="Open command drawer"><span></span></button><nav>${tabs.map(([id,label],i)=>`<button class="${i===0?'is-active':''}" data-v5-tab="${id}">${label}</button>`).join('')}</nav><div class="tbv5-filters"><button class="is-active">ALL</button><button>QB</button><button>RB</button><button>WR</button><button>TE</button><button>FLEX</button><button>K</button><button>DEF</button></div><div class="tbv5-panels">${tabs.map(([id],i)=>`<div class="${i===0?'is-active':''}" data-v5-panel="${id}">${panel(id)}</div>`).join('')}</div></section>`;
+  }
+  function renderBoard(){
+    const board=document.getElementById('board');if(!board)return;
+    const teams=Array.from({length:teamCount()},(_,i)=>ownerAt(i));
+    const keeperList=Array.isArray(keepers())?keepers():[];
+    const keeperMap=new Map();
+    keeperList.forEach(k=>{const owner=k?.owner||k?.team||k?.teamName||'';if(!keeperMap.has(owner))keeperMap.set(owner,[]);keeperMap.get(owner).push(k?.player||k)});
+    const rounds=Math.max(8,Math.ceil(Math.max(drafted().length,teamCount()*8)/teamCount()));
+    const cells=[];
+    for(let r=0;r<rounds;r++)for(let c=0;c<teamCount();c++){
+      const idx=r*teamCount()+c,pick=drafted()[idx],p=pick?.player||pick||null;
+      cells.push(`<article class="tbv5-board-pick ${p?'is-filled':''}"><small>${esc(pickLabel(idx))}</small>${p?`${photo(p,'tbv5-board-photo')}<div>${stacked(p)}<span>${esc(posOf(p))} · ${esc(teamOf(p))}</span></div>`:'<em>Open</em>'}</article>`);
+    }
+    board.innerHTML=`<section class="tbv5-board-shell"><header><div><small>LIVE DRAFT</small><h2>THE BOARD</h2></div><span>${drafted().length} picks made</span></header><div class="tbv5-board-teams">${teams.map(t=>`<div><b title="${esc(t)}">${esc(t)}</b>${(keeperMap.get(t)||[]).slice(0,5).map(p=>`<small>KEEPER · ${esc(nameOf(p))}</small>`).join('')}</div>`).join('')}</div><div class="tbv5-board-grid" style="--teams:${teamCount()}">${cells.join('')}</div></section>`;
+  }
+  function clean(surface){
+    surface.querySelector('.tb-roster-banner')?.setAttribute('hidden','');
+    surface.querySelector('.tb-perfect-banner')?.setAttribute('hidden','');
+    surface.querySelectorAll('.tb-live-rail,.tb-command-drawer,.tbv2-header,.tbv2-live-zone,.tbv2-context,.tbv2-drawer,.tbv21-team-summary,.tbv3-header,.tbv3-projected,.tbv31-projected,.tbv32-projected,.tbv3-drawer,.tbv4-projected,.tbv4-drawer,.tbv5-header,.tbv5-projected,.tbv5-drawer').forEach(n=>n.remove());
+    const sides=surface.querySelectorAll('.tb-side');
+    if(sides[0]){sides[0].querySelectorAll('.eyebrow,.tb-section-kicker').forEach(n=>n.remove());const h=sides[0].querySelector('h3');if(h)h.textContent='Alternate Paths'}
+    if(sides[1]){sides[1].querySelectorAll('.eyebrow,.tb-section-kicker').forEach(n=>n.remove());const h=sides[1].querySelector('h3');if(h)h.textContent='Likely Available'}
+    surface.querySelector('.tb-draft-pulse')?.remove();
+    surface.querySelectorAll('.tb-support-card').forEach(card=>{
+      const position=(card.querySelector('.position,.pos,.tb-position')?.textContent||card.textContent.match(/\b(QB|RB|WR|TE|K|DEF)\b/)?.[1]||'').trim().toUpperCase();
+      if(position){card.dataset.pos=position;card.classList.add(`pos-${position.toLowerCase()}`)}
+      const el=[...card.querySelectorAll('b,strong,h4')].find(x=>x.textContent.trim().split(/\s+/).length>1);
+      if(el){const[f,l]=splitName(el.textContent);el.innerHTML=`<span>${esc(f)}</span>${l?`<span>${esc(l)}</span>`:''}`;el.classList.add('tbv5-side-name')}
+    });
+  }
+  function openSettings(){
+    const legacy=document.getElementById('settingsBtn');
+    if(legacy)legacy.click();
+    const modal=document.getElementById('settingsModal');
+    if(modal)modal.hidden=false;
+    const reset=document.getElementById('resetBtn');
+    if(reset){reset.textContent='Reset Draft';reset.removeAttribute('hidden');reset.setAttribute('aria-label','Reset current draft and preserve league settings')}
+    setTimeout(()=>document.getElementById('leagueNameInput')?.focus(),0);
+  }
+  function wire(surface){
+    surface.querySelectorAll('[data-v5-view]').forEach(btn=>btn.onclick=()=>{document.querySelector(`.tabs .tab[data-view="${btn.dataset.v5View}"]`)?.click();if(btn.dataset.v5View==='board')setTimeout(renderBoard,0)});
+    surface.querySelector('.tbv5-settings')?.addEventListener('click',openSettings);
+    surface.querySelectorAll('[data-player]').forEach(el=>el.onclick=()=>window.openPlayerDetails?.(decodeURIComponent(el.dataset.player)));
+    const dr=surface.querySelector('.tbv5-drawer'),handle=surface.querySelector('.tbv5-handle');
+    const toggle=open=>{dr.classList.toggle('is-open',open);handle.setAttribute('aria-expanded',String(open))};
+    handle.onclick=()=>toggle(!dr.classList.contains('is-open'));
+    surface.querySelectorAll('[data-v5-tab]').forEach(btn=>btn.onclick=()=>{surface.querySelectorAll('[data-v5-tab]').forEach(x=>x.classList.toggle('is-active',x===btn));surface.querySelectorAll('[data-v5-panel]').forEach(x=>x.classList.toggle('is-active',x.dataset.v5Panel===btn.dataset.v5Tab));toggle(true)});
+  }
+  function apply(){
+    const surface=document.querySelector('#frontOfficeRoot .tb-command-surface');
+    if(!surface||surface.dataset.v5===VERSION)return false;
+    surface.dataset.v5=VERSION;
+    document.body.className=document.body.className.replace(/\btbv\S+/g,'').trim();
+    document.body.classList.add('tbv5-active');
+    clean(surface);
+    surface.insertAdjacentHTML('afterbegin',header()+projectedRail());
+    surface.insertAdjacentHTML('beforeend',drawer());
+    wire(surface);renderBoard();
+    document.documentElement.dataset.cockpitReady='true';
+    return true;
+  }
+  let scheduled=false;
+  function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;apply()})}
+  function boot(){
+    schedule();
+    const root=document.getElementById('frontOfficeRoot');
+    if(root){const observer=new MutationObserver(()=>{const surface=root.querySelector('.tb-command-surface');if(surface&&!surface.dataset.v5)schedule()});observer.observe(root,{childList:true,subtree:false});window.__TB_COCKPIT_OBSERVER__?.disconnect?.();window.__TB_COCKPIT_OBSERVER__=observer}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+  window.BoardCockpitV5={apply,renderBoard,openSettings};
+})();
