@@ -1,0 +1,210 @@
+/* THE BOARD — Cockpit Visual System v1
+   One visual language for projected, alternate, and likely-available player cards. */
+:root{
+  --tb-bg:#071018;
+  --tb-panel:#111a26;
+  --tb-panel-2:#182331;
+  --tb-line:rgba(255,255,255,.10);
+  --tb-muted:#91a0b2;
+  --tb-orange:#ff8500;
+}
+
+body.tbv52-active .tb-command-surface{
+  grid-template-rows:40px 84px minmax(0,1fr)!important;
+  background:
+    radial-gradient(circle at 8% 22%,rgba(22,102,78,.22),transparent 31%),
+    radial-gradient(circle at 72% 46%,rgba(255,133,0,.07),transparent 30%),
+    var(--tb-bg)!important;
+}
+
+/* Integrated app chrome */
+.tbv52-header{
+  height:40px;
+  grid-template-columns:172px auto minmax(140px,1fr) 34px;
+  padding:3px 12px;
+  background:rgba(5,13,21,.94);
+  backdrop-filter:blur(18px);
+}
+.tbv52-brand img{width:29px;height:29px}
+.tbv52-brand b,.tbv52-team b{font-size:12px;letter-spacing:-.01em}
+.tbv52-header nav button{font-size:10px;padding-inline:14px}
+.tbv52-settings{width:32px;height:32px;border-radius:10px}
+
+/* Next-ten rail */
+.tbv52-projected{
+  height:84px;
+  grid-template-columns:184px minmax(0,1fr);
+  gap:8px;
+  padding:6px 12px;
+  background:rgba(5,14,22,.34);
+}
+.tbv52-projected-label{
+  padding:10px 12px;
+  border:1px solid rgba(255,255,255,.045);
+  background:linear-gradient(135deg,rgba(18,81,65,.40),rgba(9,18,27,.78));
+}
+.tbv52-projected-label b{font-size:12px;line-height:1.08;letter-spacing:-.01em}
+.tbv52-projected-track{gap:6px}
+
+/* Universal player-card shell */
+.tbv52-pick,.tbv52-side-card{
+  --pos:#8490a0;
+  position:relative;
+  border:1px solid color-mix(in srgb,var(--pos) 62%,rgba(255,255,255,.08));
+  border-left:3px solid var(--pos);
+  background:
+    linear-gradient(150deg,color-mix(in srgb,var(--pos) 10%,#1b2634),#0b131d 72%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 5px 16px rgba(0,0,0,.12);
+  color:#fff;
+  overflow:hidden;
+}
+.tbv52-pick:after,.tbv52-side-card:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(110deg,rgba(255,255,255,.035),transparent 42%);
+}
+.pos-qb{--pos:#f2c84b}.pos-rb{--pos:#44c987}.pos-wr{--pos:#3ba2ff}.pos-te{--pos:#ff4ca0}.pos-k{--pos:#ef5350}.pos-def{--pos:#7e8794}
+
+/* Projected cards */
+.tbv52-pick{
+  height:70px;
+  padding:5px 6px 4px;
+  grid-template-rows:14px minmax(0,1fr) 9px;
+  border-radius:10px;
+}
+.tbv52-pick>header{height:14px;gap:4px}
+.tbv52-pick>header span,.tbv52-side-card>header span{
+  min-width:20px;height:14px;padding:0 4px;border-radius:4px;
+  font-size:6px;line-height:14px;
+}
+.tbv52-pick>header small{font-size:6px;line-height:1;color:#aeb8c5}
+.tbv52-pick>main{
+  grid-template-columns:29px minmax(0,1fr);
+  gap:6px;
+  align-items:center;
+  overflow:hidden;
+}
+.tbv52-pick-photo{
+  width:29px;height:35px;border-radius:6px;
+  align-self:end;
+  background:linear-gradient(180deg,#2a3748,#202b3a);
+}
+.tbv52-photo img{
+  display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;
+  filter:saturate(.96) contrast(1.02);
+}
+.tbv52-pick>main>div{gap:1px;align-content:center}
+.tbv52-owner{font-size:5px;line-height:1;color:#9ca9b9}
+.tbv52-name{font-size:7.8px;line-height:.98;letter-spacing:-.015em}
+.tbv52-name span{display:block;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbv52-pick em{font-size:5.2px;line-height:1.1;color:#8795a7}
+.tbv52-pick footer{font-size:5.2px;line-height:1;font-weight:900;align-self:end}
+.tbv52-pick.is-current{border-color:var(--tb-orange);box-shadow:0 0 0 1px var(--tb-orange),0 6px 20px rgba(255,133,0,.15)}
+.tbv52-pick.is-yours{border-color:#3fd397;box-shadow:0 0 0 1px #3fd397,0 6px 20px rgba(63,211,151,.12)}
+
+/* Main cockpit composition */
+body.tbv52-active .tb-decision-grid{
+  grid-template-columns:minmax(170px,188px) minmax(500px,1fr) minmax(170px,188px)!important;
+  gap:9px!important;
+  padding:6px 12px 40px!important;
+  align-items:start!important;
+}
+body.tbv52-active .tb-side h3{
+  margin:0 0 6px!important;
+  font-size:15px!important;
+  line-height:1!important;
+  letter-spacing:-.02em!important;
+}
+.tbv52-side-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+
+/* Side cards use the same content hierarchy, scaled for the stack */
+.tbv52-side-card{
+  height:60px;
+  padding:5px 6px;
+  border-radius:10px;
+}
+.tbv52-side-card>header{
+  height:14px;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  gap:4px;
+}
+.tbv52-side-card>header small{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size:5.2px;
+  color:#c29b69;
+}
+.tbv52-side-card>header>b{font-size:13px;line-height:1}
+.tbv52-side-card>div{
+  height:38px;
+  grid-template-columns:29px minmax(0,1fr);
+  gap:6px;
+  align-items:end;
+}
+.tbv52-side-photo{
+  width:29px;height:36px;border-radius:6px;
+  background:linear-gradient(180deg,#2a3748,#202b3a);
+}
+.tbv52-side-card section{height:36px;gap:1px;align-content:center}
+.tbv52-side-card .tbv52-name{font-size:7.8px;line-height:.98}
+.tbv52-side-card em{font-size:5px;line-height:1;color:#8795a7}
+.tbv52-side-card footer{margin-top:1px;gap:3px}
+.tbv52-side-card i{max-width:50%;overflow:hidden;text-overflow:ellipsis;font-size:4.6px;color:#9ba8b8}
+
+/* Hero refinement: preserve information while fitting one-screen cockpit */
+body.tbv52-active .tb-hero{
+  max-height:calc(100dvh - 170px)!important;
+  border-radius:15px!important;
+  border:1px solid rgba(255,255,255,.055)!important;
+  box-shadow:0 18px 42px rgba(0,0,0,.20)!important;
+}
+body.tbv52-active .tb-hero-head{min-height:105px!important;padding:8px 13px 5px!important}
+body.tbv52-active .tb-hero-photo{max-height:96px!important;max-width:132px!important}
+body.tbv52-active .tb-hero h2{font-size:23px!important;letter-spacing:-.025em!important}
+body.tbv52-active .tb-goose-call{margin:3px 9px!important;padding:8px 12px!important}
+body.tbv52-active .tb-hero-stats span{padding:5px 8px!important}
+body.tbv52-active .tb-decision-compare{gap:5px!important;margin-top:3px!important}
+body.tbv52-active .tb-decision-compare section{padding:7px 9px!important}
+body.tbv52-active .tb-hero-actions{margin-top:3px!important;padding-bottom:5px!important}
+
+/* Bottom operating drawer */
+.tbv52-drawer{height:40px;background:rgba(5,14,28,.97);backdrop-filter:blur(18px)}
+.tbv52-drawer>nav{gap:31px}
+.tbv52-drawer>nav button{font-size:10px}
+
+/* DeX / compact desktop */
+@media (max-width:1280px){
+  .tbv52-header{grid-template-columns:150px auto 137px 32px;padding-inline:9px}
+  .tbv52-header nav button{padding-inline:10px}
+  .tbv52-projected{height:80px;grid-template-columns:158px minmax(0,1fr);padding:5px 9px}
+  .tbv52-pick{height:68px;padding-inline:5px}
+  .tbv52-pick>main{grid-template-columns:25px minmax(0,1fr);gap:4px}
+  .tbv52-pick-photo{width:25px;height:31px}
+  .tbv52-name{font-size:7.2px}
+  body.tbv52-active .tb-command-surface{grid-template-rows:40px 80px minmax(0,1fr)!important}
+  body.tbv52-active .tb-decision-grid{grid-template-columns:156px minmax(450px,1fr) 156px!important;gap:7px!important;padding:5px 9px 40px!important}
+  .tbv52-side-grid{gap:5px}
+  .tbv52-side-card{height:56px;padding:4px 5px}
+  .tbv52-side-card>div{height:35px;grid-template-columns:26px minmax(0,1fr);gap:5px}
+  .tbv52-side-photo{width:26px;height:33px}
+  .tbv52-side-card section{height:33px}
+  .tbv52-side-card .tbv52-name{font-size:7.1px}
+  body.tbv52-active .tb-hero{max-height:calc(100dvh - 160px)!important}
+  body.tbv52-active .tb-hero-head{min-height:98px!important}
+  body.tbv52-active .tb-hero-photo{max-height:89px!important}
+  body.tbv52-active .tb-hero h2{font-size:21px!important}
+}
+
+/* Mobile/tablet safety: preserve usability rather than crushing cards */
+@media (max-width:900px){
+  body.tbv52-active{overflow:auto}
+  body.tbv52-active .tb-command-surface{height:auto;min-height:100dvh;overflow:visible!important;grid-template-rows:auto auto auto!important}
+  .tbv52-header{grid-template-columns:1fr auto 34px}.tbv52-brand{display:none}.tbv52-team{display:none}
+  .tbv52-projected{grid-template-columns:1fr;height:auto}.tbv52-projected-label{display:none}.tbv52-projected-track{display:flex;overflow-x:auto;padding-bottom:4px}.tbv52-pick{flex:0 0 112px}
+  body.tbv52-active .tb-decision-grid{grid-template-columns:1fr!important;overflow:visible!important;padding-bottom:48px!important}
+  body.tbv52-active .tb-side{order:2}.tbv52-side-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.tbv52-active .tb-hero{order:1;max-height:none!important}
+}
