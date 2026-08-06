@@ -1,1 +1,1 @@
-Draft Cockpit v18.2.0 full release: DeX one-screen fit, disciplined photos, restored position colors, unified cards
+Draft Cockpit v19.0.0 full release: single-render architecture, stable cards, no layered cockpit observers
