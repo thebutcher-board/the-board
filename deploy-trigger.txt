@@ -1,1 +1,1 @@
-Draft Cockpit v18.1.0 full release: settings fix, shared cards, one-screen fit, keepers on Board
+Draft Cockpit v18.2.0 full release: DeX one-screen fit, disciplined photos, restored position colors, unified cards
