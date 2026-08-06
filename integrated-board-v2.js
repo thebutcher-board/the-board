@@ -1,7 +1,7 @@
 'use strict';
 (function(){
-  const VERSION='integrated-board-2.0.0';
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+  const VERSION='integrated-board-2.0.1';
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const bridge=()=>window.BoardStateBridge;
   const state=()=>bridge()?.getState?.()||window.state||{};
   const teamCount=()=>Math.max(1,Number(state().profile?.teamCount||10));
@@ -32,7 +32,6 @@
     }
     board.innerHTML=`<section class="tb-board-app" data-version="${VERSION}"><header class="tb-board-top"><button type="button" class="tb-board-back">← <b>Draft</b></button><div><small>LIVE DRAFT ROOM</small><h1>THE BOARD</h1></div><aside><span><small>PICKS MADE</small><b>${drafted().length}</b></span><span><small>ON THE CLOCK</small><b>${esc(ownerAt(drafted().length))}</b></span></aside></header><div class="tb-board-team-row" style="--teams:${count}">${teams.map(t=>`<section class="${t===teamName()?'is-mine':''}"><b>${esc(t)}</b>${(keeperMap.get(t)||[]).slice(0,4).map(p=>`<small>KEEPER · ${esc(nameOf(p))}</small>`).join('')}</section>`).join('')}</div><div class="tb-board-grid" style="--teams:${count}">${cells.join('')}</div></section>`;
     board.querySelector('.tb-board-back')?.addEventListener('click',goDraft);
-    window.BoardDraftEngine?.refresh?.();
     return true;
   }
   function leave(){if(location.hash!=='#board')document.body.classList.remove('tb-board-active')}
