@@ -17,8 +17,16 @@
     if(lastMode!==contract.mode){lastMode=contract.mode;window.dispatchEvent(new CustomEvent('theboard:presentationchange',{detail:contract}))}
     return contract;
   }
+  function loadIntegrityGate(){
+    if(window.BoardIntegrityGate||document.querySelector('script[data-board-integrity-gate]'))return;
+    const script=document.createElement('script');
+    script.src='draft-state-integrity-gate-v1.js?v=23.0.0';
+    script.dataset.boardIntegrityGate='1';
+    document.head.appendChild(script);
+  }
   let timer=0;window.addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(apply,80)},{passive:true});
   window.addEventListener('orientationchange',()=>setTimeout(apply,120),{passive:true});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply,{once:true});else apply();
+  loadIntegrityGate();
   window.BoardPresentation=Object.freeze({version:VERSION,apply,current:()=>core()?.services?.presentation?.contractForWidth?.(window.innerWidth)||null});
 })();
