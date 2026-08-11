@@ -1,35 +1,31 @@
 'use strict';
 (function(){
-  const STORAGE_KEY='the-board-fast-runtime';
   function expose(){
-    try{
-      Object.defineProperty(window,'state',{configurable:true,get:()=>state,set:value=>{state=value}});
-    }catch{window.state=state}
-    const persist=()=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));return true}catch{return false}};
+    const core=window.BoardCore;if(!core)return;
+    try{state=core.state}catch{}
+    try{Object.defineProperty(window,'state',{configurable:true,get:()=>core.state,set:value=>{if(value?.profile)core.services.league.update({profile:value.profile,teams:value.teams,slot:value.slot});if(Array.isArray(value?.drafted)&&value.drafted.length===0)core.services.draft.reset()}})}catch{window.state=core.state}
     const goTo=view=>{
-      const target=view||'warroom';
+      const target=view||'warroom';core.services.navigation.go(target);
       try{showView(target)}catch{document.querySelector(`.tabs .tab[data-view="${target}"]`)?.click()}
-      const hash=target==='warroom'?'#warroom':`#${target}`;
-      if(location.hash!==hash)history.replaceState(null,'',hash);
-      return target;
+      const hash=target==='warroom'?'#warroom':`#${target}`;if(location.hash!==hash)history.replaceState(null,'',hash);return target;
     };
-    const undoPick=()=>{const before=state.drafted.length;try{undo()}catch{state.drafted.pop();try{renderActive()}catch{}}persist();return state.drafted.length<before};
-    const resetDraft=()=>{state.drafted=[];pendingPlayerName=null;persist();try{saveSoon();renderActive()}catch{}return true};
     window.BoardStateBridge=Object.freeze({
-      getState:()=>state,
-      getDrafted:()=>state.drafted,
-      persist,
+      getState:()=>core.state,
+      getCanonicalState:()=>core.getCanonicalState(),
+      getDrafted:()=>core.services.draft.getPicks(),
+      persist:()=>core.persist('bridge'),
       goTo,
-      undo:undoPick,
-      reset:resetDraft,
-      currentTeam:()=>{try{return currentTeam()}catch{return''}},
-      draftOrderAt:index=>{try{return draftOrderAt(index)}catch{return''}},
-      playerByName:name=>{try{return playerByName(name)}catch{return null}},
+      undo:()=>core.services.draft.undo().ok,
+      reset:()=>core.services.draft.reset().ok,
+      currentTeam:()=>core.services.draft.currentTeam(),
+      draftOrderAt:index=>core.services.draft.draftOrderAt(index),
+      playerByName:name=>core.services.players.byName(name),
+      playerById:id=>core.services.players.byId(id),
       ranked:()=>{try{return ranked()}catch{return[]}},
-      rosterFor:team=>{try{return rosterFor(team)}catch{return[]}},
+      rosterFor:team=>core.services.league.rosterFor(team),
       render:()=>{try{renderActive();return true}catch{return false}}
     });
-    window.dispatchEvent(new CustomEvent('theboard:statebridge-ready'));
+    window.dispatchEvent(new CustomEvent('theboard:statebridge-ready',{detail:{core:core.version}}));
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',expose,{once:true});else expose();
 })();
