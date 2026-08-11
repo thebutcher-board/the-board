@@ -1,6 +1,6 @@
 'use strict';
 (function(global){
-  const VERSION='app-core-1.0.0';
+  const VERSION='app-core-1.1.0';
   const STORAGE_KEY='the-board-app-state-v1';
   const LEGACY_KEYS=['the-board-fast-runtime','the-board-v1-2-scouting-controls','the-board-v1-ai-gm-canonical','the-board-v9','the-board-v8','the-board-v7','the-board-v6','the-board-v5','the-board-v4','the-board-v3','the-board-v2','the-board-v1'];
   const NAME_CORRECTIONS={'George KittleO':'George Kittle','James Cook':'James Cook III'};
@@ -23,7 +23,9 @@
   function defaultSlices(){return {schemaVersion:1,draft:{picks:[]},league:{teams:[...sourceTeams],slot:8,profile:clone(DEFAULT_PROFILE),keepers:clone(sourceKeepers)},scouting:{},settings:{},recommendations:{current:null,alternatives:[],likely:[],updatedAt:null},navigation:{route:'warroom'}}}
   function normalizePick(raw,index){
     if(!raw)return null;
-    const playerId=raw.playerId||raw.id&&playerById.has(raw.id)?raw.id:playerIdByName.get(normalize(raw.name||raw.player?.name));
+    let playerId=raw.playerId||null;
+    if(!playerId&&raw.id&&playerById.has(raw.id))playerId=raw.id;
+    if(!playerId)playerId=playerIdByName.get(normalize(raw.name||raw.player?.name));
     if(!playerId||!playerById.has(playerId))return null;
     return {playerId,draftedBy:String(raw.draftedBy||raw.owner||''),pick:Number(raw.pick)||index+1};
   }
@@ -59,10 +61,6 @@
   let slices=readStorage();
   const subscribers=new Set();
   const enrichedDraft=()=>slices.draft.picks.map(record=>{const player=playerById.get(record.playerId);return player?{...player,playerId:player.id,draftedBy:record.draftedBy,pick:record.pick}:null}).filter(Boolean);
-  const legacyState=new Proxy({}, {
-    get(_,prop){if(prop==='drafted')return enrichedDraft();if(prop==='teams')return slices.league.teams;if(prop==='slot')return slices.league.slot;if(prop==='profile')return slices.league.profile;if(prop==='scouting')return slices.scouting;if(prop==='recommendations')return slices.recommendations;if(prop==='settings')return slices.settings;return undefined},
-    set(_,prop,value){if(prop==='teams'){slices.league.teams=Array.isArray(value)?[...value]:slices.league.teams;persist('league')}else if(prop==='slot'){slices.league.slot=Number(value)||8;persist('league')}else if(prop==='profile'){slices.league.profile={...slices.league.profile,...(value||{}),rosterTargets:{...DEFAULT_PROFILE.rosterTargets,...(value?.rosterTargets||{})}};persist('league')}else if(prop==='scouting'){slices.scouting=value&&typeof value==='object'?value:{};persist('scouting')}else if(prop==='recommendations'){slices.recommendations={...slices.recommendations,...(value||{})};persist('recommendations')}else return false;return true}
-  });
   function snapshot(){return clone(slices)}
   function persist(reason='persist'){
     try{localStorage.setItem(STORAGE_KEY,JSON.stringify(slices))}catch{}
@@ -84,6 +82,25 @@
   function navigate(route){slices.navigation.route=String(route||'warroom');persist('navigation');global.dispatchEvent?.(new CustomEvent('theboard:navigate',{detail:{route:slices.navigation.route}}));return slices.navigation.route}
   function rosterFor(team){const keepers=(slices.league.keepers?.[team]||[]).map(name=>{const found=player(name);return found?{...found,keeper:true}:{id:`keeper:${slug(name)}`,name:canonicalName(name),pos:'—',team:'—',keeper:true}});const picks=enrichedDraft().filter(p=>p.draftedBy===team);return [...keepers,...picks]}
   function contractForWidth(width){const w=Number(width)||0;if(w<768)return Object.freeze({mode:'phone',primary:true,columns:1,navigation:'bottom',detail:'sheet',minimumTarget:44});if(w<1180)return Object.freeze({mode:'tablet',primary:false,columns:2,navigation:'adaptive',detail:'sheet',minimumTarget:44});return Object.freeze({mode:'desktop',primary:false,columns:3,navigation:'integrated',detail:'panel',minimumTarget:40})}
+
+  const draftedCompat=new Proxy([],{
+    get(_,prop){const list=enrichedDraft();if(prop==='length')return list.length;if(prop==='toJSON')return()=>list;if(prop===Symbol.iterator)return list[Symbol.iterator].bind(list);if(prop==='push')return(...items)=>{items.forEach(item=>draftPlayer(item?.playerId||item?.id||item?.name||item));return enrichedDraft().length};if(prop==='pop')return()=>{const result=undoDraft();return result.ok&&result.record.player?{...result.record.player,playerId:result.record.player.id,draftedBy:result.record.draftedBy,pick:result.record.pick}:undefined};const value=list[prop];return typeof value==='function'?value.bind(list):value},
+    set(){return false}
+  });
+  const scoutingCompat=new Proxy({}, {
+    get(_,prop){if(prop==='toJSON')return()=>({...slices.scouting});return slices.scouting[prop]},
+    set(_,prop,value){slices.scouting[prop]=value;persist('scouting');return true},
+    deleteProperty(_,prop){delete slices.scouting[prop];persist('scouting');return true},
+    ownKeys(){return Reflect.ownKeys(slices.scouting)},
+    getOwnPropertyDescriptor(){return {enumerable:true,configurable:true}}
+  });
+  const legacyState=new Proxy({}, {
+    get(_,prop){if(prop==='toJSON')return()=>({drafted:enrichedDraft(),teams:[...slices.league.teams],slot:slices.league.slot,profile:clone(slices.league.profile),scouting:{...slices.scouting},recommendations:clone(slices.recommendations),settings:clone(slices.settings)});if(prop==='drafted')return draftedCompat;if(prop==='teams')return slices.league.teams;if(prop==='slot')return slices.league.slot;if(prop==='profile')return slices.league.profile;if(prop==='scouting')return scoutingCompat;if(prop==='recommendations')return slices.recommendations;if(prop==='settings')return slices.settings;return undefined},
+    set(_,prop,value){if(prop==='drafted'){if(Array.isArray(value)&&value.length===0)resetDraft();return true}if(prop==='teams'){slices.league.teams=Array.isArray(value)?[...value]:slices.league.teams;persist('league')}else if(prop==='slot'){slices.league.slot=Number(value)||8;persist('league')}else if(prop==='profile'){slices.league.profile={...slices.league.profile,...(value||{}),rosterTargets:{...DEFAULT_PROFILE.rosterTargets,...(value?.rosterTargets||{})}};persist('league')}else if(prop==='scouting'){slices.scouting=value&&typeof value==='object'?{...value}:{};persist('scouting')}else if(prop==='recommendations'){slices.recommendations={...slices.recommendations,...(value||{})};persist('recommendations')}else return false;return true},
+    ownKeys(){return ['drafted','teams','slot','profile','scouting','recommendations','settings']},
+    getOwnPropertyDescriptor(){return {enumerable:true,configurable:true}}
+  });
+
   const services=Object.freeze({
     draft:Object.freeze({take:draftPlayer,undo:undoDraft,reset:resetDraft,currentTeam,draftOrderAt,isDrafted,getPicks:()=>enrichedDraft()}),
     league:Object.freeze({update:updateLeague,rosterFor,get:()=>clone(slices.league)}),
