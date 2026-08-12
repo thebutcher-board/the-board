@@ -1,0 +1,124 @@
+/* Deployment 2 presentation correction only: My Team + Analytics drawer readability. */
+[data-v52-panel="team"].is-active,
+[data-v52-panel="analytics"].is-active{
+  display:block!important;
+}
+
+[data-v52-panel="team"] .tbv52-team-summary,
+[data-v52-panel="analytics"] .tbv52-team-summary{
+  display:flex;
+  align-items:stretch;
+  gap:10px;
+  margin:0 0 10px;
+}
+
+[data-v52-panel="team"] .tbv52-team-summary>* ,
+[data-v52-panel="analytics"] .tbv52-team-summary>*{
+  min-width:0;
+  padding:9px 12px;
+}
+
+[data-v52-panel="team"] .tbv52-team-summary b,
+[data-v52-panel="analytics"] .tbv52-team-summary b{
+  display:block;
+  margin-top:2px;
+  font-size:14px;
+  line-height:1.15;
+  white-space:nowrap;
+}
+
+[data-v52-panel="team"] .tbv52-team-grid,
+[data-v52-panel="analytics"] .tbv52-team-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(220px,1fr));
+  gap:8px 12px;
+  align-items:stretch;
+}
+
+/* Summary metrics and positional-need cards do not have player photos. Remove the
+   generic row's 34px photo column so copy cannot collapse into vertical text. */
+[data-v52-panel="team"] .tbv52-team-grid>.tbv52-row:not([data-player]),
+[data-v52-panel="analytics"] .tbv52-team-grid>.tbv52-row:not([data-player]){
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  min-height:66px;
+  padding:9px 12px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;
+  background:rgba(255,255,255,.025);
+}
+
+[data-v52-panel="team"] .tbv52-team-grid>.tbv52-row:not([data-player]) span,
+[data-v52-panel="analytics"] .tbv52-team-grid>.tbv52-row:not([data-player]) span{
+  display:block;
+  min-width:0;
+}
+
+[data-v52-panel="team"] .tbv52-team-grid>.tbv52-row:not([data-player]) span b,
+[data-v52-panel="analytics"] .tbv52-team-grid>.tbv52-row:not([data-player]) span b{
+  display:block;
+  font-size:12px;
+  line-height:1.15;
+  white-space:normal;
+  overflow-wrap:normal;
+  word-break:normal;
+}
+
+[data-v52-panel="team"] .tbv52-team-grid>.tbv52-row:not([data-player]) span small,
+[data-v52-panel="analytics"] .tbv52-team-grid>.tbv52-row:not([data-player]) span small{
+  display:block;
+  margin-top:4px;
+  font-size:8px;
+  line-height:1.35;
+  color:#93a0b0;
+  white-space:normal;
+  overflow-wrap:normal;
+  word-break:normal;
+}
+
+[data-v52-panel="team"] .tbv52-team-grid>.tbv52-row:not([data-player]) em,
+[data-v52-panel="analytics"] .tbv52-team-grid>.tbv52-row:not([data-player]) em{
+  align-self:center;
+  min-width:max-content;
+  font-size:16px;
+  line-height:1;
+  white-space:nowrap;
+}
+
+/* Roster rows retain the approved three-part player layout, but gain consistent
+   spacing and a clean separation from the summary/need cards above them. */
+[data-v52-panel="team"] .tbv52-team-grid>.tbv52-row[data-player]{
+  min-height:56px;
+  padding:4px 7px;
+  border:1px solid rgba(255,255,255,.055);
+  border-radius:9px;
+  background:rgba(255,255,255,.015);
+}
+
+[data-v52-panel="team"] .tbv52-team-grid>.tbv52-row[data-player] span b{
+  font-size:11px;
+  line-height:1.15;
+}
+
+[data-v52-panel="team"] .tbv52-team-grid>.tbv52-row[data-player] span small{
+  margin-top:2px;
+  font-size:7px;
+  line-height:1.25;
+  white-space:normal;
+}
+
+/* DeX/tablet widths: two readable columns rather than three compressed ones. */
+@media (max-width:1180px){
+  [data-v52-panel="team"] .tbv52-team-grid,
+  [data-v52-panel="analytics"] .tbv52-team-grid{
+    grid-template-columns:repeat(2,minmax(240px,1fr));
+  }
+}
+
+/* Narrow tablet fallback only; this is not the mobile-product redesign. */
+@media (max-width:760px){
+  [data-v52-panel="team"] .tbv52-team-grid,
+  [data-v52-panel="analytics"] .tbv52-team-grid{
+    grid-template-columns:1fr;
+  }
+}
